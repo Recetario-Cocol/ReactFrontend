@@ -55,9 +55,9 @@ export default function UnidadGrilla() {
 
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
-    {field: 'id', headerName: 'ID', width: 90},
-    {field: 'abreviacion', headerName: 'Abreviación', width: 150, editable: true},
-    {field: 'nombre', headerName: 'Nombre', width: 150, editable: true}
+    {field: 'id', headerName: 'ID', width: 90, disableColumnMenu: true},
+    {field: 'abreviacion', headerName: 'Abreviación', width: 150, editable: true, disableColumnMenu: true},
+    {field: 'nombre', headerName: 'Nombre', width: 150, editable: true,  disableColumnMenu: true}
   ];
 
   function getSelectedRowId(): number {
@@ -85,10 +85,6 @@ export default function UnidadGrilla() {
     setIdToOpen(getSelectedRowId());
     setOpenBorrarUnidad(true);
   }
-  
-  function  filtrar() {
-    console.log("Filtrar");
-  }
 
   return (
     <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
@@ -96,7 +92,6 @@ export default function UnidadGrilla() {
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
         <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
         <Button startIcon={<DeleteIcon />} disabled={!seleccionado} onClick={eliminar}>Eliminar</Button>
-        <Button startIcon={<FilterListIcon />} onClick={filtrar}>Filtrar</Button>
       </Box>
       <DataGrid
         rows={rows}
@@ -115,7 +110,6 @@ export default function UnidadGrilla() {
       <div>
       {openModal && <UnidadFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
       {openBorrarUnidad && <AlertDialogBorrarUnidad paramId={idToOpen} onClose={handleCloseDialog}/>}
-
     </div>
     </Box>
   );
