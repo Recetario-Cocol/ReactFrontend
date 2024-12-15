@@ -10,10 +10,9 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import Receta from '../Receta';
 import { useRecetaService } from '../useRecetaService';
-import { usePaqueteService } from '../../paquete/usePaqueteService';
+import { useProductoService } from '../../producto/useProductoService';
 import { useUnidadService } from '../../unidad/useUnidadService';
-import { styled } from "@mui/system";
-import Paquete from '../../paquete/Paquete';
+import Producto from '../../producto/Producto';
 import { Unidad } from '../../unidad/Unidad';
 import Ingrediente from '../../ingrediente/Ingrediente';
 import IngredienteModal, { AlertDialogBorrarIngrediente } from '../../ingrediente/components/IngredienteModal';
@@ -65,9 +64,9 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const [form, setForm] = useState<Receta>(new Receta());
     const [rows, setRows] = useState<Row[]>([]); 
     const RecetaService = useRecetaService();
-    const PaqueteService = usePaqueteService();
+    const ProductoService = useProductoService();
     const UnidadService = useUnidadService();
-    const [productos, setProductos] = useState<Paquete[]>([]); 
+    const [productos, setProductos] = useState<Producto[]>([]); 
     const [unidades, setUnidades] = useState<Unidad[]>([]);
     const [openIngredienteModal, setOpenIngredienteModal] = useState(false);
     const onHanderSubmitIngrediente = (ingrediente: Ingrediente | undefined) => {
@@ -160,7 +159,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     useEffect(() => {
       setLoadingProducts(true);
       try {
-        PaqueteService.getAll()                      
+        ProductoService.getAll()                      
         .then((response) => setProductos(response.data));
         UnidadService.getUnidades()                      
         .then((response) => setUnidades(response.data));

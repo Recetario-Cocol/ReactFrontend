@@ -1,4 +1,4 @@
-export default class Paquete {
+export default class Producto {
 	private _id: number;
   private _nombre: String;
   private _unidadId: number;

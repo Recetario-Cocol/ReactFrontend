@@ -5,9 +5,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect, useState } from 'react';
 import {Box, Button} from '@mui/material';
-import PaqueteFormModal, { AlertDialogBorrarPaquete} from './PaqueteFormModal';
-import { usePaqueteService } from '../usePaqueteService';
-import Paquete from '../Paquete';
+import PaqueteFormModal, { AlertDialogBorrarProducto} from './ProductoFormModal';
+import { useProductoService } from '../useProductoService';
+import Producto from '../Producto';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import { Unidad } from '../../usuarios/Unidad';
 
@@ -25,10 +25,10 @@ export default function PaqueteGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
   const [, setSelectionModel] = React.useState<GridRowSelectionModel>();
   const [openModal, setOpenModal] = useState(false);
-  const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
+  const [openBorrarProducto, setOpenBorrarProducto] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<any[]>([]); 
-  const PaqueteService = usePaqueteService();
+  const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
 
 
@@ -47,7 +47,7 @@ export default function PaqueteGrilla() {
 
   const handleCloseDialog = () => {
     fetchRows();
-    setOpenBorrarUnidad(false);
+    setOpenBorrarProducto(false);
   };
 
   useEffect(() => {
@@ -56,9 +56,9 @@ export default function PaqueteGrilla() {
 
   async function fetchRows() {
     try {
-      const result = await PaqueteService.getAll();
+      const result = await ProductoService.getAll();
       if (result.data) {
-        const paquetesFormApi = await Promise.all(
+        const productoFormApi = await Promise.all(
           result.data.map(async (item: any) => {
             const unidadResult = await UnidadService.getUnidad(item.unidadId);
             return {
@@ -71,13 +71,13 @@ export default function PaqueteGrilla() {
             };
           })
         );
-        setRows(paquetesFormApi);
+        setRows(productoFormApi);
       } else {
         setRows([]);
       }
     } catch (error) {
       console.error("Error al cargar los paquetes:", error);
-      setRows([]); // Manejar el error asignando un estado vacío
+      setRows([]);
     }
   }
 
@@ -113,11 +113,7 @@ export default function PaqueteGrilla() {
   
   function eliminar() {
     setIdToOpen(getSelectedRowId());
-    setOpenBorrarUnidad(true);
-  }
-  
-  function filtrar() {
-    console.log("Filtrar");
+    setOpenBorrarProducto(true);
   }
 
   return (
@@ -126,7 +122,6 @@ export default function PaqueteGrilla() {
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
         <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
         <Button startIcon={<DeleteIcon />} disabled={!seleccionado} onClick={eliminar}>Eliminar</Button>
-        <Button startIcon={<FilterListIcon />} onClick={filtrar}>Filtrar</Button>
       </Box>
       <DataGrid
         rows={rows}
@@ -144,7 +139,7 @@ export default function PaqueteGrilla() {
       />;
       <div>
         {openModal && <PaqueteFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
-        {openBorrarUnidad && <AlertDialogBorrarPaquete paramId={idToOpen} onClose={handleCloseDialog}/>}
+        {openBorrarProducto && <AlertDialogBorrarProducto paramId={idToOpen} onClose={handleCloseDialog}/>}
       </div>
     </Box>
   );

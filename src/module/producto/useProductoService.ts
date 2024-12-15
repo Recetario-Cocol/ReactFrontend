@@ -1,4 +1,4 @@
-import Paquete from './Paquete';
+import Producto from './Producto';
 import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication"
 import { API_BASE_URL } from '../../config';
 
@@ -8,7 +8,7 @@ interface request {
   data: any;
 }
 
-export const usePaqueteService = () => {
+export const useProductoService = () => {
   const axiosWithAuthentication = useAxiosWithAuthentication();
 
   return {
@@ -22,12 +22,12 @@ export const usePaqueteService = () => {
       });
     },
 
-    async crear(paquete: Paquete): Promise<Paquete> {
+    async crear(paquete: Producto): Promise<Producto> {
       const respuesta = await axiosWithAuthentication.post(apiEndpoint, paquete);
       return respuesta.data;
     },
 
-    async actualizar(id: number, paquete: Paquete): Promise<Paquete> {
+    async actualizar(id: number, paquete: Producto): Promise<Producto> {
       const respuesta = await axiosWithAuthentication.put(
         `${apiEndpoint}/${id}`,
         paquete.toJSON(),

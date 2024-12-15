@@ -6,7 +6,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect, useState } from 'react';
 import {Box, Button} from '@mui/material';
 import RecetaFormModal, {AlertDialogBorrarReceta} from './RecetaFormModal';
-import { usePaqueteService } from '../../paquete/usePaqueteService';
+import { useProductoService } from '../../producto/useProductoService';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import { useRecetaService } from '../useRecetaService';
 
@@ -17,7 +17,7 @@ export default function RecetaGrilla() {
   const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<any[]>([]); 
-  const PaqueteService = usePaqueteService();
+  const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
   const RecetaService = useRecetaService();
 
@@ -51,7 +51,7 @@ export default function RecetaGrilla() {
             // Cambiar forEach por un bucle for...of para manejar promesas
             for (const ingrediente of item.ingredientes) {
               const unidadResult = await UnidadService.getUnidad(ingrediente.unidadId);
-              const paqueteResult = await PaqueteService.get(ingrediente.paqueteId);
+              const paqueteResult = await ProductoService.get(ingrediente.paqueteId);
   
               // Construir la cadena
               ingredientesString +=

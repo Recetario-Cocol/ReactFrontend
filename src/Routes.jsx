@@ -3,7 +3,7 @@ import { useAuth } from './module/contexts/AuthContext';
 import Login from './module/usuarios/login';
 //import NotificationsSignInPageError from './module/usuarios/login2';
 import UnidadGrilla from './module/unidad/components/UnidadGrilla';
-import PaqueteGrilla from './module/paquete/components/PaqueteGrilla';
+import PaqueteGrilla from './module/producto/components/PaqueteGrilla';
 import RecetaGrilla from './module/receta/components/RecetaGrilla';
 
 const PrivateRoute = ({ children }) => {

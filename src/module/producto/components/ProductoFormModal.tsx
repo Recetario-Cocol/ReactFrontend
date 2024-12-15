@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUnidadService } from '../../unidad/useUnidadService';
-import { usePaqueteService } from '../usePaqueteService';
-import Paquete from '../Paquete';
+import Producto from '../Producto';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { MenuItem} from "@mui/material";
+import { useProductoService } from '../useProductoService';
 
 const style = {
   position: 'absolute',
@@ -29,21 +29,21 @@ interface UnidadFormModalProps {
 }
 
 export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFormModalProps) {
-    const [id, setId] = useState(idToOpen);
+    const [id,] = useState(idToOpen);
     const [open, setOpen] = useState(openArg);
-    const [form, setForm] = useState<Paquete>(new Paquete());
+    const [form, setForm] = useState<Producto>(new Producto());
     const UnidadService = useUnidadService();
-    const PaqueteService = usePaqueteService();
+    const ProductoService = useProductoService();
     const [unidadesOptions, setUnidadesOptions] = useState([]);
     useEffect(() => {
       if (id) {
-        PaqueteService.get(id).then((result) => {
-          const item =  result.data;
-          const paqueteFromApi = new Paquete(item.id || 0, item.nombre || '', item.unidadId || 0, item.precio || 0, item.cantidad || 0);
+        ProductoService.get(id).then((result) => {
+          const item :Producto =  result.data;
+          const paqueteFromApi = new Producto(item.id || 0, item.nombre || '', item.unidadId || 0, item.precio || 0, item.cantidad || 0);
           setForm(paqueteFromApi);
         });  
       } else {
-       setForm(new Paquete(0, '', 0, 0, 0));
+       setForm(new Producto(0, '', 0, 0, 0));
       }
       UnidadService.getUnidades()
       .then((result) => {
@@ -52,7 +52,6 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
       }); 
     }, [id]);
   
-    const handleOpen = () => setOpen(true);
     const handleClose = () => {
       if(onClose) onClose();
       setOpen(false);
@@ -60,34 +59,30 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
 
     const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Paquete(prevForm.id,  value || '', prevForm.unidadId, prevForm.precio, prevForm.cantidad));
+      setForm((prevForm) => new Producto(prevForm.id,  value || '', prevForm.unidadId, prevForm.precio, prevForm.cantidad));
     }
 
     const handlerChangeCantidad = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Paquete(prevForm.id,  prevForm.nombre, prevForm.unidadId, prevForm.precio, Number(value) || 0));
+      setForm((prevForm) => new Producto(prevForm.id,  prevForm.nombre, prevForm.unidadId, prevForm.precio, Number(value) || 0));
     }
 
     const handleChangeUnidad = (event: SelectChangeEvent<number | string>) => {
       const { value } = event.target;
-      setForm((prevForm) => new Paquete(prevForm.id,  prevForm.nombre, Number(value) || 0, prevForm.precio, prevForm.cantidad));
+      setForm((prevForm) => new Producto(prevForm.id,  prevForm.nombre, Number(value) || 0, prevForm.precio, prevForm.cantidad));
     };
 
     const handlerChangePrecio = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Paquete(prevForm.id,  prevForm.nombre, prevForm.unidadId, Number(value) || 0, prevForm.cantidad));
+      setForm((prevForm) => new Producto(prevForm.id,  prevForm.nombre, prevForm.unidadId, Number(value) || 0, prevForm.cantidad));
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (id) {
-        PaqueteService.actualizar(id, form).then((result)=>{
-          handleClose();
-        });
+        ProductoService.actualizar(id, form).then(() => handleClose());
       } else {
-        PaqueteService.crear(form).then((result)=>{
-          handleClose();
-        });
+        ProductoService.crear(form).then(() => handleClose());
       }
     };
   
@@ -96,7 +91,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
         <Modal open={open} onClose={handleClose}>
           <Box sx={style}>
             <Typography variant="h6" component="h2">
-              Paquete
+              Producto
               <IconButton
                 aria-label="close"
                 onClick={handleClose}
@@ -170,22 +165,20 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
   }
   
 
-  type AlertDialogBorrarPaqueteProps = {
+  type AlertDialogBorrarProductoProps = {
     paramId: number;
     onClose?: () => void;
   };
 
-export function AlertDialogBorrarPaquete({ paramId, onClose }: AlertDialogBorrarPaqueteProps): React.JSX.Element {
+export function AlertDialogBorrarProducto({ paramId, onClose }: AlertDialogBorrarProductoProps): React.JSX.Element {
   const [open, setOpen] = React.useState(true);
-  const [id, setId] = React.useState(paramId);
-  const PaqueteService = usePaqueteService();
+  const [id,] = React.useState(paramId);
+  const ProductoService = useProductoService();
 
   const handlerClickSi = () => {
-    PaqueteService.eliminar(id).then().then((result)=>{
-      console.log(result);
-      handleClose();
-    });
+    ProductoService.eliminar(id).then().then(()=>handleClose());
   }
+  
   const handleClose = () => {
     if(onClose) onClose();
     setOpen(false);

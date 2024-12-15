@@ -7,7 +7,7 @@ import { MenuItem} from "@mui/material";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
-import Paquete from '../../paquete/Paquete';
+import Producto from '../../producto/Producto';
 import { Unidad } from '../../unidad/Unidad';
 
 const generateUniqueNumericId = () => {
@@ -31,14 +31,14 @@ interface IngredienteModalProps {
     onSubmit: (ingrediente?: Ingrediente) => void;
     ingredienteParam: Ingrediente | undefined;
     unidades: Unidad[];
-    productos: Paquete[];
+    productos: Producto[];
     onClose: () => void;
   }
   
   export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, unidades, productos, onClose}: IngredienteModalProps) {
       const [ingrediente, setIngrediente] = useState<Ingrediente>(ingredienteParam || new Ingrediente(generateUniqueNumericId()));
       const [id, setId] = useState<number>(ingrediente.id);
-      const [producto, setProducto] = useState<Paquete>();
+      const [producto, setProducto] = useState<Producto>();
       const [unidad, setUnidad] = useState<Unidad>();
       const [cantidad, setCantidad] = useState(ingrediente.cantidad);
       const [abreviacion, setAbreviacion] = useState<string>('');
@@ -108,7 +108,7 @@ interface IngredienteModalProps {
                   fullWidth
                 >
                   <MenuItem value={"0"}>Seleccione un Paquete</MenuItem>
-                  {productos.map((paquete : Paquete) => (
+                  {productos.map((paquete : Producto) => (
                     <MenuItem key={paquete.id} value={paquete.id}>
                       {paquete.nombre}
                     </MenuItem>
