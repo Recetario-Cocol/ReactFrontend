@@ -22,8 +22,7 @@ interface Row {
 
 
 export default function PaqueteGrilla() {
-  const [seleccionado, setSeleccionado] = React.useState(false);
-  const [, setSelectionModel] = React.useState<GridRowSelectionModel>();
+  const [estaSelecionado, setEstaSelecionado] = React.useState<boolean>(false);
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarProducto, setOpenBorrarProducto] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
@@ -31,13 +30,8 @@ export default function PaqueteGrilla() {
   const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
 
-
-  const handleSeleccion = (
-    rowSelectionModel: GridRowSelectionModel,
-    details: GridCallbackDetails<any>
-  ) => {
-    setSeleccionado(rowSelectionModel.length > 0);
-    setSelectionModel(rowSelectionModel);
+  const handleSeleccion = ( rowSelectionModel: GridRowSelectionModel) => {
+    setEstaSelecionado(rowSelectionModel.length > 0);
   };
 
   const handleCloseModal = () => {
@@ -52,7 +46,7 @@ export default function PaqueteGrilla() {
 
   useEffect(() => {
        fetchRows();
-  }, []);
+  });
 
   async function fetchRows() {
     try {
@@ -83,11 +77,11 @@ export default function PaqueteGrilla() {
 
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
-    {field: 'id', headerName: 'ID', width: 30},
-    {field: 'nombre', headerName: 'Nombre', width: 200, editable: false},
-    {field: 'nombreUnidad', headerName: 'Unidad', width: 150, editable: false},
-    {field: 'precio', headerName: 'Precio', width: 100, editable: false},
-    {field: 'cantidad', headerName: 'Cantidad', width: 1100, editable: false},
+    {field: 'id', headerName: 'Id', width: 30},
+    {field: 'nombre', headerName: 'Nombre', width: 200, editable: false, disableColumnMenu: true},
+    {field: 'nombreUnidad', headerName: 'Unidad', width: 150, editable: false, disableColumnMenu: true},
+    {field: 'precio', headerName: 'Precio', width: 100, editable: false, disableColumnMenu: true},
+    {field: 'cantidad', headerName: 'Cantidad', width: 1100, editable: false, disableColumnMenu: true},
   ];
 
   function getSelectedRowId(): number {
@@ -101,17 +95,17 @@ export default function PaqueteGrilla() {
     return 0; 
   }
 
-  function agregar() {
+  function agregar(): void {
     setIdToOpen(0);
     setOpenModal(true);
   }
   
-  function modificar() {
+  function modificar(): void {
     setIdToOpen(getSelectedRowId());
     setOpenModal(true);
   }
   
-  function eliminar() {
+  function eliminar(): void {
     setIdToOpen(getSelectedRowId());
     setOpenBorrarProducto(true);
   }
@@ -120,8 +114,8 @@ export default function PaqueteGrilla() {
     <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
-        <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!seleccionado} onClick={eliminar}>Eliminar</Button>
+        <Button startIcon={<EditIcon />} disabled={!estaSelecionado} onClick={modificar}>Modificar</Button>
+        <Button startIcon={<DeleteIcon />} disabled={!estaSelecionado} onClick={eliminar}>Eliminar</Button>
       </Box>
       <DataGrid
         rows={rows}

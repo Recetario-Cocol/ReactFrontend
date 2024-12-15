@@ -2,7 +2,6 @@ import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGr
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect, useState } from 'react';
 import {Box, Button} from '@mui/material';
 import RecetaFormModal, {AlertDialogBorrarReceta} from './RecetaFormModal';
@@ -20,7 +19,6 @@ export default function RecetaGrilla() {
   const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
   const RecetaService = useRecetaService();
-
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,

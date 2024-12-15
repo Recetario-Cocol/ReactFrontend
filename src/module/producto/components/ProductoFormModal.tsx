@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, InputLabel, FormControl, FormHelperText} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import Producto from '../Producto';
@@ -47,7 +47,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
       }
       UnidadService.getUnidades()
       .then((result) => {
-        const options = result.data ? result.data.map((item: any) => ({"id": item.id, "name": item.nombre})) : [];
+        const options = result.data ? result.data.map((item: any) => ({"id": item.id, "name": item.abreviacion})) : [];
         setUnidadesOptions(options);
       }); 
     }, [id]);
@@ -90,73 +90,33 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
       <div>
         <Modal open={open} onClose={handleClose}>
           <Box sx={style}>
-            <Typography variant="h6" component="h2">
-              Producto
-              <IconButton
-                aria-label="close"
-                onClick={handleClose}
-                sx={{
-                  position: 'absolute',
-                  right: 8,
-                  top: 8,
-                }}
-              >
+            <Typography variant="h6" component="h2">Producto
+              <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8}}>
                 <CloseIcon />
               </IconButton>
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
-              <TextField
-                label="ID"
-                name="id"
-                value={form.id}
-                fullWidth
-                margin="normal"
-                disabled
-              />
-              <TextField
-                label="Nombre"
-                name="nombre"
-                value={form.nombre}
-                onChange={handlerChangeNombre}
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Cantidad"
-                name="cantidad"
-                value={form.cantidad}
-                onChange={handlerChangeCantidad}
-                fullWidth
-                margin="normal"
-              />
-              <Select
-                label="Unidad"
-                name="unidad"
-                value={form.unidadId}
-                onChange={handleChangeUnidad}
-                fullWidth
-              >
-                <MenuItem value={"0"}>Seleccione una unidad</MenuItem>
-                {unidadesOptions.map((option : any) => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              <TextField
-                label="Precio"
-                name="precio"
-                value={form.precio}
-                onChange={handlerChangePrecio}
-                fullWidth
-                margin="normal"
-              />
-              <Button type="submit" variant="contained" color="primary">
-                Enviar
-              </Button>
-              <Button variant="outlined" color="error" onClick={handleClose}>
-                Cancelar
-              </Button>
+              <TextField label="Id" name="id" value={form.id} margin="normal" disabled sx={{ width: "10%"}}/>
+              <FormControl error={!form.nombre}  sx={{ width: `calc(100% - (10% + 16px))`, ml: 2}}>
+                <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal"/>
+                {!form.nombre && <FormHelperText>Por favor ingrese un Nombre.</FormHelperText>}
+              </FormControl>
+              <TextField label="Cantidad" name="cantidad" value={form.cantidad} onChange={handlerChangeCantidad} margin="normal" sx={{ width: `calc(100% - (40% + 16px))`, mr: 2}}/>
+              <FormControl error={!form.unidadId} sx={{ width: "40%", my: 2}}>
+                <InputLabel id="unidad-label">Unidad</InputLabel>
+                <Select label="Unidad" labelId="unidad-label" id="unidad" value={form.unidadId} onChange={handleChangeUnidad}>
+                  <MenuItem value={"0"}>Vacio</MenuItem>
+                  {unidadesOptions.map((option : any) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {!form.unidadId && <FormHelperText>Selecione una Unidad.</FormHelperText>}
+              </FormControl>
+              <TextField label="Precio" name="precio" value={form.precio} onChange={handlerChangePrecio} fullWidth margin="normal" />
+              <Button type="submit" variant="contained" color="primary">Enviar</Button>
+              <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
             </Box>
           </Box>
         </Modal>

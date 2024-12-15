@@ -6,7 +6,6 @@ export default class Receta {
     private _rinde: number;
     private _ingredientes: Array<Ingrediente>;
 
-
     constructor(id: number = 0, nombre: String = '', rinde: number = 0, ingredientes: Array<Ingrediente> = []) {
         this._id = id;
         this._nombre = nombre;

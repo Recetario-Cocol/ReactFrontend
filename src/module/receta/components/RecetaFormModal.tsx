@@ -261,7 +261,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <TextField label="ID" name="id" value={form.id} margin="normal" disabled sx={{ width: "10%"}}/>
-              <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} fullWidth margin="normal" sx={{ width: "50%", mx: 2}}/>
+              <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal" sx={{ width: "50%", mx: 2}}/>
               <TextField label="Rinde Cauntas porciones" name="rinde" value={form.rinde} onChange={handlerChangeRinde} fullWidth margin="normal"sx={{ width: `calc(100% - (10% + 50% + 32px))`}}/>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Button startIcon={<AddIcon />} disabled={loadingProducts} onClick={agregarIngrediente}>Agregar</Button>
