@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, FormControl, InputLabel} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Ingrediente from "../Ingrediente";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
@@ -27,166 +27,111 @@ const style = {
   };
 
 interface IngredienteModalProps {
-    openArg: boolean;
-    onSubmit: (ingrediente?: Ingrediente) => void;
-    ingredienteParam: Ingrediente | undefined;
-    unidades: Unidad[];
-    productos: Producto[];
-    onClose: () => void;
+  openArg: boolean;
+  onSubmit: (ingrediente?: Ingrediente) => void;
+  ingredienteParam: Ingrediente | undefined;
+  unidades: Unidad[];
+  productos: Producto[];
+  onClose: () => void;
+}
+  
+export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, unidades, productos, onClose}: IngredienteModalProps) {
+  const [ingrediente, setIngrediente] = useState<Ingrediente>(ingredienteParam || new Ingrediente(generateUniqueNumericId()));
+  const [id,] = useState<number>(ingrediente.id);
+  const [producto, setProducto] = useState<Producto>();
+  const [unidad, setUnidad] = useState<Unidad>();
+  const [cantidad, setCantidad] = useState(ingrediente.cantidad);
+  const [abreviacion, setAbreviacion] = useState<string>('');
+  const [precio, setPrecio] = useState<number>(0);
+
+  const [open, setOpen] = useState(openArg);    
+  const handleClose = () => {
+    setOpen(false);
+    onClose();
   }
-  
-  export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, unidades, productos, onClose}: IngredienteModalProps) {
-      const [ingrediente, setIngrediente] = useState<Ingrediente>(ingredienteParam || new Ingrediente(generateUniqueNumericId()));
-      const [id, setId] = useState<number>(ingrediente.id);
-      const [producto, setProducto] = useState<Producto>();
-      const [unidad, setUnidad] = useState<Unidad>();
-      const [cantidad, setCantidad] = useState(ingrediente.cantidad);
-      const [abreviacion, setAbreviacion] = useState<string>('');
-      const [precio, setPrecio] = useState<number>(0);
-    
-      const [open, setOpen] = useState(openArg);    
-      const handleClose = () => {
-        setOpen(false);
-        onClose();
-      }
 
-      useEffect(() => {
-        const selectedProducto = productos.find((p) => p.id === ingrediente.paqueteId);
-        const selectedUnidad = unidades.find((u) => u.id === selectedProducto?.unidadId);
-        setProducto(selectedProducto);
-        setUnidad(selectedUnidad);
-        setAbreviacion(selectedUnidad?.abreviacion ?? '');
-        setPrecio(selectedProducto?.precio ?? 0);
-      }, [ingrediente.paqueteId, productos, unidades]);
-  
-      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (onSubmit) onSubmit(new Ingrediente(id, producto?.id ?? 0, unidad?.id ?? 0, cantidad));
-        handleClose();
-      };
+  useEffect(() => {
+    const selectedProducto = productos.find((p) => p.id === ingrediente.paqueteId);
+    const selectedUnidad = unidades.find((u) => u.id === selectedProducto?.unidadId);
+    setProducto(selectedProducto);
+    setUnidad(selectedUnidad);
+    setAbreviacion(selectedUnidad?.abreviacion ?? '');
+    setPrecio(selectedProducto?.precio ?? 0);
+  }, [ingrediente.paqueteId, productos, unidades]);
 
-      const handleProductoChange = (e: SelectChangeEvent) => {
-        setIngrediente((prevIngrediente) => {
-          const clonedIngrediente = prevIngrediente.clone();
-          clonedIngrediente.paqueteId = Number(e.target.value);
-          return clonedIngrediente;
-        });
-      };
-    
-      return (
-        <div>
-          <Modal open={open} onClose={handleClose}>
-            <Box sx={style}>
-              <Typography variant="h6" component="h2">
-                Paquete
-                <IconButton
-                  aria-label="close"
-                  onClick={handleClose}
-                  sx={{
-                    position: 'absolute',
-                    right: 8,
-                    top: 8,
-                  }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Typography>
-              <Box component="form" onSubmit={handleSubmit}>
-                <TextField
-                  label="ID"
-                  name="id"
-                  value={id}
-                  fullWidth
-                  margin="normal"
-                  disabled
-                />
-                <Select
-                  label="Producto"
-                  name="producto"
-                  value={producto?.id.toString() ?? "0"}
-                  onChange={handleProductoChange}
-                  fullWidth
-                >
-                  <MenuItem value={"0"}>Seleccione un Paquete</MenuItem>
-                  {productos.map((paquete : Producto) => (
-                    <MenuItem key={paquete.id} value={paquete.id}>
-                      {paquete.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <TextField
-                  label="Cantidad"
-                  name="cantidad"
-                  value={cantidad}
-                  onChange={(e) => setCantidad( Number(e.target.value))}
-                  fullWidth
-                  margin="normal"
-                />
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (onSubmit) onSubmit(new Ingrediente(id, producto?.id ?? 0, unidad?.id ?? 0, cantidad));
+    handleClose();
+  };
 
-                <TextField
-                  label="Unidad"
-                  name="abreviacion"
-                  value={abreviacion}
-                  fullWidth
-                  margin="normal"
-                  disabled={true}
-                />
-                <TextField
-                  label="Precio"
-                  name="precio"
-                  value={precio}
-                  fullWidth
-                  margin="normal"
-                  disabled={true}
-                />
-                <Button type="submit" variant="contained" color="primary">
-                  Enviar
-                </Button>
-                <Button variant="outlined" color="error" onClick={handleClose}>
-                  Cancelar
-                </Button>
-              </Box>
-            </Box>
-          </Modal>
-        </div>
-      );
-    }
-    
-  
+  const handleProductoChange = (e: SelectChangeEvent) => {
+    setIngrediente((prevIngrediente) => {
+      const clonedIngrediente = prevIngrediente.clone();
+      clonedIngrediente.paqueteId = Number(e.target.value);
+      return clonedIngrediente;
+    });
+  };
+
+  return (
+    <div>
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={style}>
+          <Typography variant="h6" component="h2">Producto
+            <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8}}><CloseIcon /></IconButton>
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField label="Id" name="id" value={id} fullWidth margin="normal" disabled  sx={{ width: "20%"}}/>
+            <FormControl sx={{ width: `calc(100% - (20% + 16px))`, ml: 2, mt: 2}}>
+              <InputLabel id="producto-label">Producto</InputLabel>
+              <Select label="Producto" labelId="producto-label" name="producto" value={producto?.id.toString() ?? "0"} onChange={handleProductoChange} >
+                <MenuItem value={"0"}>Seleccione un Paquete</MenuItem>
+                {productos.map((paquete : Producto) => (
+                  <MenuItem key={paquete.id} value={paquete.id}>
+                    {paquete.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField label="Cantidad" name="cantidad" value={cantidad} onChange={(e) => setCantidad( Number(e.target.value))} fullWidth margin="normal"/>
+            <TextField label="Unidad" name="abreviacion" value={abreviacion} fullWidth margin="normal" disabled={true} />
+            <TextField label="Precio" name="precio" value={precio} fullWidth margin="normal" disabled={true}/>
+            <Button type="submit" variant="contained" color="primary">Enviar</Button>
+            <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
+          </Box>
+        </Box>
+      </Modal>
+    </div>
+  );
+}
+
 type AlertDialogBorrarIngredienteProps = {
-    paramId: number;
-    onSubmit: (id: number) => void;
-    onClose: () => void;
+  paramId: number;
+  onSubmit: (id: number) => void;
+  onClose: () => void;
 };
   
-  export function AlertDialogBorrarIngrediente({ paramId, onSubmit, onClose }: AlertDialogBorrarIngredienteProps): React.JSX.Element {
-    const [open, setOpen] = React.useState(true);
-  
-    const handlerClickSi = () => {
-        onSubmit(paramId);
-        handleClose();
-    }
-    const handleClose = () => {
-      setOpen(false);
-      onClose();
-    }
-  
-    return (
-      <React.Fragment>
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="alert-dialog-title"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {"¿Desea Borrar el Ingerdiente?"}
-          </DialogTitle>
-          <DialogActions>
-            <Button onClick={handleClose} autoFocus>No</Button>
-            <Button onClick={handlerClickSi}>Si</Button>
-          </DialogActions>
-        </Dialog>
-      </React.Fragment>
-    );
+export function AlertDialogBorrarIngrediente({ paramId, onSubmit, onClose }: AlertDialogBorrarIngredienteProps): React.JSX.Element {
+  const [open, setOpen] = React.useState(true);
+  const handlerClickSi = () => {
+      onSubmit(paramId);
+      handleClose();
   }
-
+  const handleClose = () => {
+    setOpen(false);
+    onClose();
+  }
+  return (
+    <React.Fragment>
+      <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title">
+        <DialogTitle id="alert-dialog-title">
+          {"¿Desea Borrar el Ingerdiente?"}
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={handleClose} autoFocus>No</Button>
+          <Button onClick={handlerClickSi}>Si</Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
+  );
+}

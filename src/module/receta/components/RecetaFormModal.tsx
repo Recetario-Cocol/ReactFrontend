@@ -76,6 +76,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const handleCloseIngredienteModal = () => {
       setOpenIngredienteModal(false);
     };
+    const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
+    const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
     const addRowFromIngrediente = (ingrediente: Ingrediente) => {
       const newRow: Row = {
@@ -102,28 +104,15 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     }
 
     const handleIngredienteCloseDialog = (id: number) => {
-      setRows((prevRows) => {
-        return prevRows.filter(row => row.id !== id);
-      });
+      setRows((prevRows) => {return prevRows.filter(row => row.id !== id);});
     }
-
-    const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
-
     const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
-      console.log(newSelectionModel);
       const selectedRowId = newSelectionModel[0];
       const selectedRowData = rows.find((row:Row) => row.id === selectedRowId);
       if (selectedRowData) {
-        setIngredienteSeleccionado(new Ingrediente(
-          Number(selectedRowData.id), 
-          selectedRowData.paqueteId, 
-          selectedRowData.unidadId,
-          selectedRowData.cantidad
-        ));
-      } 
+        setIngredienteSeleccionado(new Ingrediente( Number(selectedRowData.id), selectedRowData.paqueteId, selectedRowData.unidadId, selectedRowData.cantidad));
+      }
     };
-
-    const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
     type TypeOfRow = (typeof rows)[number];
     const GrillaRef = useGridApiRef();
@@ -244,10 +233,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       }
     };
 
-    const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({
-      id: false,
-      unidadId: false
-    });
+    const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({id: false, unidadId: false});
     
     return (
       <div>
@@ -287,12 +273,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                 onRowSelectionModelChange={handleRowSelection}
                 columnVisibilityModel={columnVisibilityModel}
                 />         
-              <Button type="submit" variant="contained" color="primary">
-                Enviar
-              </Button>
-              <Button variant="outlined" color="error" onClick={handleClose}>
-                Cancelar
-              </Button>
+              <Button type="submit" variant="contained" color="primary">Enviar</Button>
+              <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
             </Box>                 
             <div>
                 {!loadingProducts && openIngredienteModal && 
@@ -302,15 +284,12 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                     ingredienteParam={ingredienteSeleccionado}
                     unidades={unidades}
                     productos={productos}
-                    onClose={handleCloseIngredienteModal} // Pasar la función de cierre¿
+                    onClose={handleCloseIngredienteModal}
                     />
                 }
                 {!loadingProducts && openBorrarIngrediente && 
-                  <AlertDialogBorrarIngrediente
-                    paramId={ingredienteIdToDelete}
-                    onSubmit={handleIngredienteCloseDialog}
-                    onClose={handleIngredienteCloseDialogClose}/>
-                  }
+                  <AlertDialogBorrarIngrediente paramId={ingredienteIdToDelete} onSubmit={handleIngredienteCloseDialog} onClose={handleIngredienteCloseDialogClose}/>
+                }
             </div>
           </Box>
         </Modal>
@@ -340,11 +319,7 @@ export function AlertDialogBorrarReceta({ paramId, onClose }: AlertDialogBorrarR
 
   return (
     <React.Fragment>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-      >
+      <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title">
         <DialogTitle id="alert-dialog-title">
           {"¿Desea Borrar la Receta?"}
         </DialogTitle>
