@@ -64,8 +64,8 @@ export default function UnidadGrilla() {
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
     {field: 'id', headerName: 'ID', width: 90, disableColumnMenu: true},
-    {field: 'abreviacion', headerName: 'Abreviación', width: 150, editable: true, disableColumnMenu: true},
-    {field: 'nombre', headerName: 'Nombre', width: 150, editable: true,  disableColumnMenu: true},
+    {field: 'abreviacion', headerName: 'Abreviación', width: 150, editable: false, disableColumnMenu: true},
+    {field: 'nombre', headerName: 'Nombre', width: 150, editable: false,  disableColumnMenu: true},
     {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 

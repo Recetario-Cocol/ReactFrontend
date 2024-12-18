@@ -3,7 +3,7 @@ import { useAuth } from './module/contexts/AuthContext';
 import Login from './module/usuarios/login';
 //import NotificationsSignInPageError from './module/usuarios/login2';
 import UnidadGrilla from './module/unidad/components/UnidadGrilla';
-import PaqueteGrilla from './module/producto/components/PaqueteGrilla';
+import ProductoGrilla from './module/producto/components/ProductoGrilla';
 import RecetaGrilla from './module/receta/components/RecetaGrilla';
 
 const PrivateRoute = ({ children }) => {
@@ -21,7 +21,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Login />} />
         <Route path="/Home" element={<PrivateRoute><UnidadGrilla /></PrivateRoute>} />
         <Route path="/Unidades" element={<PrivateRoute><UnidadGrilla /></PrivateRoute>} />
-        <Route path="/Paquetes" element={<PrivateRoute><PaqueteGrilla /></PrivateRoute>} />
+        <Route path="/Paquetes" element={<PrivateRoute><ProductoGrilla /></PrivateRoute>} />
         <Route path="/Recetas" element={<PrivateRoute><RecetaGrilla /></PrivateRoute>} />
         <Route path="*" element={<Login />} />
     </Routes>

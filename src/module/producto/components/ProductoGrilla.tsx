@@ -2,14 +2,11 @@ import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGr
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect, useState } from 'react';
 import {Box, Button} from '@mui/material';
 import PaqueteFormModal, { AlertDialogBorrarProducto} from './ProductoFormModal';
 import { useProductoService } from '../useProductoService';
-import Producto from '../Producto';
 import { useUnidadService } from '../../unidad/useUnidadService';
-import { Unidad } from '../../usuarios/Unidad';
 
 interface Row {
   id: number;
@@ -21,7 +18,7 @@ interface Row {
 }
 
 
-export default function PaqueteGrilla() {
+export default function ProductoGrilla() {
   const [estaSelecionado, setEstaSelecionado] = React.useState<boolean>(false);
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarProducto, setOpenBorrarProducto] = useState(false);
@@ -70,7 +67,7 @@ export default function PaqueteGrilla() {
         setRows([]);
       }
     } catch (error) {
-      console.error("Error al cargar los paquetes:", error);
+      console.error("Error al cargar los productos:", error);
       setRows([]);
     }
   }
