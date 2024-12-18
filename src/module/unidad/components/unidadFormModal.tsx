@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert, Snackbar} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUnidadService } from '../useUnidadService';
 import { Unidad } from '../Unidad';
@@ -29,6 +29,7 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
   const [id,] = useState<number>(idToOpen);
   const [open, setOpen] = useState<boolean>(openArg);
   const [form, setForm] = useState<Unidad>(new Unidad());
+  const [mensajeDeError, setMensajeDeError] = useState<String>("");
   const UnidadService = useUnidadService();
   
   useEffect(() => {
@@ -50,6 +51,17 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if(!form.nombre) {
+      setMensajeDeError("Ingrese un nombre.");
+      return;
+    }
+
+    if (!form.abreviacion) {
+      setMensajeDeError("Ingrese una abreviacion");
+      return;
+    }
+  
     if (id) {
       UnidadService.actualizarUnidad(id, form).then(
         ()=>handleClose()
@@ -69,30 +81,14 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
           <CloseIcon />
         </IconButton>
       </Typography>
+      {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}    
       <Box component="form" onSubmit={handleSubmit}>
-        <TextField
-          label="ID"
-          name="id"
-          value={form.id}
-          fullWidth
-          margin="normal"
-          disabled
-        />
-        <TextField
-          label="Nombre"
-          name="nombre"
-          value={form.nombre}
+        <TextField label="ID" name="id" value={form.id} fullWidth margin="normal" disabled/>
+        <TextField label="Nombre" name="nombre" value={form.nombre} fullWidth margin="normal"
           onChange={e => setForm((prevForm) => new Unidad(prevForm.id, e.target.value || '', prevForm.abreviacion))}
-          fullWidth
-          margin="normal"
         />
-        <TextField
-          label="Abreviación"
-          name="abreviacion"
-          value={form.abreviacion}
+        <TextField label="Abreviación" name="abreviacion" value={form.abreviacion} fullWidth margin="normal"
           onChange={e => setForm((prevForm) => new Unidad(prevForm.id, prevForm.nombre, e.target.value || ''))}
-          fullWidth
-          margin="normal"
         />
         <Button type="submit" variant="contained" color="primary">Enviar</Button>
         <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
@@ -104,7 +100,7 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
 
 type AlertDialogBorrarUnidadProps = {
   paramId: number;
-  onClose?: () => void;
+  onClose?: (mensaje: string) => void;
 };
 
 export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarUnidadProps): React.JSX.Element {
@@ -112,27 +108,43 @@ export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarU
   const [id,] = React.useState<number>(paramId);
   const UnidadService = useUnidadService();
 
-  const handlerClickSi = () => {
-    UnidadService.eliminarUnidad(id).then().then(
-      ()=>handleClose()
-    );
-  }
-  const handleClose = () => {
-    if(onClose) onClose();
+  const handlerClickSi = async () => {
+    try {
+      await UnidadService.eliminarUnidad(id);
+      handleClose("Unidad eliminada correctamente.");
+    } catch (error: any) {
+      let mensajeError = "Ocurrió un error inesperado al intentar eliminar la unidad.";
+      if (error.response) {
+        const { status } = error.response; 
+        if (status === 409) {
+          mensajeError = "No se puede eliminar la unidad porque está relacionada con otros recursos.";
+        } else if (status === 404) {
+          mensajeError = "La unidad que intentas eliminar no existe.";
+        }
+      } else {
+        mensajeError = "Error de conexión. Intenta de nuevo más tarde.";
+      }
+      handleClose(mensajeError);
+    }
+  };
+
+  const handleClose = (mensaje: string) => {
+    if(onClose) onClose(mensaje);
     setOpen(false);
   }
 
   return (
     <React.Fragment>
-      <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" >
+      <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title" >
         <DialogTitle id="alert-dialog-title">
           {"¿Desea Borrar la Unidad?"}
         </DialogTitle>
         <DialogActions>
-          <Button onClick={handleClose} autoFocus>No</Button>
+          <Button onClick={() => handleClose("")} autoFocus>No</Button>
           <Button onClick={handlerClickSi}>Si</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
   );
 }
+ 

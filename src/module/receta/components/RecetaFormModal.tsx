@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
 import { DataGrid, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef} from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -78,6 +78,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     };
     const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
+    const [mensajeDeError, setMensajeDeError] = useState<String>("");
 
     const addRowFromIngrediente = (ingrediente: Ingrediente) => {
       const newRow: Row = {
@@ -122,21 +123,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
         try {
           const result = await RecetaService.get(id);
           const item = result.data;
-          setForm(new Receta(
-            item.id || 0,
-            item.nombre || '',
-            item.rinde || 0,
-            item.ingredientes || []
-          ));
-          setRows(
-            item.ingredientes.map((ingrediente: Ingrediente, index: number) => ({
+          setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes));
+          setRows(item.ingredientes.map((ingrediente: Ingrediente, index: number) => ({
               id: ingrediente.id,
               paqueteId: ingrediente.paqueteId,
               unidadId: ingrediente.unidadId,
               cantidad: ingrediente.cantidad,
               precio: "0",
-            }))
-          );
+          })));
         } catch (error) {
           console.error('Error fetching receta:', error);
         }
@@ -206,6 +200,22 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       form.ingredientes = rows.map((row: Row, index: number) => {
         return new Ingrediente(row.id, row.paqueteId, row.unidadId, row.cantidad);
       });
+
+      if (!form.nombre){
+        setMensajeDeError("Ingrese un nombre.");
+        return;
+      }
+
+      if (!form.rinde){
+        setMensajeDeError("Ingrese cuantas rinde la receta.");
+        return;
+      }
+
+      if (form.ingredientes.length < 1){
+        setMensajeDeError("Ingrese al menos un ingrediente");
+        return;
+      }
+
       if (id) {
         RecetaService.actualizar(id, form).then((result)=>{
           handleClose();
@@ -245,6 +255,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                 <CloseIcon />
               </IconButton>
             </Typography>
+            {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}
             <Box component="form" onSubmit={handleSubmit}>
               <TextField label="ID" name="id" value={form.id} margin="normal" disabled sx={{ width: "10%"}}/>
               <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal" sx={{ width: "50%", mx: 2}}/>

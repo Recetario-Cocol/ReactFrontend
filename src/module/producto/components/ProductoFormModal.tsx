@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, InputLabel, FormControl, FormHelperText} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, InputLabel, FormControl, FormHelperText, Alert} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import Producto from '../Producto';
@@ -34,6 +34,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
     const [form, setForm] = useState<Producto>(new Producto());
     const UnidadService = useUnidadService();
     const ProductoService = useProductoService();
+    const [mensajeDeError, setMensajeDeError] = useState<String>("");
     const [unidadesOptions, setUnidadesOptions] = useState([]);
     useEffect(() => {
       if (id) {
@@ -79,6 +80,26 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      if(!form.nombre) {
+        setMensajeDeError("Ingrese un nombre.");
+        return;
+      }
+  
+      if (!form.precio) {
+        setMensajeDeError("Ingrese un precio.");
+        return;
+      }
+    
+      if (!form.unidadId) {
+        setMensajeDeError("Selecione una unidad.");
+        return;
+      }
+
+      if (form.cantidad <= 0) {
+        setMensajeDeError("Selecione una cantidad valida.");
+        return;
+      }
+    
       if (id) {
         ProductoService.actualizar(id, form).then(() => handleClose());
       } else {
@@ -95,6 +116,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
                 <CloseIcon />
               </IconButton>
             </Typography>
+            {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}    
             <Box component="form" onSubmit={handleSubmit}>
               <TextField label="Id" name="id" value={form.id} margin="normal" disabled sx={{ width: "10%"}}/>
               <FormControl error={!form.nombre}  sx={{ width: `calc(100% - (10% + 16px))`, ml: 2}}>

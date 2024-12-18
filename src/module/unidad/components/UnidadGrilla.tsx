@@ -1,28 +1,35 @@
-import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect, useState } from 'react';
-import {Box, Button} from '@mui/material';
+import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
 import UnidadFormModal, { AlertDialogBorrarUnidad } from './unidadFormModal';
 import {useUnidadService} from '../useUnidadService';
 import { Unidad } from '../Unidad';
 
 export default function UnidadGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
+  const [canBeDelete, setCanBeDelete] = React.useState(false);
   const [, setSelectionModel] = React.useState<GridRowSelectionModel>();
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
-  const [rows, setRows] = useState([]); 
+  const [rows, setRows] = useState<Unidad[]>([]); 
   const UnidadService = useUnidadService();
-
+  const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
+  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false});
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
     details: GridCallbackDetails<any>
   ) => {
+    const selectedRow = rows.find((row) => row.id === rowSelectionModel[0]);
+    if (selectedRow) {
+      console.log(`Row ID: ${selectedRow.id}, CanBeDeleted: ${selectedRow.canBeDeleted}`);
+    }
+    setCanBeDelete(!!selectedRow?.canBeDeleted);
     setSeleccionado(rowSelectionModel.length > 0);
     setSelectionModel(rowSelectionModel);
   };
@@ -32,9 +39,10 @@ export default function UnidadGrilla() {
     setOpenModal(false);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = (mensaje: string) => {
     fetchRows();
     setOpenBorrarUnidad(false);
+    setMensajesModalBorrar(mensaje);
   };
 
   useEffect(() => {
@@ -46,7 +54,7 @@ export default function UnidadGrilla() {
     .then((result) => {
       const unidadesApi = result.data ? 
         result.data.map((item: any) => 
-          new Unidad(item.id, item.nombre, item.abreviacion)
+          new Unidad(item.id, item.nombre, item.abreviacion, item.canBeDeleted)
         ):
         [];
       setRows(unidadesApi);
@@ -57,7 +65,8 @@ export default function UnidadGrilla() {
   const columns: GridColDef<(typeof rows)[number]>[] = [
     {field: 'id', headerName: 'ID', width: 90, disableColumnMenu: true},
     {field: 'abreviacion', headerName: 'Abreviación', width: 150, editable: true, disableColumnMenu: true},
-    {field: 'nombre', headerName: 'Nombre', width: 150, editable: true,  disableColumnMenu: true}
+    {field: 'nombre', headerName: 'Nombre', width: 150, editable: true,  disableColumnMenu: true},
+    {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 
   function getSelectedRowId(): number {
@@ -86,13 +95,21 @@ export default function UnidadGrilla() {
     setOpenBorrarUnidad(true);
   }
 
+  function handleSnackBarClose(event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setMensajesModalBorrar("");
+  };
+
   return (
     <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
         <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!seleccionado} onClick={eliminar}>Eliminar</Button>
+        <Button startIcon={<DeleteIcon />} disabled={!canBeDelete} onClick={eliminar}>Eliminar</Button>
       </Box>
+      <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
       <DataGrid
         rows={rows}
         apiRef={GrillaRef}
@@ -104,8 +121,10 @@ export default function UnidadGrilla() {
             },
           },
         }}
+        disableMultipleRowSelection
         pageSizeOptions={[10]}
         onRowSelectionModelChange={handleSeleccion}
+        columnVisibilityModel={columnVisibilityModel}
       />;
       <div>
       {openModal && <UnidadFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
