@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, FormControl, InputLabel} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, FormControl, InputLabel, Alert} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Ingrediente from "../Ingrediente";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
@@ -11,7 +11,7 @@ import Producto from '../../producto/Producto';
 import { Unidad } from '../../unidad/Unidad';
 
 const generateUniqueNumericId = () => {
-  return (-1) * (Date.now() + Math.floor(Math.random() * 1000)); // Combinación de timestamp + valor aleatorio
+  return (-1) * (Date.now() + Math.floor(Math.random() * 1000));
 };
 
 const style = {
@@ -43,6 +43,7 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
   const [cantidad, setCantidad] = useState(ingrediente.cantidad);
   const [abreviacion, setAbreviacion] = useState<string>('');
   const [precio, setPrecio] = useState<number>(0);
+  const [mensajeDeError, setMensajeDeError] = useState<String>("");
 
   const [open, setOpen] = useState(openArg);    
   const handleClose = () => {
@@ -61,7 +62,17 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (onSubmit) onSubmit(new Ingrediente(id, producto?.id ?? 0, unidad?.id ?? 0, cantidad));
+    if (onSubmit){
+      if (!producto?.id){
+        setMensajeDeError("Selecione un producto.");
+        return;
+      }
+      if (!cantidad) {
+        setMensajeDeError("Ingrese una cantidad diferente a 0");
+        return;
+      }
+      onSubmit(new Ingrediente(id, producto?.id ?? 0, unidad?.id ?? 0, cantidad));
+    }
     handleClose();
   };
 
@@ -80,6 +91,7 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
           <Typography variant="h6" component="h2">Producto
             <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8}}><CloseIcon /></IconButton>
           </Typography>
+          {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}
           <Box component="form" onSubmit={handleSubmit}>
             <TextField label="Id" name="id" value={id} fullWidth margin="normal" disabled  sx={{ width: "20%"}}/>
             <FormControl sx={{ width: `calc(100% - (20% + 16px))`, ml: 2, mt: 2}}>
