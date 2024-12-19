@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
-import { DataGrid, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef} from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnVisibilityModel, GridFooter, GridFooterContainer, GridRowSelectionModel, useGridApiRef} from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,6 +16,7 @@ import Producto from '../../producto/Producto';
 import { Unidad } from '../../unidad/Unidad';
 import Ingrediente from '../../ingrediente/Ingrediente';
 import IngredienteModal, { AlertDialogBorrarIngrediente } from '../../ingrediente/components/IngredienteModal';
+import { displayPartsToString } from 'typescript';
 
 const style = {
   position: 'absolute',
@@ -79,6 +80,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
     const [mensajeDeError, setMensajeDeError] = useState<String>("");
+    const [total, setTotal] = useState<number>(0);
+    const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({id: false, unidadId: false});
 
     const addRowFromIngrediente = (ingrediente: Ingrediente) => {
       const newRow: Row = {
@@ -107,6 +110,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const handleIngredienteCloseDialog = (id: number) => {
       setRows((prevRows) => {return prevRows.filter(row => row.id !== id);});
     }
+
     const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
       const selectedRowId = newSelectionModel[0];
       const selectedRowData = rows.find((row:Row) => row.id === selectedRowId);
@@ -119,23 +123,32 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const GrillaRef = useGridApiRef();
 
     const fetchData = async () => {
+      let totalFetchData = 0;
       if (id) {
         try {
           const result = await RecetaService.get(id);
           const item = result.data;
-          setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes));
-          setRows(item.ingredientes.map((ingrediente: Ingrediente, index: number) => ({
-              id: ingrediente.id,
-              paqueteId: ingrediente.paqueteId,
-              unidadId: ingrediente.unidadId,
-              cantidad: ingrediente.cantidad,
-              precio: "0",
-          })));
+          setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
+          if (productos.length > 0) {
+            setRows(item.ingredientes.map((ingrediente: Ingrediente, index: number) => {
+              const producto = productos.find((row) => row.id === ingrediente.paqueteId);
+              const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1) * ingrediente.cantidad);
+              totalFetchData += precio
+              return {
+                id: ingrediente.id,
+                paqueteId: ingrediente.paqueteId,
+                unidadId: ingrediente.unidadId,
+                cantidad: ingrediente.cantidad,
+                precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
+              };
+            }));
+            setTotal(totalFetchData);
+          }
         } catch (error) {
           console.error('Error fetching receta:', error);
         }
       } else {
-        setForm(new Receta(0, '', 0, []));
+        setForm(new Receta());
       }
     };
   
@@ -152,12 +165,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
         setLoadingProducts(false);
       }
       fetchData();
-    }, [id]);
-
-    const getPrecioProducto = (paqueteId?: number) => {
-        const producto = productos.find((p) => p.id === paqueteId);
-        return producto ? `$ ${producto.precio}` : 'Sin Precio';
-    }
+    }, [id, productos.length, unidades.length]);
 
     const columns: GridColDef<TypeOfRow>[] = [
       {field: 'id', headerName: 'IngredienteId', width: 100, type: 'number', editable: false, disableColumnMenu: true}, 
@@ -177,7 +185,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
         const unidad = unidades.find((p) => p.id === producto?.unidadId);
         return unidad?.abreviacion;
       }},
-      {field: 'precio', headerName: 'Precio', width: 100, editable: false, disableColumnMenu: true, valueGetter: (value, row) => getPrecioProducto(row.paqueteId)}
+      {field: 'precio', headerName: 'Precio', width: 100, editable: false, disableColumnMenu: true}
     ];
 
     const handleClose = () => {
@@ -187,12 +195,18 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
 
     const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Receta(prevForm.id,  value || '', prevForm.rinde, prevForm.ingredientes));
+      setForm((prevForm) => new Receta(prevForm.id,  value || '', prevForm.rinde, prevForm.ingredientes, prevForm.observaciones));
     }
 
     const handlerChangeRinde = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Receta(prevForm.id,  prevForm.nombre, Number(value) || 0, prevForm.ingredientes));
+      setForm((prevForm) => new Receta(prevForm.id,  prevForm.nombre, Number(value) || 0, prevForm.ingredientes, prevForm.observaciones));
+    }
+
+    const handlerChangeObservaciones = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = e.target;
+      console.log(value); 
+      setForm((prevForm) => new Receta(prevForm.id,  prevForm.nombre, prevForm.rinde, prevForm.ingredientes, value || ''));
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -215,6 +229,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
         setMensajeDeError("Ingrese al menos un ingrediente");
         return;
       }
+      console.log(form);
 
       if (id) {
         RecetaService.actualizar(id, form).then((result)=>{
@@ -243,12 +258,26 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       }
     };
 
-    const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({id: false, unidadId: false});
+    const totalAsString = (subtotal?: number) => {
+      return (subtotal ?? total).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+    };  
+
+    const CustomFooter = () => {
+      return (
+        <GridFooterContainer>
+          <GridFooter />
+          <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2">Total: {totalAsString()} | Por Porcion: {totalAsString(total/(form.rinde ?? 0))}</Typography>
+          </Box>
+        </GridFooterContainer>
+      );
+    };
     
     return (
       <div>
         <Modal open={open} onClose={handleClose}>
-          <Box sx={style}>
+          <>
+          <Box component="form" onSubmit={handleSubmit}  sx={style}>
             <Typography variant="h6" component="h2">
               Receta
               <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8, }}>
@@ -256,53 +285,88 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
               </IconButton>
             </Typography>
             {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}
-            <Box component="form" onSubmit={handleSubmit}>
-              <TextField label="ID" name="id" value={form.id} margin="normal" disabled sx={{ width: "10%"}}/>
-              <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal" sx={{ width: "50%", mx: 2}}/>
-              <TextField label="Rinde Cauntas porciones" name="rinde" value={form.rinde} onChange={handlerChangeRinde} fullWidth margin="normal"sx={{ width: `calc(100% - (10% + 50% + 32px))`}}/>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ width: '100%' }}>
+              <TextField label="ID" name="id" value={form.id} margin="normal" disabled sx={{ width: "20%"}}/>
+              <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal" sx={{ width: "60%", mx: 2}}/>
+              <TextField label="Rinde Cuantas porciones" name="rinde" value={form.rinde} onChange={handlerChangeRinde} fullWidth margin="normal" sx={{ width: `calc(100% - (20% + 60% + 32px))`}}/>
+            </Box>
+            <Box sx={{ display: 'flex', width: '100%' }}>
+              <Box sx={{ width: '50%' }} id="grillaIngredientes">
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Ingredientes
+                </Typography>
                 <Button startIcon={<AddIcon />} disabled={loadingProducts} onClick={agregarIngrediente}>Agregar</Button>
                 <Button startIcon={<EditIcon />} disabled={loadingProducts && !ingredienteSeleccionado} onClick={modificarIngrediente}>Modificar</Button>
                 <Button startIcon={<DeleteIcon />} disabled={loadingProducts && !ingredienteSeleccionado} onClick={eliminarIngrediente}>Eliminar</Button>
-              </Box>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                Ingredientes
-              </Typography>
-              <DataGrid
-                rows={rows}
-                apiRef={GrillaRef}
-                columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 10,
+                <DataGrid
+                  rows={rows}
+                  apiRef={GrillaRef}
+                  columns={columns}
+                  initialState={{
+                    pagination: {
+                      paginationModel: {
+                        pageSize: 10,
+                      },
                     },
-                  },
-                }}
-                pageSizeOptions={[10]}
-                sx={{ height: "50vh" }}
-                onRowSelectionModelChange={handleRowSelection}
-                columnVisibilityModel={columnVisibilityModel}
+                  }}
+                  pageSizeOptions={[10]}
+                  sx={{ height: "50vh" }}
+                  onRowSelectionModelChange={handleRowSelection}
+                  columnVisibilityModel={columnVisibilityModel}                    
+                  slots={{
+                    footer: CustomFooter,
+                  }}
                 />         
+              </Box>
+              <Box sx={{
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column'
+              }} id="BoxObservaciones">
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Observaciones/Receta:
+                </Typography>
+                <TextField
+                  name="observaciones"
+                  value={form.observaciones}
+                  onChange={handlerChangeObservaciones}
+                  variant="outlined"
+                  label="Observaciones"
+                  multiline
+                  fullWidth
+                  margin="normal" 
+                  sx={{
+                    flexGrow: 1,
+                    marginBottom: 1,
+                    flex:1,
+                    
+    textAlign: 'left',     // Alineación horizontal
+    verticalAlign: 'top',  // (Opcional, no es estrictamente necesario)
+                  }}
+                />
+              </Box>
+            </Box>
+            <Box sx={{ width: '100%' }}>
               <Button type="submit" variant="contained" color="primary">Enviar</Button>
               <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
-            </Box>                 
-            <div>
-                {!loadingProducts && openIngredienteModal && 
-                  <IngredienteModal
-                    openArg={openIngredienteModal}
-                    onSubmit={onHanderSubmitIngrediente}
-                    ingredienteParam={ingredienteSeleccionado}
-                    unidades={unidades}
-                    productos={productos}
-                    onClose={handleCloseIngredienteModal}
-                    />
-                }
-                {!loadingProducts && openBorrarIngrediente && 
-                  <AlertDialogBorrarIngrediente paramId={ingredienteIdToDelete} onSubmit={handleIngredienteCloseDialog} onClose={handleIngredienteCloseDialogClose}/>
-                }
-            </div>
+            </Box>   
           </Box>
+          <Box>
+            {!loadingProducts && openIngredienteModal && 
+              <IngredienteModal
+                openArg={openIngredienteModal}
+                onSubmit={onHanderSubmitIngrediente}
+                ingredienteParam={ingredienteSeleccionado}
+                unidades={unidades}
+                productos={productos}
+                onClose={handleCloseIngredienteModal}
+              />
+            }
+            {!loadingProducts && openBorrarIngrediente && 
+              <AlertDialogBorrarIngrediente paramId={ingredienteIdToDelete} onSubmit={handleIngredienteCloseDialog} onClose={handleIngredienteCloseDialogClose}/>
+            } 
+          </Box>
+          </>
         </Modal>
       </div>
     );

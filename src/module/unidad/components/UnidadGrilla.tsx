@@ -2,7 +2,6 @@ import { DataGrid, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, G
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect, useState } from 'react';
 import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
 import UnidadFormModal, { AlertDialogBorrarUnidad } from './unidadFormModal';
@@ -12,7 +11,6 @@ import { Unidad } from '../Unidad';
 export default function UnidadGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
   const [canBeDelete, setCanBeDelete] = React.useState(false);
-  const [, setSelectionModel] = React.useState<GridRowSelectionModel>();
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
@@ -26,12 +24,8 @@ export default function UnidadGrilla() {
     details: GridCallbackDetails<any>
   ) => {
     const selectedRow = rows.find((row) => row.id === rowSelectionModel[0]);
-    if (selectedRow) {
-      console.log(`Row ID: ${selectedRow.id}, CanBeDeleted: ${selectedRow.canBeDeleted}`);
-    }
     setCanBeDelete(!!selectedRow?.canBeDeleted);
     setSeleccionado(rowSelectionModel.length > 0);
-    setSelectionModel(rowSelectionModel);
   };
 
   const handleCloseModal = () => {

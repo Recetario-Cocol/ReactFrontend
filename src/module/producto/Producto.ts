@@ -4,13 +4,15 @@ export default class Producto {
   private _unidadId: number;
   private _precio: number;
   private _cantidad: number;
+  private _canBeDeleted: boolean;
 
-  constructor(id: number = 0, nombre: String = '', unidadId: number = 0, precio: number = 0, cantidad: number = 0) {
+  constructor(id: number = 0, nombre: String = '', unidadId: number = 0, precio: number = 0, cantidad: number = 0, canBeDeleted: boolean = false) {
     this._id = id;
     this._nombre = nombre;
     this._unidadId = unidadId;
     this._precio = precio;
     this._cantidad = cantidad;
+    this._canBeDeleted = canBeDeleted;
   }
   
   public get cantidad(): number {
@@ -51,6 +53,14 @@ export default class Producto {
 
   public set id(value: number) {
     this._id = value;
+  }
+
+  public get canBeDeleted(): boolean {
+    return this._canBeDeleted;
+  }
+
+  public set canBeDeleted(value: boolean) {
+    this._canBeDeleted = value;
   }
 
   public toJSON() {

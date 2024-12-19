@@ -1,12 +1,13 @@
-import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import React, { useEffect, useState } from 'react';
-import {Box, Button} from '@mui/material';
+import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
 import PaqueteFormModal, { AlertDialogBorrarProducto} from './ProductoFormModal';
 import { useProductoService } from '../useProductoService';
 import { useUnidadService } from '../../unidad/useUnidadService';
+import Producto from '../Producto';
 
 interface Row {
   id: number;
@@ -15,20 +16,25 @@ interface Row {
   precio: number;
   cantidad: number;
   nombreUnidad: string;
+  canBeDeleted: boolean;
 }
-
 
 export default function ProductoGrilla() {
   const [estaSelecionado, setEstaSelecionado] = React.useState<boolean>(false);
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarProducto, setOpenBorrarProducto] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
-  const [rows, setRows] = useState<any[]>([]); 
+  const [rows, setRows] = useState<Row[]>([]); 
+  const [canBeDelete, setCanBeDelete] = React.useState(false);
+  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false});
+  const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
   const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
 
   const handleSeleccion = ( rowSelectionModel: GridRowSelectionModel) => {
     setEstaSelecionado(rowSelectionModel.length > 0);
+    const selectedRow = rows.find((row) => row.id === rowSelectionModel[0]);
+    setCanBeDelete(!!selectedRow?.canBeDeleted);
   };
 
   const handleCloseModal = () => {
@@ -36,21 +42,22 @@ export default function ProductoGrilla() {
     setOpenModal(false);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = (mensaje: string) => {
     fetchRows();
     setOpenBorrarProducto(false);
+    setMensajesModalBorrar(mensaje);
   };
 
   useEffect(() => {
        fetchRows();
-  });
+  },[]);
 
   async function fetchRows() {
     try {
       const result = await ProductoService.getAll();
       if (result.data) {
         const productoFormApi = await Promise.all(
-          result.data.map(async (item: any) => {
+          result.data.map(async (item: Producto) => {
             const unidadResult = await UnidadService.getUnidad(item.unidadId);
             return {
               id: item.id,
@@ -59,6 +66,7 @@ export default function ProductoGrilla() {
               precio: item.precio,
               cantidad: item.cantidad,
               nombreUnidad: unidadResult.data.nombre,
+              canBeDeleted: item.canBeDeleted
             };
           })
         );
@@ -79,6 +87,7 @@ export default function ProductoGrilla() {
     {field: 'nombreUnidad', headerName: 'Unidad', width: 150, editable: false, disableColumnMenu: true},
     {field: 'precio', headerName: 'Precio', width: 100, editable: false, disableColumnMenu: true},
     {field: 'cantidad', headerName: 'Cantidad', width: 1100, editable: false, disableColumnMenu: true},
+    {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 
   function getSelectedRowId(): number {
@@ -107,13 +116,21 @@ export default function ProductoGrilla() {
     setOpenBorrarProducto(true);
   }
 
+  function handleSnackBarClose(event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setMensajesModalBorrar("");
+  };
+
   return (
     <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
         <Button startIcon={<EditIcon />} disabled={!estaSelecionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!estaSelecionado} onClick={eliminar}>Eliminar</Button>
+        <Button startIcon={<DeleteIcon />} disabled={!canBeDelete} onClick={eliminar}>Eliminar</Button>
       </Box>
+      <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
       <DataGrid
         rows={rows}
         apiRef={GrillaRef}
@@ -127,6 +144,8 @@ export default function ProductoGrilla() {
         }}
         pageSizeOptions={[10]}
         onRowSelectionModelChange={handleSeleccion}
+        disableMultipleRowSelection
+        columnVisibilityModel={columnVisibilityModel}
       />;
       <div>
         {openModal && <PaqueteFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}

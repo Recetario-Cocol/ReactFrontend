@@ -147,37 +147,49 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
   }
   
 
-  type AlertDialogBorrarProductoProps = {
-    paramId: number;
-    onClose?: () => void;
-  };
+type AlertDialogBorrarProductoProps = {
+  paramId: number;
+  onClose?: (mensaje: string) => void;
+};
 
 export function AlertDialogBorrarProducto({ paramId, onClose }: AlertDialogBorrarProductoProps): React.JSX.Element {
   const [open, setOpen] = React.useState(true);
   const [id,] = React.useState(paramId);
   const ProductoService = useProductoService();
 
-  const handlerClickSi = () => {
-    ProductoService.eliminar(id).then().then(()=>handleClose());
-  }
-  
-  const handleClose = () => {
-    if(onClose) onClose();
+  const handlerClickSi = async () => {
+    try {
+      await ProductoService.eliminar(id);
+      handleClose("Producto eliminado correctamente.");
+    } catch (error: any) {
+      let mensajeError = "Ocurrió un error inesperado al intentar eliminar el producto.";
+      if (error.response) {
+        const { status } = error.response; 
+        if (status === 409) {
+          mensajeError = "No se puede eliminar el producto porque está relacionada con alguna receta.";
+        } else if (status === 404) {
+          mensajeError = "El producto que intentas eliminar no existe.";
+        }
+      } else {
+        mensajeError = "Error de conexión. Intenta de nuevo más tarde.";
+      }
+      handleClose(mensajeError);
+    }
+  };
+
+  const handleClose = (mensaje: string) => {
+    if(onClose) onClose(mensaje);
     setOpen(false);
   }
 
   return (
     <React.Fragment>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-      >
+      <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title">
         <DialogTitle id="alert-dialog-title">
           {"¿Desea Borrar el Paquete?"}
         </DialogTitle>
         <DialogActions>
-          <Button onClick={handleClose} autoFocus>No</Button>
+          <Button onClick={() => handleClose("")} autoFocus>No</Button>
           <Button onClick={handlerClickSi}>Si</Button>
         </DialogActions>
       </Dialog>

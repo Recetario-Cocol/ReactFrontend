@@ -5,12 +5,14 @@ export default class Receta {
     private _nombre: String;
     private _rinde: number;
     private _ingredientes: Array<Ingrediente>;
+    private _observaciones: string;
 
-    constructor(id: number = 0, nombre: String = '', rinde: number = 0, ingredientes: Array<Ingrediente> = []) {
+    constructor(id: number = 0, nombre: String = '', rinde: number = 0, ingredientes: Array<Ingrediente> = [], observaciones: string = '') {
         this._id = id;
         this._nombre = nombre;
         this._rinde = rinde;
         this._ingredientes = ingredientes;
+        this._observaciones = observaciones;
     }
 
     public get rinde(): number {
@@ -44,13 +46,22 @@ export default class Receta {
     public set id(value: number) {
         this._id = value;
     }
+
+    public get observaciones(): string {
+        return this._observaciones;
+    }
+
+    public set observaciones(value: string) {
+        this._observaciones = value;
+    }
     
     public toJSON() {
         return {
             id: this._id,
             nombre: this._nombre,
             rinde: this._rinde,
-            ingredientes: this._ingredientes.map(ingrediente => ingrediente.toJSON())
+            ingredientes: this._ingredientes.map(ingrediente => ingrediente.toJSON()),
+            observaciones: this._observaciones
         };
     }
 }
