@@ -44,11 +44,13 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
   const [abreviacion, setAbreviacion] = useState<string>('');
   const [precio, setPrecio] = useState<number>(0);
   const [mensajeDeError, setMensajeDeError] = useState<String>("");
-
   const [open, setOpen] = useState(openArg);    
-  const handleClose = () => {
-    setOpen(false);
-    onClose();
+
+  const handleClose = (event?: any, reason?: string) => {
+    if (!reason || reason !== 'backdropClick') {
+      setOpen(false);
+      onClose();
+    } 
   }
 
   useEffect(() => {
@@ -108,8 +110,10 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
             <TextField label="Cantidad" name="cantidad" value={cantidad} onChange={(e) => setCantidad( Number(e.target.value))} fullWidth margin="normal"/>
             <TextField label="Unidad" name="abreviacion" value={abreviacion} fullWidth margin="normal" disabled={true} />
             <TextField label="Precio" name="precio" value={precio} fullWidth margin="normal" disabled={true}/>
-            <Button type="submit" variant="contained" color="primary">Enviar</Button>
-            <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+              <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
+              <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+            </Box>
           </Box>
         </Box>
       </Modal>

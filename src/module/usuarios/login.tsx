@@ -4,8 +4,6 @@ import { Box, TextField, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-
-
 const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate(); // Aquí
@@ -29,30 +27,13 @@ const Login = () => {
         <Box sx={{ height: 400, display: 'flex', justifyContent: 'center'}}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 {error && <div className="text-red-500">{error}</div>}
-                <TextField
-                    label="Usuario"
-                    {...register('email', { required: true })}
-                    fullWidth
-                    margin="normal"
-                    error={!!errors.usuario}
-                    helperText={errors.usuario?.message as string || ''}
-                />
-                <TextField
-                    label="Contraseña"
-                    type="password"
-                    {...register('password', { required: true })}
-                    fullWidth
-                    
-                    margin="normal"
-                    error={!!errors.contraseña}
-                    helperText={errors.contraseña?.message as string || ''}
-                />
+
+                <TextField label="Contraseña" type="password" {...register('password', { required: true })} fullWidth margin="normal" error={!!errors.contraseña} helperText={errors.contraseña?.message as string || ''} />
                 <Button type="submit" variant="contained" color="primary">
                     Login
                 </Button>
             </form>
         </Box>
-    );
+   );
 };
-
 export default Login;

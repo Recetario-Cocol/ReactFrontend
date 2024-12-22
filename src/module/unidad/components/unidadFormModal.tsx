@@ -44,9 +44,12 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
     }
   }, [id]);
   
-  const handleClose = () => {
-    if(onClose) onClose();
-    setOpen(false);
+  
+  const handleClose = (event?: any, reason?: string) => {
+    if (!reason || reason !== 'backdropClick') {
+      if(onClose) onClose();
+      setOpen(false);
+    }
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,8 +93,10 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
         <TextField label="Abreviación" name="abreviacion" value={form.abreviacion} fullWidth margin="normal"
           onChange={e => setForm((prevForm) => new Unidad(prevForm.id, prevForm.nombre, e.target.value || ''))}
         />
-        <Button type="submit" variant="contained" color="primary">Enviar</Button>
-        <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+          <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
+          <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+        </Box>
       </Box>
     </Box>
   </Modal>;

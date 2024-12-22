@@ -53,9 +53,11 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
       }); 
     }, [id]);
   
-    const handleClose = () => {
-      if(onClose) onClose();
-      setOpen(false);
+    const handleClose = (event?: any, reason?: string) => {
+      if (!reason || reason !== 'backdropClick') {
+        if(onClose) onClose();
+        setOpen(false);
+      }
     }
 
     const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,8 +139,10 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
                 {!form.unidadId && <FormHelperText>Selecione una Unidad.</FormHelperText>}
               </FormControl>
               <TextField label="Precio" name="precio" value={form.precio} onChange={handlerChangePrecio} fullWidth margin="normal" />
-              <Button type="submit" variant="contained" color="primary">Enviar</Button>
-              <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
+              <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+                <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
+                <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+              </Box>
             </Box>
           </Box>
         </Modal>

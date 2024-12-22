@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
-import { DataGrid, GridColDef, GridColumnVisibilityModel, GridFooter, GridFooterContainer, GridRowSelectionModel, useGridApiRef} from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnVisibilityModel, GridFooterContainer, GridRowSelectionModel, useGridApiRef} from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,7 +16,6 @@ import Producto from '../../producto/Producto';
 import { Unidad } from '../../unidad/Unidad';
 import Ingrediente from '../../ingrediente/Ingrediente';
 import IngredienteModal, { AlertDialogBorrarIngrediente } from '../../ingrediente/components/IngredienteModal';
-import { displayPartsToString } from 'typescript';
 
 const style = {
   position: 'absolute',
@@ -28,6 +27,8 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  overflow: 'auto',
+  maxHeight: '100vh',
 };
 
 interface UnidadFormModalProps {
@@ -188,9 +189,11 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       {field: 'precio', headerName: 'Precio', width: 100, editable: false, disableColumnMenu: true}
     ];
 
-    const handleClose = () => {
-      if(onClose) onClose();
-      setOpen(false);
+    const handleClose = (event?: any, reason?: string) => {
+      if (!reason || reason !== 'backdropClick') {
+        if(onClose) onClose();
+        setOpen(false);
+      }
     }
 
     const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,8 +268,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const CustomFooter = () => {
       return (
         <GridFooterContainer>
-          <GridFooter />
-          <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ p: 1, display: 'flex', justifyContent: 'end' }}>
             <Typography variant="body2">Total: {totalAsString()} | Por Porcion: {totalAsString(total/(form.rinde ?? 0))}</Typography>
           </Box>
         </GridFooterContainer>
@@ -290,14 +292,16 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
               <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal" sx={{ width: "60%", mx: 2}}/>
               <TextField label="Rinde Cuantas porciones" name="rinde" value={form.rinde} onChange={handlerChangeRinde} fullWidth margin="normal" sx={{ width: `calc(100% - (20% + 60% + 32px))`}}/>
             </Box>
-            <Box sx={{ display: 'flex', width: '100%', height: '100%', flexDirection: 'column', backgroundColor: 'yellow' }}>
-              <Box sx={{ width: '50%', height: '100%'}} id="grillaIngredientes">
+            <Box sx={{ display: 'flex', width: '100%', minHeight: '400px', height: '100%', maxHeight: '500px', flexDirection: 'row'}}>
+              <Box sx={{display: "flex", flexDirection: "column", width: '50%', flex: 1}} id="grillaIngredientes">
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   Ingredientes
                 </Typography>
-                <Button startIcon={<AddIcon />} disabled={loadingProducts} onClick={agregarIngrediente}>Agregar</Button>
-                <Button startIcon={<EditIcon />} disabled={loadingProducts && !ingredienteSeleccionado} onClick={modificarIngrediente}>Modificar</Button>
-                <Button startIcon={<DeleteIcon />} disabled={loadingProducts && !ingredienteSeleccionado} onClick={eliminarIngrediente}>Eliminar</Button>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Button startIcon={<AddIcon />} disabled={loadingProducts} onClick={agregarIngrediente}>Agregar</Button>
+                  <Button startIcon={<EditIcon />} disabled={loadingProducts && !ingredienteSeleccionado} onClick={modificarIngrediente}>Modificar</Button>
+                  <Button startIcon={<DeleteIcon />} disabled={loadingProducts && !ingredienteSeleccionado} onClick={eliminarIngrediente}>Eliminar</Button>
+                </Box>
                 <DataGrid
                   rows={rows}
                   apiRef={GrillaRef}
@@ -305,26 +309,19 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                   initialState={{
                     pagination: {
                       paginationModel: {
-                        pageSize: 10,
+                        pageSize: -1,
                       },
                     },
                   }}
-                  pageSizeOptions={[10]}
                   sx={{ height: "50vh" }}
                   onRowSelectionModelChange={handleRowSelection}
-                  columnVisibilityModel={columnVisibilityModel}                    
+                  columnVisibilityModel={columnVisibilityModel}
                   slots={{
                     footer: CustomFooter,
                   }}
-                />         
+                />
               </Box>
-              <Box sx={{
-                flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                m: 2,
-                height: '100%',
-              }} id="BoxObservaciones">
+              <Box sx={{flexGrow: 1, display: 'flex', flexDirection: 'column', mx: 2, flex: 1, width: `calc(50% - (32px))`}} id="BoxObservaciones">
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   Observaciones/Receta:
                 </Typography>
@@ -339,16 +336,23 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                   margin="normal" 
                   sx={{
                     flexGrow: 1,
-                    marginBottom: 1,
                     flex:1,
                     minHeight: 0,
+                    '& .MuiInputBase-root': {
+                      height: '100%', // Hace que el área de entrada ocupe todo el espacio disponible
+                      alignItems: 'flex-start', // Alinea el texto al inicio del textarea
+                    },
+                    '& .MuiInputBase-input': {
+                      height: '100%', // Ajusta la altura del textarea interno
+                      overflow: 'auto', // Permite scroll si el contenido excede
+                    }
                   }}
                 />
               </Box>
             </Box>
-            <Box sx={{ width: '100%' }}>
-              <Button type="submit" variant="contained" color="primary">Enviar</Button>
-              <Button variant="outlined" color="error" onClick={handleClose}>Cancelar</Button>
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>  
+              <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
+              <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
             </Box>   
           </Box>
           <Box>
