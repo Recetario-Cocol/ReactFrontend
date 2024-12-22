@@ -7,6 +7,7 @@ import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
 import UnidadFormModal, { AlertDialogBorrarUnidad } from './unidadFormModal';
 import {useUnidadService} from '../useUnidadService';
 import { Unidad } from '../Unidad';
+import HeaderApp from '../../core/components/HeaderApp';
 
 export default function UnidadGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
@@ -96,34 +97,37 @@ export default function UnidadGrilla() {
     setMensajesModalBorrar("");
   };
 
-  return (
-    <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
-        <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!canBeDelete} onClick={eliminar}>Eliminar</Button>
+  return <Box sx={{display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+      <HeaderApp titulo="Unidades" />
+      <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+          <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
+          <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
+          <Button startIcon={<DeleteIcon />} disabled={!canBeDelete} onClick={eliminar}>Eliminar</Button>
+        </Box>
+        <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
+        <Box sx={{ flex: 1}}>
+          <DataGrid
+            rows={rows}
+            apiRef={GrillaRef}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+            disableMultipleRowSelection
+            pageSizeOptions={[10]}
+            onRowSelectionModelChange={handleSeleccion}
+            columnVisibilityModel={columnVisibilityModel}
+          />  
+        </Box> 
+        <div>
+          {openModal && <UnidadFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
+          {openBorrarUnidad && <AlertDialogBorrarUnidad paramId={idToOpen} onClose={handleCloseDialog}/>}
+        </div>
       </Box>
-      <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
-      <DataGrid
-        rows={rows}
-        apiRef={GrillaRef}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
-            },
-          },
-        }}
-        disableMultipleRowSelection
-        pageSizeOptions={[10]}
-        onRowSelectionModelChange={handleSeleccion}
-        columnVisibilityModel={columnVisibilityModel}
-      />;
-      <div>
-      {openModal && <UnidadFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
-      {openBorrarUnidad && <AlertDialogBorrarUnidad paramId={idToOpen} onClose={handleCloseDialog}/>}
-    </div>
-    </Box>
-  );
+    </Box>;
 }

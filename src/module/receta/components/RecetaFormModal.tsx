@@ -290,8 +290,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
               <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal" sx={{ width: "60%", mx: 2}}/>
               <TextField label="Rinde Cuantas porciones" name="rinde" value={form.rinde} onChange={handlerChangeRinde} fullWidth margin="normal" sx={{ width: `calc(100% - (20% + 60% + 32px))`}}/>
             </Box>
-            <Box sx={{ display: 'flex', width: '100%' }}>
-              <Box sx={{ width: '50%' }} id="grillaIngredientes">
+            <Box sx={{ display: 'flex', width: '100%', height: '100%', flexDirection: 'column', backgroundColor: 'yellow' }}>
+              <Box sx={{ width: '50%', height: '100%'}} id="grillaIngredientes">
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   Ingredientes
                 </Typography>
@@ -321,7 +321,9 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
               <Box sx={{
                 flexGrow: 1,
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                m: 2,
+                height: '100%',
               }} id="BoxObservaciones">
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   Observaciones/Receta:
@@ -339,9 +341,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                     flexGrow: 1,
                     marginBottom: 1,
                     flex:1,
-                    
-    textAlign: 'left',     // Alineación horizontal
-    verticalAlign: 'top',  // (Opcional, no es estrictamente necesario)
+                    minHeight: 0,
                   }}
                 />
               </Box>

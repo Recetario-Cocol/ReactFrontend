@@ -8,6 +8,7 @@ import PaqueteFormModal, { AlertDialogBorrarProducto} from './ProductoFormModal'
 import { useProductoService } from '../useProductoService';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import Producto from '../Producto';
+import HeaderApp from '../../core/components/HeaderApp';
 
 interface Row {
   id: number;
@@ -123,34 +124,37 @@ export default function ProductoGrilla() {
     setMensajesModalBorrar("");
   };
 
-  return (
-    <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+  return <Box sx={{display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+    <HeaderApp titulo="Productos" />
+    <Box sx={{display: 'flex', flexDirection: 'column',  flex: 1, width: '100%', maxWidth: 800}}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
         <Button startIcon={<EditIcon />} disabled={!estaSelecionado} onClick={modificar}>Modificar</Button>
         <Button startIcon={<DeleteIcon />} disabled={!canBeDelete} onClick={eliminar}>Eliminar</Button>
       </Box>
       <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
-      <DataGrid
-        rows={rows}
-        apiRef={GrillaRef}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
+      <Box sx={{ flex: 1}}>
+        <DataGrid
+          rows={rows}
+          apiRef={GrillaRef}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 10,
+              },
             },
-          },
-        }}
-        pageSizeOptions={[10]}
-        onRowSelectionModelChange={handleSeleccion}
-        disableMultipleRowSelection
-        columnVisibilityModel={columnVisibilityModel}
-      />;
+          }}
+          pageSizeOptions={[10]}
+          onRowSelectionModelChange={handleSeleccion}
+          disableMultipleRowSelection
+          columnVisibilityModel={columnVisibilityModel}
+        />
+      </Box>
       <div>
         {openModal && <PaqueteFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
         {openBorrarProducto && <AlertDialogBorrarProducto paramId={idToOpen} onClose={handleCloseDialog}/>}
       </div>
     </Box>
-  );
+  </Box>;
 }

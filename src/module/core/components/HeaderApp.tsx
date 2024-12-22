@@ -10,8 +10,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 import { To, useNavigate } from 'react-router-dom';
-
-export default function HeaderApp() {
+interface HeaderAppProps {
+  titulo: string;
+}
+export default function HeaderApp({titulo}: HeaderAppProps) {
   const navigate = useNavigate();
 
   const [auth, setAuth] = React.useState(true);
@@ -35,7 +37,7 @@ export default function HeaderApp() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{width: '100%' }}> 
       <AppBar position="static">
         <Toolbar>
           <PopupState variant="popover" popupId="demo-popup-menu">
@@ -43,7 +45,7 @@ export default function HeaderApp() {
             <React.Fragment>
               <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} {...bindTrigger(popupState)}><MenuIcon /></IconButton>
               <Menu {...bindMenu(popupState)}>
-                <MenuItem onClick={() => handleClick(popupState, "/Home")}>Menu</MenuItem>
+                <MenuItem onClick={() => handleClick(popupState, "/Home")}>Home</MenuItem>
                 <MenuItem onClick={() => handleClick(popupState, "/Unidades")}>Unidades</MenuItem>
                 <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Paquete</MenuItem>
                 <MenuItem onClick={() => handleClick(popupState, "/Recetas")}>Recetas</MenuItem>
@@ -52,7 +54,7 @@ export default function HeaderApp() {
           )}
         </PopupState>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Unidades
+            {titulo}
           </Typography>
           {auth && (
             <div>

@@ -8,6 +8,7 @@ import RecetaFormModal, {AlertDialogBorrarReceta} from './RecetaFormModal';
 import { useProductoService } from '../../producto/useProductoService';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import { useRecetaService } from '../useRecetaService';
+import HeaderApp from '../../core/components/HeaderApp';
 
 export default function RecetaGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
@@ -115,31 +116,34 @@ export default function RecetaGrilla() {
     setOpenBorrarUnidad(true);
   }
 
-  return (
-    <Box sx={{ height: 400, width: '100%', maxWidth: 800}}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+  return <Box sx={{display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+    <HeaderApp titulo="Recetas" />
+    <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
         <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
         <Button startIcon={<DeleteIcon />} disabled={!seleccionado} onClick={eliminar}>Eliminar</Button>
       </Box>
-      <DataGrid
-        rows={rows}
-        apiRef={GrillaRef}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
+      <Box sx={{ flex: 1}}>
+        <DataGrid
+          rows={rows}
+          apiRef={GrillaRef}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 10,
+              },
             },
-          },
-        }}
-        pageSizeOptions={[10]}
-        onRowSelectionModelChange={handleSeleccion}
-      />;
+          }}
+          pageSizeOptions={[10]}
+          onRowSelectionModelChange={handleSeleccion}
+        />
+      </Box>
       <div>
         {openModal && <RecetaFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
         {openBorrarUnidad && <AlertDialogBorrarReceta paramId={idToOpen} onClose={handleCloseDialog}/>}
       </div>
     </Box>
-  );
+  </Box>;
 }
