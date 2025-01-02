@@ -41,18 +41,18 @@ export default function HeaderApp({titulo}: HeaderAppProps) {
       <AppBar position="static">
         <Toolbar>
           <PopupState variant="popover" popupId="demo-popup-menu">
-          {(popupState) => (
-            <React.Fragment>
-              <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} {...bindTrigger(popupState)}><MenuIcon /></IconButton>
-              <Menu {...bindMenu(popupState)}>
-                <MenuItem onClick={() => handleClick(popupState, "/Home")}>Home</MenuItem>
-                <MenuItem onClick={() => handleClick(popupState, "/Unidades")}>Unidades</MenuItem>
-                <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Paquete</MenuItem>
-                <MenuItem onClick={() => handleClick(popupState, "/Recetas")}>Recetas</MenuItem>
-              </Menu>
-            </React.Fragment>
-          )}
-        </PopupState>
+            {(popupState) => (
+              <React.Fragment>
+                <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} {...bindTrigger(popupState)}><MenuIcon /></IconButton>
+                <Menu {...bindMenu(popupState)}>
+                  <MenuItem onClick={() => handleClick(popupState, "/Home")}>Home</MenuItem>
+                  <MenuItem onClick={() => handleClick(popupState, "/Unidades")}>Unidades</MenuItem>
+                  <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Paquete</MenuItem>
+                  <MenuItem onClick={() => handleClick(popupState, "/Recetas")}>Recetas</MenuItem>
+                </Menu>
+              </React.Fragment>
+            )}
+          </PopupState>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {titulo}
           </Typography>

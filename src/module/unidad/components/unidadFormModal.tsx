@@ -117,7 +117,7 @@ export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarU
     try {
       await UnidadService.eliminarUnidad(id);
       handleClose("Unidad eliminada correctamente.");
-    } catch (error: any) {
+    } catch (error) {
       let mensajeError = "Ocurrió un error inesperado al intentar eliminar la unidad.";
       if (error.response) {
         const { status } = error.response; 

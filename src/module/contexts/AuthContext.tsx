@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { API_BASE_URL } from '../../config';
 const apiEndpoint = '/auth/login';
 
@@ -48,26 +48,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { token, user } = response.data;
       setToken(token);
       setUser(user);
-    } catch (error: any) {
-      if (error.response) {
-        // Manejo de errores según el código de estado HTTP
-        const { status, data } = error.response;
-        switch (status) {
-          case 400:
-            throw new Error('Datos inválidos');
-          case 401:
-            throw new Error(data?.description || 'No autorizado');
-          case 403:
-            throw new Error('Acceso prohibido');
-          case 404:
-            throw new Error('Recurso no encontrado');
-          case 500:
-            throw new Error('Error interno del servidor');
-          default:
-            throw new Error(`Error HTTP: ${status}`);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          const { status, data } = error.response;
+          switch (status) {
+            case 400:
+              throw new Error('Datos inválidos');
+            case 401:
+              throw new Error(data?.description || 'No autorizado');
+            case 403:
+              throw new Error('Acceso prohibido');
+            case 404:
+              throw new Error('Recurso no encontrado');
+            case 500:
+              throw new Error('Error interno del servidor');
+            default:
+              throw new Error(`Error HTTP: ${status}`);
+          }
+        } else {
+          throw new Error('Error desconocido');
         }
       } else {
-        // Error general o de red
         throw new Error('Error desconocido');
       }
     }

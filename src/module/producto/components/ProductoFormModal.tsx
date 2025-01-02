@@ -165,7 +165,7 @@ export function AlertDialogBorrarProducto({ paramId, onClose }: AlertDialogBorra
     try {
       await ProductoService.eliminar(id);
       handleClose("Producto eliminado correctamente.");
-    } catch (error: any) {
+    } catch (error) {
       let mensajeError = "Ocurrió un error inesperado al intentar eliminar el producto.";
       if (error.response) {
         const { status } = error.response; 
