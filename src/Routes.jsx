@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './module/contexts/AuthContext';
-import Login from './module/usuarios/login';
+import Login from './module/usuarios/components/login';
 import UnidadGrilla from './module/unidad/components/UnidadGrilla';
 import ProductoGrilla from './module/producto/components/ProductoGrilla';
 import RecetaGrilla from './module/receta/components/RecetaGrilla';

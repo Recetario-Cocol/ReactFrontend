@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Box, TextField, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
+import HeaderApp from '../../core/components/HeaderApp';
+import { API_BASE_URL } from '../../../config';
+
 
 const Login = () => {
     const { login } = useAuth();
@@ -11,6 +14,10 @@ const Login = () => {
     const [error, setError] = useState('');
     const onSubmit = async (data: any) => {
         setError('');
+            
+        console.log("API_BASE_URL");
+        console.log(API_BASE_URL);
+        console.log("API_BASE_UR L 2");
         try {
             await login(data);
             navigate('/home');
@@ -23,7 +30,8 @@ const Login = () => {
         } 
     };
     
-    return (
+    return <>
+        <HeaderApp titulo="Recetas" />
         <Box sx={{ height: 400, display: 'flex', justifyContent: 'center'}}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 {error && <div className="text-red-500">{error}</div>}
@@ -34,6 +42,6 @@ const Login = () => {
                 </Button>
             </form>
         </Box>
-   );
+    </>;
 };
 export default Login;
