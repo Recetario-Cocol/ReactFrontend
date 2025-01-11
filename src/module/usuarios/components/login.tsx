@@ -6,15 +6,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import HeaderApp from '../../core/components/HeaderApp';
 import { API_BASE_URL } from '../../../config';
 
-
 const Login = () => {
     const { login } = useAuth();
-    const navigate = useNavigate(); // Aquí
+    const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState('');
     const onSubmit = async (data: any) => {
         setError('');
-            
         console.log("API_BASE_URL");
         console.log(API_BASE_URL);
         console.log("API_BASE_UR L 2");

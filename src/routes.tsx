@@ -4,15 +4,18 @@ import Login from './module/usuarios/components/login';
 import UnidadGrilla from './module/unidad/components/UnidadGrilla';
 import ProductoGrilla from './module/producto/components/ProductoGrilla';
 import RecetaGrilla from './module/receta/components/RecetaGrilla';
-
 import { ReactNode } from 'react';
 
-const PrivateRoute = ({ children }: { children: ReactNode }) => {
+interface PrivateRouteProps {
+  children: ReactNode;
+}
+
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }  
-  return children;
+  return <>{children}</>;
 };
 
 export default function AppRoutes() {

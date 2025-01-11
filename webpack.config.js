@@ -1,14 +1,19 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
-    entry: './src/index.tsx',
+    entry: './src/index.tsx', // o tu archivo principal
     output: {
-        filename: 'bundle.js',
+        filename: '[name].[contenthash].js',
         path: path.resolve(__dirname, 'dist'),
+        publicPath: '/',
+        clean: true,
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js'],
+        extensions: ['.tsx', '.ts', '.js', '.jsx'],
     },
+    devtool: 'source-map',
     module: {
         rules: [
             {
@@ -20,11 +25,33 @@ module.exports = {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader'],
             },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource',
+            },
         ],
     },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './public/index.html',
+            favicon: './public/favicon.ico'
+        }),
+        new webpack.DefinePlugin({
+          'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || 'http://localhost:3000'),
+        }),
+    ],
     devServer: {
-        static: './dist',
-        allowedHosts: 'all',
+        historyApiFallback: true,
+        static: {
+            directory: path.join(__dirname, 'public'),
+        },
+        port: 3000,
+        hot: true,
+        open: true,
+        compress: true,
+        client: {
+            overlay: true,
+        },
     },
     mode: 'development',
 };
