@@ -5,7 +5,9 @@ import UnidadGrilla from './module/unidad/components/UnidadGrilla';
 import ProductoGrilla from './module/producto/components/ProductoGrilla';
 import RecetaGrilla from './module/receta/components/RecetaGrilla';
 
-const PrivateRoute = ({ children }) => {
+import { ReactNode } from 'react';
+
+const PrivateRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

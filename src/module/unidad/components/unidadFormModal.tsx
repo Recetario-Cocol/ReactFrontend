@@ -119,8 +119,9 @@ export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarU
       handleClose("Unidad eliminada correctamente.");
     } catch (error) {
       let mensajeError = "Ocurrió un error inesperado al intentar eliminar la unidad.";
-      if (error.response) {
-        const { status } = error.response; 
+      const axiosError = error as { response?: { status: number } };
+      if (axiosError.response) {
+        const { status } = axiosError.response;
         if (status === 409) {
           mensajeError = "No se puede eliminar la unidad porque está relacionada con otros recursos.";
         } else if (status === 404) {

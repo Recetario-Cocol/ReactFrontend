@@ -167,8 +167,9 @@ export function AlertDialogBorrarProducto({ paramId, onClose }: AlertDialogBorra
       handleClose("Producto eliminado correctamente.");
     } catch (error) {
       let mensajeError = "Ocurrió un error inesperado al intentar eliminar el producto.";
-      if (error.response) {
-        const { status } = error.response; 
+      const axiosError = error as { response?: { status: number } };
+      if (axiosError.response) {
+        const { status } = axiosError.response;
         if (status === 409) {
           mensajeError = "No se puede eliminar el producto porque está relacionada con alguna receta.";
         } else if (status === 404) {

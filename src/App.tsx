@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './module/contexts/AuthContext';
-import AppRoutes from './Routes';
+import AppRoutes from './routes';
 
 const App: React.FC = () => {
   return (
