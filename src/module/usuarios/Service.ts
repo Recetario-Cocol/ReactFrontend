@@ -57,4 +57,9 @@ export const LoginService = {
       }
     }
   },
+  
+  logout(): void {
+    localStorage.removeItem('auth_token'); // O sessionStorage.removeItem('auth_token')
+    window.location.href = '/login';  
+  },
 };

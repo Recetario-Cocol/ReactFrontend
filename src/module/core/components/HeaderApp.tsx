@@ -8,24 +8,24 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
+import { usePopupState, bindTrigger, bindMenu } from 'material-ui-popup-state/hooks';
 import { To, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
 interface HeaderAppProps {
   titulo: string;
 }
-export default function HeaderApp({titulo}: HeaderAppProps) {
+
+const HeaderApp = ({ titulo }: HeaderAppProps) => {
   const navigate = useNavigate();
+  const { isAuthenticated, logout, userName } = useAuth();
 
-  const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const popupState = usePopupState({ variant: 'popover', popupId: 'menuPopup' });
 
-  const handleClick = (popupState: any, path: To ) =>{
-    popupState.close()
+  const handleClick = (state: any, path: To) => {
+    state.close();
     navigate(path);
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAuth(event.target.checked);
   };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -37,26 +37,36 @@ export default function HeaderApp({titulo}: HeaderAppProps) {
   };
 
   return (
-    <Box sx={{width: '100%' }}> 
+    <Box sx={{ width: '100%' }}>
       <AppBar position="static">
         <Toolbar>
-          <PopupState variant="popover" popupId="demo-popup-menu">
-            {(popupState) => (
-              <React.Fragment>
-                <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} {...bindTrigger(popupState)}><MenuIcon /></IconButton>
-                <Menu {...bindMenu(popupState)}>
-                  <MenuItem onClick={() => handleClick(popupState, "/Home")}>Home</MenuItem>
-                  <MenuItem onClick={() => handleClick(popupState, "/Unidades")}>Unidades</MenuItem>
-                  <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Paquete</MenuItem>
-                  <MenuItem onClick={() => handleClick(popupState, "/Recetas")}>Recetas</MenuItem>
-                </Menu>
-              </React.Fragment>
-            )}
-          </PopupState>
+          {isAuthenticated && (
+            <React.Fragment>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 2 }}
+                {...bindTrigger(popupState)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu {...bindMenu(popupState)}>
+                <MenuItem onClick={() => handleClick(popupState, "/Home")}>Home</MenuItem>
+                <MenuItem onClick={() => handleClick(popupState, "/Unidades")}>Unidades</MenuItem>
+                <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Paquete</MenuItem>
+                <MenuItem onClick={() => handleClick(popupState, "/Recetas")}>Recetas</MenuItem>
+              </Menu>
+            </React.Fragment>
+          )}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {titulo}
           </Typography>
-          {auth && (
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "end"}}>
+            {userName}
+          </Typography>
+          {isAuthenticated && (
             <div>
               <IconButton
                 size="large"
@@ -71,20 +81,14 @@ export default function HeaderApp({titulo}: HeaderAppProps) {
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+                {/* <MenuItem onClick={() => handleClick(popupState, "/RecProfileetas")}>Profile</MenuItem> */}
+                <MenuItem onClick={logout}>Log out</MenuItem>
               </Menu>
             </div>
           )}
@@ -92,4 +96,6 @@ export default function HeaderApp({titulo}: HeaderAppProps) {
       </AppBar>
     </Box>
   );
-}
+};
+
+export default HeaderApp;

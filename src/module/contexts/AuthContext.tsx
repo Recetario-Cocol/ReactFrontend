@@ -1,12 +1,9 @@
 import React, { createContext, useContext, useState } from 'react';
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios';
+import { jwtDecode } from 'jwt-decode';
+
 import { API_BASE_URL } from '../../config';
 const apiEndpoint = '/auth/login';
-
-interface User {
-  id: string;
-  email: string;
-}
 
 interface LoginData {
   email: string;
@@ -14,17 +11,27 @@ interface LoginData {
 }
 
 interface LoginResponse {
-  "type": string;
-  "title": string;
-  "status": number;
-  "detail": string;
-  "instance": string;
-  "description": string;
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  instance: string;
+  description: string;
+}
+
+interface DecodedToken {
+  sub: string;
+  roles: string[];
+  exp: number;
+  name: string;
+  email: string;
 }
 
 interface AuthContextType {
-  user: User | null;
+  userName: String;
+  email: String;
   token: string | null;
+  isAdmin: boolean;
   login: (data: LoginData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -33,21 +40,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [userName, setUserName] = useState<String>('');
+  const [email, setEmail] = useState<String>('');
   const [token, setToken] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const login = async (data: LoginData) => {
     try {
       const response = await axios.post(`${API_BASE_URL}${apiEndpoint}`, data, {
         headers: {
           'Content-Type': 'application/json',
-          'credentials': 'include',
+          credentials: 'include',
         },
       });
   
-      const { token, user } = response.data;
+      const { token } = response.data;
+
+      const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token);
+      const roles = decodedToken.roles || [];
+
       setToken(token);
-      setUser(user);
+      setUserName(decodedToken.name);
+      setEmail(decodedToken.email);
+      setIsAdmin(roles.includes('ROLE_ADMIN'));
+      
+      localStorage.setItem('authToken', token);
     } catch (error) {
       if (error instanceof AxiosError) {
         if (error.response) {
@@ -77,14 +94,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setToken(null);
-    setUser(null);
+    setUserName('');
+    setIsAdmin(false);
+    setEmail('');
     localStorage.removeItem('authToken');
   };
 
   return (
     <AuthContext.Provider value={{
-      user,
+      userName,
+      email,
       token,
+      isAdmin,
       login,
       logout,
       isAuthenticated: !!token,
@@ -102,5 +123,4 @@ export const useAuth = () => {
   return context;
 };
 
-export type { AuthContextType, LoginData, User };
-
+export type { AuthContextType, LoginData};
