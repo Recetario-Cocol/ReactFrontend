@@ -44,6 +44,10 @@ export const useRecetaService = () => {
     async eliminar(id: number): Promise<void> {
       await axiosWithAuthentication.delete(`${apiEndpoint}/${id}`);
     },
+    
+    async getGrilla(): Promise<any> {
+      return axiosWithAuthentication.get<any, request>(apiEndpoint + '/grilla');
+    },
   };
 };
 

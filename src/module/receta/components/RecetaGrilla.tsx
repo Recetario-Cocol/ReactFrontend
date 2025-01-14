@@ -41,35 +41,9 @@ export default function RecetaGrilla() {
 
   async function fetchRows() {
     try {
-      const result = await RecetaService.getAll();
+      const result = await RecetaService.getGrilla();
       if (result.data) {
-        const recetasFormApi = await Promise.all(
-          result.data.map(async (item: any) => {
-            let ingredientesString = '';
-  
-            // Cambiar forEach por un bucle for...of para manejar promesas
-            for (const ingrediente of item.ingredientes) {
-              const unidadResult = await UnidadService.getUnidad(ingrediente.unidadId);
-              const paqueteResult = await ProductoService.get(ingrediente.paqueteId);
-  
-              // Construir la cadena
-              ingredientesString +=
-                `${paqueteResult.data.nombre} ${ingrediente.cantidad}${unidadResult.data.abreviacion}, `;
-            }
-  
-            // Eliminar la última coma y espacio
-            ingredientesString = ingredientesString === ''
-              ? ingredientesString 
-              : ingredientesString.slice(0, -2);
-  
-            return {
-              id: item.id,
-              nombre: item.nombre,
-              ingredientes: ingredientesString
-            };
-          })
-        );
-        setRows(recetasFormApi);
+        setRows(result.data);
       } else {
         setRows([]);
       }

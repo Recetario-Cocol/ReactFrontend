@@ -3,11 +3,18 @@ import axios, { AxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
 import { API_BASE_URL } from '../../config';
-const apiEndpoint = '/auth/login';
+const loginEndpoint = '/auth/login';
+const signupEndpoint = '/auth/signup';
 
 interface LoginData {
   email: string;
   password: string;
+}
+
+interface SignupData {
+  email: string;
+  password: string;
+  fullName: string;
 }
 
 interface LoginResponse {
@@ -32,6 +39,7 @@ interface AuthContextType {
   email: String;
   token: string | null;
   isAdmin: boolean;
+  signup: (data: SignupData) => Promise<void>;
   login: (data: LoginData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -45,9 +53,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const login = async (data: LoginData) => {
+  const handleAuthRequest = async (endpoint: string, data: LoginData | SignupData) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}${apiEndpoint}`, data, {
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, data, {
         headers: {
           'Content-Type': 'application/json',
           credentials: 'include',
@@ -55,15 +63,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
   
       const { token } = response.data;
-
+  
       const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token);
       const roles = decodedToken.roles || [];
-
+      console.log(decodedToken);
+  
+      // Almacenar datos del usuario
       setToken(token);
       setUserName(decodedToken.name);
       setEmail(decodedToken.email);
       setIsAdmin(roles.includes('ROLE_ADMIN'));
-      
+  
+      // Guardar token en el almacenamiento local
       localStorage.setItem('authToken', token);
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -92,6 +103,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const login = async (data: LoginData) => {
+    await handleAuthRequest(loginEndpoint, data);
+  };
+  
+  const signup = async (data: SignupData) => {
+    await handleAuthRequest(signupEndpoint, data);
+  };  
+
   const logout = () => {
     setToken(null);
     setUserName('');
@@ -106,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       token,
       isAdmin,
+      signup,
       login,
       logout,
       isAuthenticated: !!token,
