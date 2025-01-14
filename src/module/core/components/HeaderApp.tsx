@@ -55,7 +55,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
               <Menu {...bindMenu(popupState)}>
                 <MenuItem onClick={() => handleClick(popupState, "/Home")}>Home</MenuItem>
                 <MenuItem onClick={() => handleClick(popupState, "/Unidades")}>Unidades</MenuItem>
-                <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Paquete</MenuItem>
+                <MenuItem onClick={() => handleClick(popupState, "/Paquetes")}>Productos</MenuItem>
                 <MenuItem onClick={() => handleClick(popupState, "/Recetas")}>Recetas</MenuItem>
               </Menu>
             </React.Fragment>
