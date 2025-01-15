@@ -1,8 +1,6 @@
 import axios from 'axios'
 import { API_BASE_URL } from '../../config';
 const apiEndpoint = '/auth/login';
-const apiLogout = 'api/logout';
-
 
 interface request {
   username: String;
