@@ -153,54 +153,64 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
 
     const fetchData = async () => {
       let totalFetchData = 0;
-      console.log(productos);
-      console.log(idToOpen);
-      console.log(id);
-      if (idToOpen) {
-        if (productos.length > 0 && idToOpen !== id) {
-          try {
-            setId(idToOpen);
-            const result = await RecetaService.get(idToOpen);
-            const item = result.data;
-            setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
-            if (productos.length > 0) {
-              setRows(item.ingredientes.map((ingrediente: Ingrediente, index: number) => {
-                const producto = productos.find((row) => row.id === ingrediente.paqueteId);
-                const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1) * ingrediente.cantidad);
-                totalFetchData += precio;
-                const unidad = unidades.find((p) => p.id === producto?.unidadId);
-                return {
-                  id: ingrediente.id,
-                  paqueteId: ingrediente.paqueteId,
-                  cantidad: ingrediente.cantidad + ' ' + unidad?.abreviacion,
-                  unidadId: ingrediente.unidadId,
-                  precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
-                };
-              }));
-              setTotal(totalFetchData);
-            }
-          } catch (error) {
-            console.error('Error fetching receta:', error);
-          }
+  
+      if (idToOpen && productos.length > 0 && idToOpen !== id) {
+        try {
+          setId(idToOpen);
+  
+          const result = await RecetaService.get(idToOpen);
+          const item = result.data;
+  
+          setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
+  
+          const nuevasFilas = item.ingredientes.map((ingrediente: Ingrediente) => {
+            const producto = productos.find((row) => row.id === ingrediente.paqueteId);
+            const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
+            totalFetchData += precio;
+  
+            const unidad = unidades.find((p) => p.id === producto?.unidadId);
+            return {
+              id: ingrediente.id,
+              paqueteId: ingrediente.paqueteId,
+              cantidad: ingrediente.cantidad + ' ' + unidad?.abreviacion,
+              unidadId: ingrediente.unidadId,
+              precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }),
+            };
+          });
+  
+          setRows(nuevasFilas);
+          setTotal(totalFetchData); // Actualizar el total una sola vez aquí
+        } catch (error) {
+          console.error('Error fetching receta:', error);
         }
       }
     };
   
     useEffect(() => {
-      setLoadingProducts(true);
-      try {
-        ProductoService.getAll()                      
-        .then((response) => setProductos(response.data));
-        UnidadService.getUnidades()                      
-        .then((response) => setUnidades(response.data));
-      } catch (error) {
-        console.error('Error al cargar los productos/unidades:', error);
-      } finally {
-        setLoadingProducts(false);
-      }
       fetchData();
+    }, [idToOpen, productos, unidades]);
+
+    useEffect(() => {
       actualizarTotal();
-    }, [total, idToOpen, productos.length, unidades.length, rows]);
+    }, [rows]);
+
+
+    useEffect(() => {
+      const cargarProductosYUnidades = async () => {
+        setLoadingProducts(true);
+        try {
+          const productosResponse = await ProductoService.getAll();
+          setProductos(productosResponse.data);
+          const unidadesResponse = await UnidadService.getUnidades();
+          setUnidades(unidadesResponse.data);
+        } catch (error) {
+          console.error('Error al cargar los productos/unidades:', error);
+        } finally {
+          setLoadingProducts(false);
+        }
+      };
+      cargarProductosYUnidades();
+    }, []);
 
     const columns: GridColDef<TypeOfRow>[] = [
       {field: 'id', headerName: 'IngredienteId', width: 10, type: 'number', editable: false, disableColumnMenu: true}, 
