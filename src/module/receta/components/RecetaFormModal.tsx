@@ -183,8 +183,6 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
             console.error('Error fetching receta:', error);
           }
         }
-      } else {
-        setForm(new Receta());
       }
     };
   
@@ -202,7 +200,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       }
       fetchData();
       actualizarTotal();
-    }, [total, idToOpen, productos.length, unidades.length, fetchData]);
+    }, [total, idToOpen, productos.length, unidades.length, rows]);
 
     const columns: GridColDef<TypeOfRow>[] = [
       {field: 'id', headerName: 'IngredienteId', width: 10, type: 'number', editable: false, disableColumnMenu: true}, 
