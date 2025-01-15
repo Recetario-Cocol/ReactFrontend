@@ -23,7 +23,8 @@ const style = {
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
-    p: 4,
+    p: 1,
+    maxWidth: '90%'
   };
 
 interface IngredienteModalProps {
@@ -95,8 +96,8 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
           </Typography>
           {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}
           <Box component="form" onSubmit={handleSubmit}>
-            <TextField label="Id" name="id" value={id} fullWidth margin="normal" disabled  sx={{ width: "20%"}}/>
-            <FormControl sx={{ width: `calc(100% - (20% + 16px))`, ml: 2, mt: 2}}>
+            <TextField label="Id" name="id" value={id} fullWidth margin="normal" disabled  sx={{ width: {xs: '100%', md: '20%'}}}/>
+            <FormControl sx={{ width: { xs: '100%', md: 'calc(100% - (20% + 16px))'}, ml: {xs: 0, md: 2}, mt: {xs: 0, md: 2}}}>
               <InputLabel id="producto-label">Producto</InputLabel>
               <Select label="Producto" labelId="producto-label" name="producto" value={producto?.id.toString() ?? "0"} onChange={handleProductoChange} >
                 <MenuItem value={"0"}>Seleccione un Paquete</MenuItem>

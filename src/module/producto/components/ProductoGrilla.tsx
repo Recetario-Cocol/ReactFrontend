@@ -27,7 +27,7 @@ export default function ProductoGrilla() {
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<Row[]>([]); 
   const [canBeDelete, setCanBeDelete] = React.useState(false);
-  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false});
+  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
   const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
@@ -65,8 +65,7 @@ export default function ProductoGrilla() {
               nombre: item.nombre,
               unidadId: item.unidadId,
               precio: item.precio,
-              cantidad: item.cantidad,
-              nombreUnidad: unidadResult.data.nombre,
+              cantidad: item.cantidad + " " + unidadResult.data.abreviacion,
               canBeDeleted: item.canBeDeleted
             };
           })
@@ -85,9 +84,8 @@ export default function ProductoGrilla() {
   const columns: GridColDef<(typeof rows)[number]>[] = [
     {field: 'id', headerName: 'Id', width: 30},
     {field: 'nombre', headerName: 'Nombre', width: 200, editable: false, disableColumnMenu: true},
-    {field: 'nombreUnidad', headerName: 'Unidad', width: 150, editable: false, disableColumnMenu: true},
+    {field: 'cantidad', headerName: 'Cantidad', width: 100, editable: false, disableColumnMenu: true},
     {field: 'precio', headerName: 'Precio', width: 100, editable: false, disableColumnMenu: true},
-    {field: 'cantidad', headerName: 'Cantidad', width: 1100, editable: false, disableColumnMenu: true},
     {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 

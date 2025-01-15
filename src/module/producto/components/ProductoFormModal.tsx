@@ -20,6 +20,7 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  maxWidth: '90%'
 };
 
 interface UnidadFormModalProps {
@@ -120,13 +121,14 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
             </Typography>
             {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}    
             <Box component="form" onSubmit={handleSubmit}>
-              <TextField label="Id" name="id" value={form.id} margin="normal" disabled sx={{ width: "10%"}}/>
-              <FormControl error={!form.nombre}  sx={{ width: `calc(100% - (10% + 16px))`, ml: 2}}>
+              <TextField label="Id" name="id" value={form.id} margin="normal" disabled sx={{ width: { xs: '100%', md: '10%' }}}/>
+              <FormControl error={!form.nombre}  sx={{ width: { xs: '100%', md: 'calc(100% - (10% + 16px))'}, ml: {xs: 0, md: 2}}}>
                 <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handlerChangeNombre} margin="normal"/>
                 {!form.nombre && <FormHelperText>Por favor ingrese un Nombre.</FormHelperText>}
               </FormControl>
-              <TextField label="Cantidad" name="cantidad" value={form.cantidad} onChange={handlerChangeCantidad} margin="normal" sx={{ width: `calc(100% - (40% + 16px))`, mr: 2}}/>
-              <FormControl error={!form.unidadId} sx={{ width: "40%", my: 2}}>
+              <TextField label="Cantidad" name="cantidad" value={form.cantidad} onChange={handlerChangeCantidad} margin="normal" 
+                sx={{ width: { xs: '100%', md: 'calc(100% - (40% + 16px))'}, mr: {xs: 0, md: 2}}}/>
+              <FormControl error={!form.unidadId} sx={{ width: { xs: '100%', md: '40%'}, my: {xs: 0, md: 2}}}>
                 <InputLabel id="unidad-label">Unidad</InputLabel>
                 <Select label="Unidad" labelId="unidad-label" id="unidad" value={form.unidadId} onChange={handleChangeUnidad}>
                   <MenuItem value={"0"}>Vacio</MenuItem>

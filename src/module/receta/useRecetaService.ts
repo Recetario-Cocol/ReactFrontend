@@ -28,7 +28,6 @@ export const useRecetaService = () => {
     },
 
     async actualizar(id: number, receta: Receta): Promise<Receta> {
-      console.log(receta.toJSON());
       const respuesta = await axiosWithAuthentication.put(
         `${apiEndpoint}/${id}`,
         receta.toJSON(),

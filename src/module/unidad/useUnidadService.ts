@@ -28,7 +28,6 @@ export const useUnidadService = () => {
     },
 
     async actualizarUnidad(id: number, unidad: Unidad): Promise<Unidad> {
-      console.log(unidad.toJSON());
       const respuesta = await axiosWithAuthentication.put(
         `${apiEndpoint}/${id}`,
         unidad.toJSON(),

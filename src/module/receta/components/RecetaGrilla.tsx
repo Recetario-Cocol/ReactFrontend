@@ -1,12 +1,10 @@
-import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGridApiRef, GridColumnVisibilityModel} from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import React, { useEffect, useState } from 'react';
 import {Box, Button} from '@mui/material';
 import RecetaFormModal, {AlertDialogBorrarReceta} from './RecetaFormModal';
-import { useProductoService } from '../../producto/useProductoService';
-import { useUnidadService } from '../../unidad/useUnidadService';
 import { useRecetaService } from '../useRecetaService';
 import HeaderApp from '../../core/components/HeaderApp';
 
@@ -17,9 +15,9 @@ export default function RecetaGrilla() {
   const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<any[]>([]); 
-  const ProductoService = useProductoService();
-  const UnidadService = useUnidadService();
   const RecetaService = useRecetaService();
+  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
+
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
@@ -112,6 +110,7 @@ export default function RecetaGrilla() {
           }}
           pageSizeOptions={[10]}
           onRowSelectionModelChange={handleSeleccion}
+          columnVisibilityModel={columnVisibilityModel}
         />
       </Box>
       <div>

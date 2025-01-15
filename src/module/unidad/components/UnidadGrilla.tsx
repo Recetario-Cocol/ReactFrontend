@@ -18,7 +18,7 @@ export default function UnidadGrilla() {
   const [rows, setRows] = useState<Unidad[]>([]); 
   const UnidadService = useUnidadService();
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
-  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false});
+  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
@@ -58,9 +58,9 @@ export default function UnidadGrilla() {
 
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
-    {field: 'id', headerName: 'ID', width: 90, disableColumnMenu: true},
-    {field: 'abreviacion', headerName: 'Abreviación', width: 150, editable: false, disableColumnMenu: true},
-    {field: 'nombre', headerName: 'Nombre', width: 150, editable: false,  disableColumnMenu: true},
+    {field: 'id', headerName: 'Id', width: 80, disableColumnMenu: true},
+    {field: 'abreviacion', headerName: 'Abrev.', width: 100, editable: false, disableColumnMenu: true},
+    {field: 'nombre', headerName: 'Nombre', width: 200, editable: false,  disableColumnMenu: true},
     {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 

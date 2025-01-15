@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, Alert, Snackbar} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUnidadService } from '../useUnidadService';
 import { Unidad } from '../Unidad';
@@ -17,6 +17,7 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  maxWidth: '90%'
 };
 
 interface UnidadFormModalProps {
@@ -85,7 +86,7 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
         </IconButton>
       </Typography>
       {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}    
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} >
         <TextField label="ID" name="id" value={form.id} fullWidth margin="normal" disabled/>
         <TextField label="Nombre" name="nombre" value={form.nombre} fullWidth margin="normal"
           onChange={e => setForm((prevForm) => new Unidad(prevForm.id, e.target.value || '', prevForm.abreviacion))}

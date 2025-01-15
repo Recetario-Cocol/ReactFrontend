@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
-
 import { API_BASE_URL } from '../../config';
 const loginEndpoint = '/auth/login';
 const signupEndpoint = '/auth/signup';
@@ -15,15 +14,6 @@ interface SignupData {
   email: string;
   password: string;
   fullName: string;
-}
-
-interface LoginResponse {
-  type: string;
-  title: string;
-  status: number;
-  detail: string;
-  instance: string;
-  description: string;
 }
 
 interface DecodedToken {
@@ -66,15 +56,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
       const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token);
       const roles = decodedToken.roles || [];
-      console.log(decodedToken);
-  
-      // Almacenar datos del usuario
       setToken(token);
       setUserName(decodedToken.name);
       setEmail(decodedToken.email);
       setIsAdmin(roles.includes('ROLE_ADMIN'));
-  
-      // Guardar token en el almacenamiento local
       localStorage.setItem('authToken', token);
     } catch (error) {
       if (error instanceof AxiosError) {

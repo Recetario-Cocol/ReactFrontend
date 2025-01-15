@@ -60,10 +60,10 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
               </Menu>
             </React.Fragment>
           )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, height: '32px'}}>
             {titulo}
           </Typography>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "end"}}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "end", height: '32px', margin: '0 12px', overflow: 'hidden'}}>
             {userName}
           </Typography>
           {isAuthenticated && (
