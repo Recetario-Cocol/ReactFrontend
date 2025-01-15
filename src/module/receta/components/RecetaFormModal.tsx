@@ -65,7 +65,7 @@ class Row {
 
 export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFormModalProps) {
     const [ingredienteSeleccionado, setIngredienteSeleccionado] = React.useState<Ingrediente | undefined>(undefined);
-    const [id,] = useState(idToOpen);
+    const [id, setId] = useState<number>(0);
     const [open, setOpen] = useState(openArg);
     const [form, setForm] = useState<Receta>(new Receta());
     const [rows, setRows] = useState<Row[]>([]); 
@@ -89,12 +89,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({id: false, unidadId: false});
 
     const addRowFromIngrediente = (ingrediente: Ingrediente) => {
+      const producto = productos.find((row) => row.id === ingrediente.paqueteId);
+      const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1) * ingrediente.cantidad);
       const newRow: Row = {
         id: ingrediente.id,
         paqueteId: ingrediente.paqueteId,
         unidadId: ingrediente.unidadId,
         cantidad: ingrediente.cantidad,
-        precio: "0",
+        precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
       };    
       setRows((prevRows) => {
         const existingRowIndex = prevRows.findIndex((row:Row) => row.id === newRow.id);
@@ -106,21 +108,43 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
           return [...prevRows, newRow];
         }
       });
+      actualizarTotal();
     };
+
+    const actualizarTotal = () => {
+      setTotal(rows.reduce((total, row) => {
+        if (typeof row.precio === 'string') {
+          const precioNumerico = parseFloat(
+            row.precio.replace(/[^0-9,-]+/g, '').replace(',', '.')
+          );
+          return total + (isNaN(precioNumerico) ? 0 : precioNumerico);
+        }
+        return total;
+      }, 0));
+    }
     
     const handleIngredienteCloseDialogClose = () => {
       setOpenBorrarIngrediente(false);
+      actualizarTotal();
     }
 
     const handleIngredienteCloseDialog = (id: number) => {
       setRows((prevRows) => {return prevRows.filter(row => row.id !== id);});
+      actualizarTotal();
     }
 
     const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
       const selectedRowId = newSelectionModel[0];
       const selectedRowData = rows.find((row:Row) => row.id === selectedRowId);
       if (selectedRowData) {
-        setIngredienteSeleccionado(new Ingrediente( Number(selectedRowData.id), selectedRowData.paqueteId, selectedRowData.unidadId, selectedRowData.cantidad));
+        let cantidad = 0;
+        if (typeof selectedRowData.cantidad === 'string') {
+          const cantidadString: String = selectedRowData.cantidad;
+          cantidad = parseFloat(cantidadString.split(' ')[0]) || 0;
+        } else if (typeof selectedRowData.cantidad === 'number') {
+          cantidad = selectedRowData.cantidad;
+        }
+        setIngredienteSeleccionado(new Ingrediente( Number(selectedRowData.id), selectedRowData.paqueteId, selectedRowData.unidadId, cantidad));
       }
     };
 
@@ -129,28 +153,35 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
 
     const fetchData = async () => {
       let totalFetchData = 0;
-      if (id) {
-        try {
-          const result = await RecetaService.get(id);
-          const item = result.data;
-          setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
-          if (productos.length > 0) {
-            setRows(item.ingredientes.map((ingrediente: Ingrediente, index: number) => {
-              const producto = productos.find((row) => row.id === ingrediente.paqueteId);
-              const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1) * ingrediente.cantidad);
-              totalFetchData += precio;
-              const unidad = unidades.find((p) => p.id === producto?.unidadId);
-              return {
-                id: ingrediente.id,
-                paqueteId: ingrediente.paqueteId,
-                cantidad: ingrediente.cantidad + ' ' + unidad?.abreviacion,
-                precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
-              };
-            }));
-            setTotal(totalFetchData);
+      console.log(productos);
+      console.log(idToOpen);
+      console.log(id);
+      if (idToOpen) {
+        if (productos.length > 0 && idToOpen !== id) {
+          try {
+            setId(idToOpen);
+            const result = await RecetaService.get(idToOpen);
+            const item = result.data;
+            setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
+            if (productos.length > 0) {
+              setRows(item.ingredientes.map((ingrediente: Ingrediente, index: number) => {
+                const producto = productos.find((row) => row.id === ingrediente.paqueteId);
+                const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1) * ingrediente.cantidad);
+                totalFetchData += precio;
+                const unidad = unidades.find((p) => p.id === producto?.unidadId);
+                return {
+                  id: ingrediente.id,
+                  paqueteId: ingrediente.paqueteId,
+                  cantidad: ingrediente.cantidad + ' ' + unidad?.abreviacion,
+                  unidadId: ingrediente.unidadId,
+                  precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
+                };
+              }));
+              setTotal(totalFetchData);
+            }
+          } catch (error) {
+            console.error('Error fetching receta:', error);
           }
-        } catch (error) {
-          console.error('Error fetching receta:', error);
         }
       } else {
         setForm(new Receta());
@@ -170,7 +201,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
         setLoadingProducts(false);
       }
       fetchData();
-    }, [id, productos.length, unidades.length]);
+      actualizarTotal();
+    }, [total, idToOpen, productos.length, unidades.length, fetchData]);
 
     const columns: GridColDef<TypeOfRow>[] = [
       {field: 'id', headerName: 'IngredienteId', width: 10, type: 'number', editable: false, disableColumnMenu: true}, 
@@ -180,6 +212,10 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
           return producto ? producto.nombre : 'Seleccionar producto';
         }
       },
+      {field: 'unidadId', headerName: 'unidadId', width: 100, editable: false, disableColumnMenu: true, valueGetter: (value, row) => {
+        const producto = productos.find((p) => p.id === row.paqueteId);
+        return producto?.unidadId;
+      }},
       {field: 'cantidad', headerName: 'Cantidad', flex: 1, minWidth: 100, type: 'number', editable: true, disableColumnMenu: true}, 
       {field: 'precio', headerName: 'Precio', flex:1 ,minWidth: 100, editable: false, disableColumnMenu: true}
     ];
@@ -209,7 +245,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       form.ingredientes = rows.map((row: Row, index: number) => {
-        return new Ingrediente(row.id, row.paqueteId, row.unidadId, row.cantidad);
+        let cantidad = 0;
+        if (typeof row.cantidad === 'string') {
+          const cantidadString: String = row.cantidad;
+          cantidad = parseFloat(cantidadString.split(' ')[0]) || 0;
+        } else if (typeof row.cantidad === 'number') {
+          cantidad = row.cantidad;
+        }
+        return new Ingrediente(row.id, row.paqueteId, row.unidadId, cantidad);
       });
 
       if (!form.nombre){
@@ -254,15 +297,18 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       }
     };
 
-    const totalAsString = (subtotal?: number) => {
-      return (subtotal ?? total).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-    };  
-
-    const CustomFooter = () => {
+    const CustomFooter = ({ total, rinde }: { total: number, rinde: number }) => {
+      const totalAsString = (subtotal?: number) => {
+        return (subtotal ?? total).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+      };
+    
       return (
         <GridFooterContainer>
           <Box sx={{ p: 1, display: 'flex', justifyContent: 'end' }}>
-            <Typography variant="body2">Total: {totalAsString()} <br/> Por Porcion: {totalAsString(total/(form.rinde ?? 0))}</Typography>
+            <Typography variant="body2">
+              Total: {totalAsString()} <br />
+              Por Porción: {totalAsString(total / (rinde || 1))}
+            </Typography>
           </Box>
         </GridFooterContainer>
       );
@@ -339,7 +385,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                     onRowSelectionModelChange={handleRowSelection}
                     columnVisibilityModel={columnVisibilityModel}
                     slots={{
-                      footer: CustomFooter,
+                      footer: () => <CustomFooter total={total} rinde={form.rinde ?? 1} />,
                     }}
                   />
                 </Box>
