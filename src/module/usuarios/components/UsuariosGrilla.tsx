@@ -4,25 +4,23 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import React, { useEffect, useState } from 'react';
 import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
-import UnidadFormModal, { AlertDialogBorrarUnidad } from './unidadFormModal';
-import {useUnidadService} from '../useUnidadService';
-import { Unidad } from '../Unidad';
+import { Usuario } from '../Usuario';
 import HeaderApp from '../../core/components/HeaderApp';
-import { usePermisos } from '../../contexts/Permisos';
+import { useUserService } from '../useUserService';
+import UserFormModal, { AlertDialogBorrarUsuario } from './UsuarioFormModal';
 import { useAuth } from '../../contexts/AuthContext';
 
-export default function UnidadGrilla() {
+export default function UsuariosGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
   const [canBeDelete, setCanBeDelete] = React.useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
+  const [openBorrarUsuario, setOpenBorrarUsuario] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
-  const [rows, setRows] = useState<Unidad[]>([]); 
-  const UnidadService = useUnidadService();
+  const [rows, setRows] = useState<Usuario[]>([]); 
+  const UserService = useUserService();
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
   const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
-  const { SAVE_UNIDAD, CREATE_UNIDAD, DELETE_UNIDAD } = usePermisos();
-  const { hasPermission } = useAuth();
+  const { isAdmin } = useAuth();
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
@@ -40,31 +38,31 @@ export default function UnidadGrilla() {
 
   const handleCloseDialog = (mensaje: string) => {
     fetchRows();
-    setOpenBorrarUnidad(false);
+    setOpenBorrarUsuario(false);
     setMensajesModalBorrar(mensaje);
   };
 
   useEffect(() => {
-       fetchRows();
+    fetchRows();
   }, []);
 
   function fetchRows(){
-    UnidadService.getUnidades()
+    UserService.getUsuarios()
     .then((result) => {
-      const unidadesApi = result.data ? 
+      const usuariosApi = result.data ? 
         result.data.map((item: any) => 
-          new Unidad(item.id, item.nombre, item.abreviacion, item.canBeDeleted)
+          new Usuario(item.id, item.fullName, item.email, item.canBeDeleted)
         ):
         [];
-      setRows(unidadesApi);
+      setRows(usuariosApi);
     }); 
   }
 
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
     {field: 'id', headerName: 'Id', width: 80, disableColumnMenu: true},
-    {field: 'abreviacion', headerName: 'Abrev.', width: 100, editable: false, disableColumnMenu: true},
-    {field: 'nombre', headerName: 'Nombre', width: 200, editable: false,  disableColumnMenu: true},
+    {field: 'fullName', headerName: 'fullName.', width: 100, editable: false, disableColumnMenu: true},
+    {field: 'email', headerName: 'Email', width: 200, editable: false,  disableColumnMenu: true},
     {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 
@@ -91,23 +89,24 @@ export default function UnidadGrilla() {
   
   function  eliminar() {
     setIdToOpen(getSelectedRowId());
-    setOpenBorrarUnidad(true);
+    setOpenBorrarUsuario(true);
   }
 
   function handleSnackBarClose(event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
-    if (reason === 'clickaway') { 
+    if (reason === 'clickaway') {
       return;
     }
     setMensajesModalBorrar("");
   };
 
   return <Box sx={{display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-      <HeaderApp titulo="Unidades" />
+      <HeaderApp titulo="Usuarios" />
       <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={!hasPermission(CREATE_UNIDAD)} onClick={agregar}>Agregar</Button>
-          <Button startIcon={<EditIcon />} disabled={!hasPermission(SAVE_UNIDAD) || !seleccionado} onClick={modificar}>Modificar</Button>
-          <Button startIcon={<DeleteIcon />} disabled={!hasPermission(DELETE_UNIDAD) || !canBeDelete} onClick={eliminar}>Eliminar</Button>
+          <Button startIcon={<AddIcon />} disabled={true || !isAdmin} onClick={agregar}>Agregar</Button>
+          <Button startIcon={<EditIcon />} disabled={!isAdmin || !seleccionado} onClick={modificar}>Modificar</Button>
+          <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !canBeDelete} onClick={eliminar}>Eliminar</Button>
+          <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !seleccionado} onClick={eliminar}>Eliminar Con Dependencias</Button>
         </Box>
         <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
         <Box sx={{ flex: 1}}>
@@ -129,8 +128,8 @@ export default function UnidadGrilla() {
           />  
         </Box> 
         <div>
-          {openModal && <UnidadFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
-          {openBorrarUnidad && <AlertDialogBorrarUnidad paramId={idToOpen} onClose={handleCloseDialog}/>}
+           {openModal && <UserFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
+          {openBorrarUsuario && <AlertDialogBorrarUsuario paramId={idToOpen} onClose={handleCloseDialog} forced={!canBeDelete}/>}
         </div>
       </Box>
     </Box>;

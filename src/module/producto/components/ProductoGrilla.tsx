@@ -9,6 +9,8 @@ import { useProductoService } from '../useProductoService';
 import { useUnidadService } from '../../unidad/useUnidadService';
 import Producto from '../Producto';
 import HeaderApp from '../../core/components/HeaderApp';
+import { useAuth } from '../../contexts/AuthContext';
+import { usePermisos } from '../../contexts/Permisos';
 
 interface Row {
   id: number;
@@ -31,6 +33,8 @@ export default function ProductoGrilla() {
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
   const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
+  const { SAVE_PAQUETE, CREATE_PAQUETE, DELETE_PAQUETE } = usePermisos();
+  const { hasPermission } = useAuth();
 
   const handleSeleccion = ( rowSelectionModel: GridRowSelectionModel) => {
     setEstaSelecionado(rowSelectionModel.length > 0);
@@ -126,9 +130,9 @@ export default function ProductoGrilla() {
     <HeaderApp titulo="Productos" />
     <Box sx={{display: 'flex', flexDirection: 'column',  flex: 1, width: '100%', maxWidth: 800}}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
-        <Button startIcon={<EditIcon />} disabled={!estaSelecionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!canBeDelete} onClick={eliminar}>Eliminar</Button>
+        <Button startIcon={<AddIcon />} disabled={!hasPermission(CREATE_PAQUETE)} onClick={agregar}>Agregar</Button>
+        <Button startIcon={<EditIcon />} disabled={!hasPermission(SAVE_PAQUETE) || !estaSelecionado} onClick={modificar}>Modificar</Button>
+        <Button startIcon={<DeleteIcon />} disabled={!hasPermission(DELETE_PAQUETE) || !canBeDelete} onClick={eliminar}>Eliminar</Button>
       </Box>
       <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
       <Box sx={{ flex: 1}}>

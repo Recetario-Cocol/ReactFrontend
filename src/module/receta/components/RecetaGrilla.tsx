@@ -7,6 +7,8 @@ import {Box, Button} from '@mui/material';
 import RecetaFormModal, {AlertDialogBorrarReceta} from './RecetaFormModal';
 import { useRecetaService } from '../useRecetaService';
 import HeaderApp from '../../core/components/HeaderApp';
+import { usePermisos } from '../../contexts/Permisos';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function RecetaGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
@@ -17,7 +19,8 @@ export default function RecetaGrilla() {
   const [rows, setRows] = useState<any[]>([]); 
   const RecetaService = useRecetaService();
   const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
-
+  const { SAVE_RECETA, CREATE_RECETA, DELETE_RECETA } = usePermisos();
+  const { hasPermission } = useAuth();
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
@@ -47,7 +50,7 @@ export default function RecetaGrilla() {
       }
     } catch (error) {
       console.error("Error al cargar los paquetes:", error);
-      setRows([]); // Manejar el error asignando un estado vacío
+      setRows([]);
     }
   }
 
@@ -92,9 +95,9 @@ export default function RecetaGrilla() {
     <HeaderApp titulo="Recetas" />
     <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Button startIcon={<AddIcon />} onClick={agregar}>Agregar</Button>
-        <Button startIcon={<EditIcon />} disabled={!seleccionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!seleccionado} onClick={eliminar}>Eliminar</Button>
+        <Button startIcon={<AddIcon />} disabled={!hasPermission(CREATE_RECETA)} onClick={agregar}>Agregar</Button>
+        <Button startIcon={<EditIcon />} disabled={!hasPermission(SAVE_RECETA) || !seleccionado} onClick={modificar}>Modificar</Button>
+        <Button startIcon={<DeleteIcon />} disabled={!hasPermission(DELETE_RECETA) || !seleccionado} onClick={eliminar}>Eliminar</Button>
       </Box>
       <Box sx={{ flex: 1}}>
         <DataGrid

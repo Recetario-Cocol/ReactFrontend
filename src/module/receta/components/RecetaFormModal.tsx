@@ -69,6 +69,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     const [open, setOpen] = useState(openArg);
     const [form, setForm] = useState<Receta>(new Receta());
     const [rows, setRows] = useState<Row[]>([]); 
+    const [isRowSelected, setIsRowSelected] = useState<boolean>(false);
     const RecetaService = useRecetaService();
     const ProductoService = useProductoService();
     const UnidadService = useUnidadService();
@@ -145,6 +146,9 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
           cantidad = selectedRowData.cantidad;
         }
         setIngredienteSeleccionado(new Ingrediente( Number(selectedRowData.id), selectedRowData.paqueteId, selectedRowData.unidadId, cantidad));
+        setIsRowSelected(true);
+      } else {
+        setIsRowSelected(false);
       }
     };
 
@@ -153,16 +157,12 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
 
     const fetchData = async () => {
       let totalFetchData = 0;
-  
       if (idToOpen && productos.length > 0 && idToOpen !== id) {
         try {
           setId(idToOpen);
-  
           const result = await RecetaService.get(idToOpen);
           const item = result.data;
-  
           setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
-  
           const nuevasFilas = item.ingredientes.map((ingrediente: Ingrediente) => {
             const producto = productos.find((row) => row.id === ingrediente.paqueteId);
             const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
@@ -177,7 +177,6 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
               precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }),
             };
           });
-  
           setRows(nuevasFilas);
           setTotal(totalFetchData); // Actualizar el total una sola vez aquí
         } catch (error) {
@@ -366,14 +365,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                     Ingredientes
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Button startIcon={<AddIcon />} disabled={loadingProducts} onClick={agregarIngrediente} sx={{display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, justifyContent: 'center',}}>
+                    <Button startIcon={<AddIcon />} disabled={true} onClick={agregarIngrediente} sx={{display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, justifyContent: 'center',}}>
                       <Box sx={{ display: { xs: 'none', md: 'inline' } }}>Agregar</Box>
                     </Button>
-                    <Button startIcon={<EditIcon />} disabled={loadingProducts || !ingredienteSeleccionado} onClick={modificarIngrediente} sx={{ display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, 
+                    <Button startIcon={<EditIcon />} disabled={!isRowSelected} onClick={modificarIngrediente} sx={{ display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, 
                         justifyContent: 'center', }} >
                       <Box sx={{ display: { xs: 'none', md: 'inline' } }}>Modificar</Box>
                     </Button>
-                    <Button startIcon={<DeleteIcon />} disabled={loadingProducts || !ingredienteSeleccionado} onClick={eliminarIngrediente} 
+                    <Button startIcon={<DeleteIcon />} disabled={!isRowSelected} onClick={eliminarIngrediente} 
                       sx={{ display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, justifyContent: 'center'}}>
                       <Box sx={{ display: { xs: 'none', md: 'inline' } }}>Eliminar</Box>
                     </Button>
@@ -498,4 +497,3 @@ export function AlertDialogBorrarReceta({ paramId, onClose }: AlertDialogBorrarR
     </React.Fragment>
   );
 }
- 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, JSX, Fragment } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUnidadService } from '../useUnidadService';
@@ -109,9 +109,9 @@ type AlertDialogBorrarUnidadProps = {
   onClose?: (mensaje: string) => void;
 };
 
-export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarUnidadProps): React.JSX.Element {
-  const [open, setOpen] = React.useState<boolean>(true);
-  const [id,] = React.useState<number>(paramId);
+export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarUnidadProps): JSX.Element {
+  const [open, setOpen] = useState<boolean>(true);
+  const [id,] = useState<number>(paramId);
   const UnidadService = useUnidadService();
 
   const handlerClickSi = async () => {
@@ -141,7 +141,7 @@ export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarU
   }
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title" >
         <DialogTitle id="alert-dialog-title">
           {"¿Desea Borrar la Unidad?"}
@@ -151,7 +151,7 @@ export function AlertDialogBorrarUnidad({ paramId, onClose }: AlertDialogBorrarU
           <Button onClick={handlerClickSi}>Si</Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </Fragment>
   );
 }
  

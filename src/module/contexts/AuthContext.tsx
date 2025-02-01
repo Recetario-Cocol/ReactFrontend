@@ -33,6 +33,7 @@ interface AuthContextType {
   login: (data: LoginData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  hasPermission: (permission: String) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [email, setEmail] = useState<String>('');
   const [token, setToken] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [roles, setRoles] = useState<String[]>([]);
 
   const handleAuthRequest = async (endpoint: string, data: LoginData | SignupData) => {
     try {
@@ -60,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserName(decodedToken.name);
       setEmail(decodedToken.email);
       setIsAdmin(roles.includes('ROLE_ADMIN'));
+      setRoles(roles);
       localStorage.setItem('authToken', token);
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -101,7 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserName('');
     setIsAdmin(false);
     setEmail('');
+    setRoles([]);
     localStorage.removeItem('authToken');
+  };
+
+  const hasPermission = (permission: String) => {
+    return roles.includes(permission);
   };
 
   return (
@@ -114,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       logout,
       isAuthenticated: !!token,
+      hasPermission,
     }}>
       {children}
     </AuthContext.Provider>

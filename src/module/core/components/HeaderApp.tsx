@@ -24,7 +24,7 @@ interface MenuItems {
 
 const HeaderApp = ({ titulo }: HeaderAppProps) => {
   const navigate = useNavigate();
-  const { isAuthenticated, logout, userName } = useAuth();
+  const { isAuthenticated, logout, userName, isAdmin } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const popupState = usePopupState({ variant: 'popover', popupId: 'menuPopup' });
   const [openLeftBar , setOpenLeftBar] = React.useState(false);
@@ -108,13 +108,13 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 keepMounted
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                {/* <MenuItem onClick={() => handleClick(popupState, "/RecProfileetas")}>Profile</MenuItem> */}
+                {isAdmin && (<MenuItem onClick={() => handleClick(popupState, "/Usuarios")}>Usuarios</MenuItem>)}
                 <MenuItem onClick={logout}>Log out</MenuItem>
               </Menu>
             </div>
