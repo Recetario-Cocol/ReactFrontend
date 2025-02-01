@@ -54,7 +54,6 @@ export default function UserFormModal({openArg, onClose, idToOpen}: UserFormModa
           createPermisosArray(item.permissions, permisosContext),
           createRolesArray(item.roles)
         );
-        console.log("item", userFromApi);
         setForm(userFromApi);
       });  
     } else {
@@ -69,9 +68,7 @@ export default function UserFormModal({openArg, onClose, idToOpen}: UserFormModa
     }
   }
 
-  const onSubmit = () => {
-    console.log("form", form.toJSON());
-    
+  const onSubmit = () => {    
     if (false && form.permisos.length === 0) {
       setError("permisos", { message: "Debes seleccionar al menos un Permiso" });
       return;
