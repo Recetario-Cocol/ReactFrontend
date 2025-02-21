@@ -157,7 +157,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
 
     const fetchData = async () => {
       let totalFetchData = 0;
-      if (idToOpen && productos.length > 0 && idToOpen !== id) {
+      if (idToOpen && productos.length > 0 && idToOpen !== id && unidades.length > 0) {
         try {
           setId(idToOpen);
           const result = await RecetaService.get(idToOpen);
@@ -365,7 +365,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
                     Ingredientes
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Button startIcon={<AddIcon />} disabled={true} onClick={agregarIngrediente} sx={{display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, justifyContent: 'center',}}>
+                    <Button startIcon={<AddIcon />} onClick={agregarIngrediente} sx={{display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, justifyContent: 'center',}}>
                       <Box sx={{ display: { xs: 'none', md: 'inline' } }}>Agregar</Box>
                     </Button>
                     <Button startIcon={<EditIcon />} disabled={!isRowSelected} onClick={modificarIngrediente} sx={{ display: { xs: 'flex', md: 'inline-flex' }, minWidth: { xs: 'auto', md: '64px' }, 
