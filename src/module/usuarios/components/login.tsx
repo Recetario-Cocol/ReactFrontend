@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, Button, IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import HeaderApp from '../../core/components/HeaderApp';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import { passwordValidationRules } from '../../../utils/validationRules';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -34,10 +36,13 @@ const Login = () => {
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [value, setValue] = React.useState(0);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     const {
         register: registerLogin,
@@ -102,8 +107,26 @@ const Login = () => {
                             {error && <div className="text-red-500">{error}</div>}
                             <TextField label="Usuario" {...registerLogin('email', { required: 'El email es obligatorio' })} fullWidth 
                                 margin="normal" error={!!loginErrors.email} helperText={loginErrors.email?.message as string} />
-                            <TextField label="Contraseña" type="password" {...registerLogin('password', { required: 'La contraseña es obligatoria' })} fullWidth
-                                margin="normal" error={!!loginErrors.password} helperText={loginErrors.password?.message as string} />
+                            <TextField 
+                                label="Contraseña" 
+                                type={showPassword ? 'text' : 'password'}
+                                {...registerLogin('password', {required: 'La contraseña es obligatoria'})} 
+                                fullWidth 
+                                margin="normal" 
+                                error={!!loginErrors.password} 
+                                helperText={loginErrors.password?.message as string} 
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton onClick={togglePasswordVisibility} edge="end">
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    },
+                                }}
+                            />
                             <Button type="submit" variant="contained" color="primary" fullWidth>Login</Button>
                         </form>
                     </Box>
@@ -116,8 +139,21 @@ const Login = () => {
                                 margin="normal" error={!!signupErrors.fullName} helperText={signupErrors.fullName?.message as string} />
                             <TextField label="Email" {...registerSignup('email', { required: 'El email es obligatorio' })} fullWidth
                                 margin="normal" error={!!signupErrors.email} helperText={signupErrors.email?.message as string} />
-                            <TextField label="Contraseña" type="password" {...registerSignup('password', { required: 'La contraseña es obligatoria' })} fullWidth
-                                margin="normal" error={!!signupErrors.password} helperText={signupErrors.password?.message as string} />
+                            <TextField label="Contraseña" type={showPassword ? 'text' : 'password'} {...registerSignup('password', passwordValidationRules)} fullWidth
+                                margin="normal" error={!!signupErrors.password} helperText={signupErrors.password?.message as string} 
+                                autoComplete="new-password"
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton onClick={togglePasswordVisibility} edge="end">
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    },
+                                }}
+                            />
                             <Button type="submit" variant="contained" color="primary" fullWidth>Registrarme</Button>
                         </form>
                     </Box>

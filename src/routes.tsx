@@ -8,6 +8,7 @@ import { ReactNode } from 'react';
 import Home from './module/core/components/Home';
 import UsuariosGrilla from './module/usuarios/components/UsuariosGrilla';
 import { PermisosProvider, usePermisos } from './module/contexts/Permisos';
+import UpdatePassword from './module/usuarios/components/updatePassword';
 
 interface PrivateRouteProps {
   children: ReactNode;
@@ -49,6 +50,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
+        <Route path="/updatePassword" element={<UpdatePassword />} />
       <Route path="/*" element={<PermisosProvider><PrivateRoutes /></PermisosProvider>}/>
       <Route path="*" element={<Login />} />
     </Routes>

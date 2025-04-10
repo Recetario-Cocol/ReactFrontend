@@ -2,8 +2,9 @@ import { DataGrid, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, G
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import React, { useEffect, useState } from 'react';
-import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
+import {Box, Button, Snackbar, SnackbarCloseReason, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@mui/material';
 import { Usuario } from '../Usuario';
 import HeaderApp from '../../core/components/HeaderApp';
 import { useUserService } from '../useUserService';
@@ -20,7 +21,8 @@ export default function UsuariosGrilla() {
   const UserService = useUserService();
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
   const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
-  const { isAdmin } = useAuth();
+  const { isAdmin, forgotPassword } = useAuth();
+  const [openForgotPasswordModal, setOpenForgotPasswordModal] = useState(false);
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
@@ -82,14 +84,30 @@ export default function UsuariosGrilla() {
     setOpenModal(true);
   }
   
-  function  modificar() {
+  function modificar() {
     setIdToOpen(getSelectedRowId());
     setOpenModal(true);
   }
   
-  function  eliminar() {
+  function eliminar() {
     setIdToOpen(getSelectedRowId());
     setOpenBorrarUsuario(true);
+  }
+
+  function limpiarContrasenias() {
+    setOpenForgotPasswordModal(true);
+  }
+
+  function handleForgotPasswordConfirm() {
+    const id = getSelectedRowId()
+    if (id) {
+      forgotPassword(id);
+    }
+    setOpenForgotPasswordModal(false);
+  }
+
+  function handleForgotPasswordCancel() {
+    setOpenForgotPasswordModal(false);
   }
 
   function handleSnackBarClose(event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
@@ -107,6 +125,7 @@ export default function UsuariosGrilla() {
           <Button startIcon={<EditIcon />} disabled={!isAdmin || !seleccionado} onClick={modificar}>Modificar</Button>
           <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !canBeDelete} onClick={eliminar}>Eliminar</Button>
           <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !seleccionado} onClick={eliminar}>Eliminar Con Dependencias</Button>
+          <Button startIcon={<LockResetIcon />} disabled={!isAdmin || !seleccionado} onClick={limpiarContrasenias}>Restablecer Contraseña</Button>
         </Box>
         <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
         <Box sx={{ flex: 1}}>
@@ -132,5 +151,18 @@ export default function UsuariosGrilla() {
           {openBorrarUsuario && <AlertDialogBorrarUsuario paramId={idToOpen} onClose={handleCloseDialog} forced={!canBeDelete}/>}
         </div>
       </Box>
+
+      <Dialog open={openForgotPasswordModal} onClose={handleForgotPasswordCancel}>
+        <DialogTitle>Confirmar Restablecimiento</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que deseas enviar un correo para restablecer la contraseña?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleForgotPasswordCancel} color="secondary">Cancelar</Button>
+          <Button onClick={handleForgotPasswordConfirm} color="primary">Confirmar</Button>
+        </DialogActions>
+      </Dialog>
     </Box>;
 }
