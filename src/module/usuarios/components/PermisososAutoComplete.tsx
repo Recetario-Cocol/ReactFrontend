@@ -46,7 +46,7 @@ export default function PermisosAutoComplete({ value, onChange, error }: Permiso
                 onChange={(_, newValue) => onChange(newValue)}
                 options={options}
                 getOptionLabel={(option) => option?.nombre || "Sin nombre"}
-                isOptionEqualToValue={(option, value) => option.codigo === value.codigo}
+                isOptionEqualToValue={(option, value) => option.code === value.code}
                 loading={loading}
                 renderOption={(props, option, { selected }) => {
                     const { key, ...optionProps } = props;

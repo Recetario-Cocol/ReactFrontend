@@ -92,8 +92,8 @@ export class Usuario {
       email: this._email,
       createdAt: this._createdAt.getTime(),
       updatedAt: this._updatedAt.getTime(),
-      permissions: this._permisos.map(permiso => permiso.codigo),
-      roles: this._roles.map(rol => rol.codigo),
+      permissions: this._permisos.map(permiso => permiso.code),
+      roles: this._roles.map(rol => rol.code),
     };
   }
 }

@@ -13,8 +13,8 @@ interface RolesAutoCompleteProps {
 
 export default function RolesAutoComplete({ value, onChange, error }: RolesAutoCompleteProps) {
     const options : Rol[] = [
-        { codigo: "ROLE_ADMIN", nombre: "Administrador" },
-        { codigo: "ROLE_USER", nombre: "Pasteleria" },
+        { code: "ROLE_ADMIN", nombre: "Administrador" },
+        { code: "ROLE_USER", nombre: "Pasteleria" },
     ];
     const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
     const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -27,7 +27,7 @@ export default function RolesAutoComplete({ value, onChange, error }: RolesAutoC
                 onChange={(_, newValue) => onChange(newValue)}
                 options={options}
                 getOptionLabel={(option) => option?.nombre || "Sin nombre"}
-                isOptionEqualToValue={(option, value) => option.codigo === value.codigo}
+                isOptionEqualToValue={(option, value) => option.code === value.code}
                 renderOption={(props, option, { selected }) => {
                     const { key, ...optionProps } = props;
                     return (
