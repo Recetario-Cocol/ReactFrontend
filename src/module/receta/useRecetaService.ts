@@ -1,8 +1,8 @@
-import Receta from './Receta';
+import Receta from "./Receta";
 import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication";
 import { AxiosError, AxiosResponse } from "axios";
-import { API_BASE_URL } from '../../config';
-import Ingrediente from '../ingrediente/Ingrediente';
+import { API_BASE_URL } from "../../config";
+import Ingrediente from "../ingrediente/Ingrediente";
 
 const apiEndpoint = `${API_BASE_URL}/recetario/recetas/`;
 
@@ -44,7 +44,9 @@ export const useRecetaService = () => {
      */
     async getAll(): Promise<Receta[]> {
       try {
-        const response = await axiosWithAuthentication.get<Receta[], AxiosResponse<Receta[]>>(apiEndpoint);
+        const response = await axiosWithAuthentication.get<Receta[], AxiosResponse<Receta[]>>(
+          apiEndpoint,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -70,9 +72,12 @@ export const useRecetaService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.get<Receta, AxiosResponse<Receta>>(buildUrl(id), {
-          params: { projection: 'unidadProjection' },
-        });
+        const response = await axiosWithAuthentication.get<Receta, AxiosResponse<Receta>>(
+          buildUrl(id),
+          {
+            params: { projection: "unidadProjection" },
+          },
+        );
 
         // Convertir el objeto recibido en una instancia de Receta
         const recetaData = response.data;
@@ -80,13 +85,16 @@ export const useRecetaService = () => {
           recetaData.id,
           recetaData.nombre,
           recetaData.rinde,
-          recetaData.ingredientes.map(ingrediente => new Ingrediente(
-            ingrediente.id,
-            ingrediente.productoId,
-            ingrediente.unidadId,
-            ingrediente.cantidad
-          )),
-          recetaData.observaciones
+          recetaData.ingredientes.map(
+            (ingrediente) =>
+              new Ingrediente(
+                ingrediente.id,
+                ingrediente.productoId,
+                ingrediente.unidadId,
+                ingrediente.cantidad,
+              ),
+          ),
+          recetaData.observaciones,
         );
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -109,7 +117,10 @@ export const useRecetaService = () => {
      */
     async crear(receta: Receta): Promise<Receta> {
       try {
-        const response = await axiosWithAuthentication.post<Receta, AxiosResponse<Receta>>(apiEndpoint, receta);
+        const response = await axiosWithAuthentication.post<Receta, AxiosResponse<Receta>>(
+          apiEndpoint,
+          receta,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -141,9 +152,9 @@ export const useRecetaService = () => {
           receta.toJSON(),
           {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
-          }
+          },
         );
         return response.data;
       } catch (error: unknown) {
@@ -193,9 +204,10 @@ export const useRecetaService = () => {
      */
     async getGrilla(): Promise<GrillaReceta[]> {
       try {
-        const response = await axiosWithAuthentication.get<GrillaReceta[], AxiosResponse<GrillaReceta[]>>(
-          `${apiEndpoint}grilla/`
-        );
+        const response = await axiosWithAuthentication.get<
+          GrillaReceta[],
+          AxiosResponse<GrillaReceta[]>
+        >(`${apiEndpoint}grilla/`);
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -211,4 +223,3 @@ export const useRecetaService = () => {
     },
   };
 };
-

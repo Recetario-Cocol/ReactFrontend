@@ -37,10 +37,9 @@ export const useProductoService = () => {
      */
     async getAll(): Promise<Producto[]> {
       try {
-        const response = await axiosWithAuthentication.get<
-          Producto[],
-          AxiosResponse<Producto[]>
-        >(apiEndpoint);
+        const response = await axiosWithAuthentication.get<Producto[], AxiosResponse<Producto[]>>(
+          apiEndpoint,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -66,12 +65,12 @@ export const useProductoService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.get<
-          Producto,
-          AxiosResponse<Producto>
-        >(buildUrl(id), {
-          params: { projection: "unidadProjection" },
-        });
+        const response = await axiosWithAuthentication.get<Producto, AxiosResponse<Producto>>(
+          buildUrl(id),
+          {
+            params: { projection: "unidadProjection" },
+          },
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -94,10 +93,10 @@ export const useProductoService = () => {
      */
     async crear(producto: Producto): Promise<Producto> {
       try {
-        const response = await axiosWithAuthentication.post<
-          Producto,
-          AxiosResponse<Producto>
-        >(apiEndpoint, producto);
+        const response = await axiosWithAuthentication.post<Producto, AxiosResponse<Producto>>(
+          apiEndpoint,
+          producto,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -124,14 +123,15 @@ export const useProductoService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.put<
-          Producto,
-          AxiosResponse<Producto>
-        >(buildUrl(id), producto, {
-          headers: {
-            "Content-Type": "application/json",
+        const response = await axiosWithAuthentication.put<Producto, AxiosResponse<Producto>>(
+          buildUrl(id),
+          producto,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -172,4 +172,3 @@ export const useProductoService = () => {
     },
   };
 };
-

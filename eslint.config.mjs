@@ -15,7 +15,7 @@ export default defineConfig([
   // Configuración general para JS/TS
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    ignores: ["**/*.json", "**/*.md", "eslint.config.mjs", "webpack.config.js"], 
+    ignores: ["**/*.json", "**/*.md", "eslint.config.mjs", "webpack.config.js"],
     languageOptions: {
       parser,
       parserOptions: {
@@ -56,7 +56,7 @@ export default defineConfig([
     processor: "json/json",
     rules: {
       "json/*": ["error", { allowComments: true }],
-      "quotes": ["error", "double"],
+      quotes: ["error", "double"],
       "comma-dangle": ["error", "never"],
       "eol-last": ["error", "always"],
     },

@@ -37,10 +37,9 @@ export const useUnidadService = () => {
      */
     async getUnidades(): Promise<Unidad[]> {
       try {
-        const response = await axiosWithAuthentication.get<
-          Unidad[],
-          AxiosResponse<Unidad[]>
-        >(apiEndpoint);
+        const response = await axiosWithAuthentication.get<Unidad[], AxiosResponse<Unidad[]>>(
+          apiEndpoint,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -66,12 +65,12 @@ export const useUnidadService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.get<
-          Unidad,
-          AxiosResponse<Unidad>
-        >(buildUrl(id), {
-          params: { projection: "unidadProjection" },
-        });
+        const response = await axiosWithAuthentication.get<Unidad, AxiosResponse<Unidad>>(
+          buildUrl(id),
+          {
+            params: { projection: "unidadProjection" },
+          },
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -94,10 +93,10 @@ export const useUnidadService = () => {
      */
     async crearUnidad(unidad: Unidad): Promise<Unidad> {
       try {
-        const response = await axiosWithAuthentication.post<
-          Unidad,
-          AxiosResponse<Unidad>
-        >(apiEndpoint, unidad);
+        const response = await axiosWithAuthentication.post<Unidad, AxiosResponse<Unidad>>(
+          apiEndpoint,
+          unidad,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -124,10 +123,10 @@ export const useUnidadService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.put<
-          Unidad,
-          AxiosResponse<Unidad>
-        >(buildUrl(id), unidad);
+        const response = await axiosWithAuthentication.put<Unidad, AxiosResponse<Unidad>>(
+          buildUrl(id),
+          unidad,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {

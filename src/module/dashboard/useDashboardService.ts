@@ -1,9 +1,8 @@
-import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication"
+import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication";
 import { AxiosResponse } from "axios";
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from "../../config";
 
-const apiEndpoint = API_BASE_URL + '/recetario/dashboard';
-
+const apiEndpoint = API_BASE_URL + "/recetario/dashboard";
 
 interface DashboardData {
   unidades: number;
@@ -22,4 +21,3 @@ export const useDashboardService = () => {
     },
   };
 };
-

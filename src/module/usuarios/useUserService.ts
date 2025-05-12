@@ -1,6 +1,6 @@
-import { Usuario, UserFromApi } from './Usuario';
-import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication"
-import { API_BASE_URL } from '../../config';
+import { Usuario, UserFromApi } from "./Usuario";
+import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication";
+import { API_BASE_URL } from "../../config";
 import { AxiosResponse, AxiosError } from "axios";
 
 /**
@@ -11,7 +11,7 @@ interface ServiceError {
   status?: number;
 }
 
-const apiEndpoint = API_BASE_URL + '/users/';
+const apiEndpoint = API_BASE_URL + "/users/";
 
 export const useUserService = () => {
   const axiosWithAuthentication = useAxiosWithAuthentication();
@@ -33,8 +33,11 @@ export const useUserService = () => {
      */
     async getUsuarios(): Promise<Usuario[]> {
       try {
-        const response = await axiosWithAuthentication.get<UserFromApi[], AxiosResponse<UserFromApi[]>>(apiEndpoint);
-        return response.data.map((item: UserFromApi) => Usuario.fromJSON(item));    
+        const response = await axiosWithAuthentication.get<
+          UserFromApi[],
+          AxiosResponse<UserFromApi[]>
+        >(apiEndpoint);
+        return response.data.map((item: UserFromApi) => Usuario.fromJSON(item));
       } catch (error: unknown) {
         console.log(error);
         if (error instanceof AxiosError) {
@@ -60,9 +63,12 @@ export const useUserService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.get<UserFromApi, AxiosResponse<UserFromApi>>(buildUrl(id), {
-          params: { projection: 'unidadProjection' },
-        });
+        const response = await axiosWithAuthentication.get<UserFromApi, AxiosResponse<UserFromApi>>(
+          buildUrl(id),
+          {
+            params: { projection: "unidadProjection" },
+          },
+        );
         return Usuario.fromJSON(response.data);
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -85,7 +91,10 @@ export const useUserService = () => {
      */
     async crearUsuario(usuario: Usuario): Promise<Usuario> {
       try {
-        const response = await axiosWithAuthentication.post<Usuario, AxiosResponse<Usuario>>(apiEndpoint, usuario);
+        const response = await axiosWithAuthentication.post<Usuario, AxiosResponse<Usuario>>(
+          apiEndpoint,
+          usuario,
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
@@ -112,11 +121,15 @@ export const useUserService = () => {
         throw new Error("El ID debe ser un número entero positivo") as ServiceError;
       }
       try {
-        const response = await axiosWithAuthentication.put<Usuario, AxiosResponse<Usuario>>(buildUrl(id), usuario, {
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await axiosWithAuthentication.put<Usuario, AxiosResponse<Usuario>>(
+          buildUrl(id),
+          usuario,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
         return response.data;
       } catch (error: unknown) {
         if (error instanceof AxiosError) {

@@ -1,12 +1,19 @@
 export default class Producto {
-	private _id: number;
+  private _id: number;
   private _nombre: string;
   private _unidadId: number;
   private _precio: number;
   private _cantidad: number;
   private _can_be_deleted: boolean;
 
-  constructor(id: number = 0, nombre: string = '', unidadId: number = 0, precio: number = 0, cantidad: number = 0, can_be_deleted: boolean = false) {
+  constructor(
+    id: number = 0,
+    nombre: string = "",
+    unidadId: number = 0,
+    precio: number = 0,
+    cantidad: number = 0,
+    can_be_deleted: boolean = false,
+  ) {
     this._id = id;
     this._nombre = nombre;
     this._unidadId = unidadId;
@@ -14,7 +21,7 @@ export default class Producto {
     this._cantidad = cantidad;
     this._can_be_deleted = can_be_deleted;
   }
-  
+
   public get cantidad(): number {
     return this._cantidad;
   }
@@ -29,8 +36,8 @@ export default class Producto {
 
   public set precio(value: number) {
     this._precio = value;
-  }  
-  
+  }
+
   public get unidadId(): number {
     return this._unidadId;
   }
@@ -46,7 +53,7 @@ export default class Producto {
   public set nombre(value: string) {
     this._nombre = value;
   }
-  
+
   public get id(): number {
     return this._id;
   }

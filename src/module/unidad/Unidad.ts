@@ -1,11 +1,15 @@
-
 export class Unidad {
   private _id: number;
   private _nombre: string;
   private _abreviacion: string;
   private _can_be_deleted: boolean;
 
-  constructor(id: number = 0, nombre: string = "", abreviacion: string = "", can_be_deleted: boolean = false) {
+  constructor(
+    id: number = 0,
+    nombre: string = "",
+    abreviacion: string = "",
+    can_be_deleted: boolean = false,
+  ) {
     this._id = id;
     this._nombre = nombre;
     this._abreviacion = abreviacion;

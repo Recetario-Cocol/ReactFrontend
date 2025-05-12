@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication";
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from "../../config";
 
-const apiEndpoint = API_BASE_URL + '/users/permissions/';
+const apiEndpoint = API_BASE_URL + "/users/permissions/";
 
 export interface Rol {
   code: string;
@@ -22,14 +22,14 @@ interface Permisos {
 
 const defaultPermisos: Permisos = {};
 
-export const allRoles : Rol[] = [
+export const allRoles: Rol[] = [
   { code: "ROLE_ADMIN", nombre: "Administrador" },
   { code: "ROLE_USER", nombre: "Pasteleria" },
 ];
 
 export const createRolesArray = (rolesCodes: string[]) => {
   return allRoles.filter((rol) => rolesCodes.includes(rol.code));
-}
+};
 
 export const createPermisosArray = (permisosCodes: number[]) => {
   return permisosCodes;
@@ -53,7 +53,7 @@ export const PermisosProvider: React.FC<{ children: ReactNode }> = ({ children }
         }, {} as Permisos);
         setPermisos(newPermisos);
       } catch (error) {
-        console.warn('Error al cargar los permisos:', error);
+        console.warn("Error al cargar los permisos:", error);
         setPermisos(defaultPermisos); // En caso de error, revertimos a los valores por defecto
       }
     };
@@ -61,17 +61,13 @@ export const PermisosProvider: React.FC<{ children: ReactNode }> = ({ children }
     fetchPermisos();
   }, []);
 
-  return (
-    <PermisosContext.Provider value={permisos}>
-      {children}
-    </PermisosContext.Provider>
-  );
+  return <PermisosContext.Provider value={permisos}>{children}</PermisosContext.Provider>;
 };
 
 export const usePermisos = () => {
   const context = useContext(PermisosContext);
   if (!context) {
-    console.warn('usePermisos fue llamado fuera de PermisosProvider');
+    console.warn("usePermisos fue llamado fuera de PermisosProvider");
     return defaultPermisos;
   }
   return context;

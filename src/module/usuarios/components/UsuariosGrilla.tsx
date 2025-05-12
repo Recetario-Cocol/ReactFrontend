@@ -1,15 +1,31 @@
-import { DataGrid, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import LockResetIcon from '@mui/icons-material/LockReset';
-import React, { useEffect, useState } from 'react';
-import {Box, Button, Snackbar, SnackbarCloseReason, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@mui/material';
-import { Usuario } from '../Usuario';
-import HeaderApp from '../../core/components/HeaderApp';
-import { useUserService } from '../useUserService';
-import UserFormModal, { AlertDialogBorrarUsuario } from './UsuarioFormModal';
-import { useAuth } from '../../contexts/AuthContext';
+import {
+  DataGrid,
+  GridColDef,
+  GridColumnVisibilityModel,
+  GridRowSelectionModel,
+  useGridApiRef,
+} from "@mui/x-data-grid";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import LockResetIcon from "@mui/icons-material/LockReset";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Snackbar,
+  SnackbarCloseReason,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
+import { Usuario } from "../Usuario";
+import HeaderApp from "../../core/components/HeaderApp";
+import { useUserService } from "../useUserService";
+import UserFormModal, { AlertDialogBorrarUsuario } from "./UsuarioFormModal";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function UsuariosGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
@@ -17,22 +33,23 @@ export default function UsuariosGrilla() {
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarUsuario, setOpenBorrarUsuario] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
-  const [rows, setRows] = useState<Usuario[]>([]); 
+  const [rows, setRows] = useState<Usuario[]>([]);
   const UserService = useUserService();
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
-  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({can_be_deleted: false, id: false});
+  const [columnVisibilityModel] = React.useState<GridColumnVisibilityModel>({
+    can_be_deleted: false,
+    id: false,
+  });
   const { isAdmin, forgotPassword } = useAuth();
   const [openForgotPasswordModal, setOpenForgotPasswordModal] = useState(false);
 
-const handleSeleccion = (
-  rowSelectionModel: GridRowSelectionModel
-) => {
-  const firstId = Array.from(rowSelectionModel.ids)[0];
-  const selectedRow = rows.find((row: Usuario) => row.id === firstId);
+  const handleSeleccion = (rowSelectionModel: GridRowSelectionModel) => {
+    const firstId = Array.from(rowSelectionModel.ids)[0];
+    const selectedRow = rows.find((row: Usuario) => row.id === firstId);
 
-  setCan_be_deleted(!!selectedRow?.can_be_deleted);
-  setSeleccionado(rowSelectionModel.ids.size > 0);
-};
+    setCan_be_deleted(!!selectedRow?.can_be_deleted);
+    setSeleccionado(rowSelectionModel.ids.size > 0);
+  };
 
   const handleCloseModal = () => {
     fetchRows();
@@ -49,17 +66,34 @@ const handleSeleccion = (
     fetchRows();
   }, []);
 
-  function fetchRows(){
-    UserService.getUsuarios()
-    .then((result: Usuario[]) => setRows(result)); 
+  function fetchRows() {
+    UserService.getUsuarios().then((result: Usuario[]) => setRows(result));
   }
 
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
-    {field: 'id', headerName: 'Id', width: 80, disableColumnMenu: true},
-    {field: 'name', headerName: 'Name', width: 100, editable: false, disableColumnMenu: true},
-    {field: 'email', headerName: 'Email', width: 200, editable: false,  disableColumnMenu: true},
-    {field: 'can_be_deleted', headerName: 'can_be_deleted', width: 150, editable: false,  disableColumnMenu: true}
+    { field: "id", headerName: "Id", width: 80, disableColumnMenu: true },
+    {
+      field: "name",
+      headerName: "Name",
+      width: 100,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      width: 200,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: "can_be_deleted",
+      headerName: "can_be_deleted",
+      width: 150,
+      editable: false,
+      disableColumnMenu: true,
+    },
   ];
 
   function getSelectedRowId(): number {
@@ -67,22 +101,24 @@ const handleSeleccion = (
       const selectedRows = GrillaRef.current.getSelectedRows();
       if (selectedRows && selectedRows.size > 0) {
         const firstSelectedRow = selectedRows.entries().next().value?.[0] ?? 0;
-        return typeof firstSelectedRow === 'number' ? firstSelectedRow : Number(firstSelectedRow) || 0;
+        return typeof firstSelectedRow === "number"
+          ? firstSelectedRow
+          : Number(firstSelectedRow) || 0;
       }
     }
-    return 0; 
+    return 0;
   }
 
   function agregar() {
     setIdToOpen(0);
     setOpenModal(true);
   }
-  
+
   function modificar() {
     setIdToOpen(getSelectedRowId());
     setOpenModal(true);
   }
-  
+
   function eliminar() {
     setIdToOpen(getSelectedRowId());
     setOpenBorrarUsuario(true);
@@ -93,7 +129,7 @@ const handleSeleccion = (
   }
 
   function handleForgotPasswordConfirm() {
-    const id = getSelectedRowId()
+    const id = getSelectedRowId();
     if (id) {
       forgotPassword(id);
     }
@@ -105,24 +141,68 @@ const handleSeleccion = (
   }
 
   function handleSnackBarClose(_: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
     setMensajesModalBorrar("");
-  };
+  }
 
-  return <Box sx={{display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flex: 1,
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <HeaderApp titulo="Usuarios" />
-      <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={true || !isAdmin} onClick={agregar}>Agregar</Button>
-          <Button startIcon={<EditIcon />} disabled={!isAdmin || !seleccionado} onClick={modificar}>Modificar</Button>
-          <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !can_be_deleted} onClick={eliminar}>Eliminar</Button>
-          <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !seleccionado} onClick={eliminar}>Eliminar Con Dependencias</Button>
-          <Button startIcon={<LockResetIcon />} disabled={!isAdmin || !seleccionado} onClick={limpiarContrasenias}>Restablecer Contraseña</Button>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          width: "100%",
+          maxWidth: 800,
+        }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+          <Button startIcon={<AddIcon />} disabled={true || !isAdmin} onClick={agregar}>
+            Agregar
+          </Button>
+          <Button startIcon={<EditIcon />} disabled={!isAdmin || !seleccionado} onClick={modificar}>
+            Modificar
+          </Button>
+          <Button
+            startIcon={<DeleteIcon />}
+            disabled={!isAdmin || !can_be_deleted}
+            onClick={eliminar}
+          >
+            Eliminar
+          </Button>
+          <Button
+            startIcon={<DeleteIcon />}
+            disabled={!isAdmin || !seleccionado}
+            onClick={eliminar}
+          >
+            Eliminar Con Dependencias
+          </Button>
+          <Button
+            startIcon={<LockResetIcon />}
+            disabled={!isAdmin || !seleccionado}
+            onClick={limpiarContrasenias}
+          >
+            Restablecer Contraseña
+          </Button>
         </Box>
-        <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
-        <Box sx={{ flex: 1}}>
+        <Snackbar
+          open={mensajesModalBorrar !== ""}
+          autoHideDuration={5000}
+          message={mensajesModalBorrar}
+          onClose={handleSnackBarClose}
+        />
+        <Box sx={{ flex: 1 }}>
           <DataGrid
             rows={rows}
             apiRef={GrillaRef}
@@ -138,11 +218,19 @@ const handleSeleccion = (
             pageSizeOptions={[10]}
             onRowSelectionModelChange={handleSeleccion}
             columnVisibilityModel={columnVisibilityModel}
-          />  
-        </Box> 
+          />
+        </Box>
         <div>
-           {openModal && <UserFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
-          {openBorrarUsuario && <AlertDialogBorrarUsuario paramId={idToOpen} onClose={handleCloseDialog} forced={!can_be_deleted}/>}
+          {openModal && (
+            <UserFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen} />
+          )}
+          {openBorrarUsuario && (
+            <AlertDialogBorrarUsuario
+              paramId={idToOpen}
+              onClose={handleCloseDialog}
+              forced={!can_be_deleted}
+            />
+          )}
         </div>
       </Box>
 
@@ -154,9 +242,14 @@ const handleSeleccion = (
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleForgotPasswordCancel} color="secondary">Cancelar</Button>
-          <Button onClick={handleForgotPasswordConfirm} color="primary">Confirmar</Button>
+          <Button onClick={handleForgotPasswordCancel} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleForgotPasswordConfirm} color="primary">
+            Confirmar
+          </Button>
         </DialogActions>
       </Dialog>
-    </Box>;
+    </Box>
+  );
 }
