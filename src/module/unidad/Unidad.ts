@@ -3,13 +3,13 @@ export class Unidad {
   private _id: number;
   private _nombre: string;
   private _abreviacion: string;
-  private _canBeDeleted: boolean;
+  private _can_be_deleted: boolean;
 
-  constructor(id: number = 0, nombre: string = "", abreviacion: string = "", canBeDeleted: boolean = false) {
+  constructor(id: number = 0, nombre: string = "", abreviacion: string = "", can_be_deleted: boolean = false) {
     this._id = id;
     this._nombre = nombre;
     this._abreviacion = abreviacion;
-    this._canBeDeleted = canBeDeleted;
+    this._can_be_deleted = can_be_deleted;
   }
 
   public get id(): number {
@@ -24,8 +24,8 @@ export class Unidad {
     return this._abreviacion;
   }
 
-  public get canBeDeleted(): boolean {
-    return this._canBeDeleted;
+  public get can_be_deleted(): boolean {
+    return this._can_be_deleted;
   }
 
   public set id(value: number) {
@@ -40,8 +40,8 @@ export class Unidad {
     this._abreviacion = value;
   }
 
-  public set canBeDeleted(value: boolean) {
-    this._canBeDeleted = value;
+  public set can_be_deleted(value: boolean) {
+    this._can_be_deleted = value;
   }
 
   public toJSON() {

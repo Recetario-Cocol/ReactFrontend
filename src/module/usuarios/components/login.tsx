@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Box, TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, LoginData, SignupData } from '../../contexts/AuthContext';
 import HeaderApp from '../../core/components/HeaderApp';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -32,13 +32,14 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 const Login = () => {
-    const { login, signup } = useAuth();
+    const { login, signup} = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [value, setValue] = React.useState(0);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+        event.preventDefault();
         setValue(newValue);
     };
 
@@ -48,9 +49,9 @@ const Login = () => {
         register: registerLogin,
         handleSubmit: handleSubmitLogin,
         formState: { errors: loginErrors },
-    } = useForm();
+    } = useForm<LoginData>();
 
-    const onLoginSubmit = async (data: any) => {
+    const onLoginSubmit = async (data: LoginData) => {
         setError('');
         try {
             await login(data);
@@ -68,9 +69,9 @@ const Login = () => {
         register: registerSignup,
         handleSubmit: handleSubmitSignup,
         formState: { errors: signupErrors },
-    } = useForm();
+    } = useForm<SignupData>();
 
-    const onSignupSubmit = async (data: any) => {
+    const onSignupSubmit = async (data: SignupData) => {
         setError('');
         try {
             await signup(data);
@@ -135,8 +136,8 @@ const Login = () => {
                     <Box sx={{ width: '100%', maxWidth: 400 }}>
                         <form onSubmit={handleSubmitSignup(onSignupSubmit)}> 
                             {error && <div className="text-red-500">{error}</div>}
-                            <TextField label="Nombre" {...registerSignup('fullName', { required: 'El nombre es obligatorio' })} fullWidth
-                                margin="normal" error={!!signupErrors.fullName} helperText={signupErrors.fullName?.message as string} />
+                            <TextField label="Nombre" {...registerSignup('name', { required: 'El nombre es obligatorio' })} fullWidth
+                                margin="normal" error={!!signupErrors.name} helperText={signupErrors.name?.message as string} />
                             <TextField label="Email" {...registerSignup('email', { required: 'El email es obligatorio' })} fullWidth
                                 margin="normal" error={!!signupErrors.email} helperText={signupErrors.email?.message as string} />
                             <TextField label="Contraseña" type={showPassword ? 'text' : 'password'} {...registerSignup('password', passwordValidationRules)} fullWidth

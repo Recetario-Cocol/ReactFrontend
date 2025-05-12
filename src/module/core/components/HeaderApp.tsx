@@ -32,7 +32,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
     setOpenLeftBar(newOpen);
   };
 
-  const handleClick = (state: any, path: To) => {
+  const handleClick = (state: { close: () => void }, path: To) => {
     state.close();
     navigate(path);
   };
@@ -55,7 +55,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
-        {menuItems.map((item: MenuItems, index: number) => ( 
+        {menuItems.map((item: MenuItems) => ( 
           <ListItem key={item.text} disablePadding>
             <ListItemButton onClick={() => handleClick(popupState, item.url)}>
               <ListItemText primary={item.text} />

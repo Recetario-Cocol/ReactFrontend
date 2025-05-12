@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, SyntheticEvent } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, FormControl, InputLabel, Alert} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Ingrediente from "../Ingrediente";
@@ -44,24 +44,29 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
   const [cantidad, setCantidad] = useState(ingrediente.cantidad);
   const [abreviacion, setAbreviacion] = useState<string>('');
   const [precio, setPrecio] = useState<number>(0);
-  const [mensajeDeError, setMensajeDeError] = useState<String>("");
+  const [mensajeDeError, setMensajeDeError] = useState<string>("");
   const [open, setOpen] = useState(openArg);    
 
-  const handleClose = (event?: any, reason?: string) => {
+  const handleClose = (reason?: string) => {
     if (!reason || reason !== 'backdropClick') {
       setOpen(false);
       onClose();
     } 
-  }
+  };
+
+  const handleCloseOnclick = ( event: SyntheticEvent) => {
+    event.stopPropagation();
+    handleClose();
+  };
 
   useEffect(() => {
-    const selectedProducto = productos.find((p) => p.id === ingrediente.paqueteId);
+    const selectedProducto = productos.find((p) => p.id === ingrediente.productoId);
     const selectedUnidad = unidades.find((u) => u.id === selectedProducto?.unidadId);
     setProducto(selectedProducto);
     setUnidad(selectedUnidad);
     setAbreviacion(selectedUnidad?.abreviacion ?? '');
     setPrecio(selectedProducto?.precio ?? 0);
-  }, [ingrediente.paqueteId, productos, unidades]);
+  }, [ingrediente.productoId, productos, unidades]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -82,17 +87,17 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
   const handleProductoChange = (e: SelectChangeEvent) => {
     setIngrediente((prevIngrediente) => {
       const clonedIngrediente = prevIngrediente.clone();
-      clonedIngrediente.paqueteId = Number(e.target.value);
+      clonedIngrediente.productoId = Number(e.target.value);
       return clonedIngrediente;
     });
   };
 
   return (
     <div>
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleCloseOnclick}>
         <Box sx={style}>
           <Typography variant="h6" component="h2">Producto
-            <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8}}><CloseIcon /></IconButton>
+            <IconButton aria-label="close" onClick={handleCloseOnclick} sx={{position: 'absolute', right: 8, top: 8}}><CloseIcon /></IconButton>
           </Typography>
           {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}
           <Box component="form" onSubmit={handleSubmit}>
@@ -113,7 +118,7 @@ export default function IngredienteModal({ openArg, onSubmit, ingredienteParam, 
             <TextField label="Precio" name="precio" value={precio} fullWidth margin="normal" disabled={true}/>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
               <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
-              <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+              <Button variant="outlined" color="error" onClick={handleCloseOnclick} sx={{m:1}}>Cancelar</Button>
             </Box>
           </Box>
         </Box>

@@ -2,12 +2,12 @@ import Ingrediente from "../ingrediente/Ingrediente";
 
 export default class Receta {
     private _id: number;
-    private _nombre: String;
+    private _nombre: string;
     private _rinde: number;
     private _ingredientes: Array<Ingrediente>;
     private _observaciones: string;
 
-    constructor(id: number = 0, nombre: String = '', rinde: number = 0, ingredientes: Array<Ingrediente> = [], observaciones: string = '') {
+    constructor(id: number = 0, nombre: string = '', rinde: number = 0, ingredientes: Array<Ingrediente> = [], observaciones: string = '') {
         this._id = id;
         this._nombre = nombre;
         this._rinde = rinde;
@@ -31,11 +31,11 @@ export default class Receta {
         this._ingredientes = value;
     }  
     
-    public get nombre(): String {
+    public get nombre(): string {
         return this._nombre;
     }
     
-    public set nombre(value: String) {
+    public set nombre(value: string) {
         this._nombre = value;
     }
       

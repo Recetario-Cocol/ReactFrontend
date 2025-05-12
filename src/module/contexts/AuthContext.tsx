@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { API_BASE_URL } from '../../config';
-const loginEndpoint = '/auth/login';
-const signupEndpoint = '/auth/signup';
+const loginEndpoint = '/users/login/';
+const signupEndpoint = '/users/register/';
 const updatePasswordEndpoint = '/auth/updatePassword';
-const forgotPasswordEndpoint = '/auth/forgotPassword';
+const forgotPasswordEndpoint = '/users/forgot-password/';
 
 interface LoginData {
   email: string;
@@ -15,7 +15,7 @@ interface LoginData {
 interface SignupData {
   email: string;
   password: string;
-  fullName: string;
+  name: string;
 }
 
 interface UpdatePasswordData{
@@ -29,11 +29,12 @@ interface DecodedToken {
   exp: number;
   name: string;
   email: string;
+  is_admin: boolean;
 }
 
 interface AuthContextType {
-  userName: String;
-  email: String;
+  userName: string;
+  email: string;
   token: string | null;
   isAdmin: boolean;
   signup: (data: SignupData) => Promise<void>;
@@ -42,17 +43,17 @@ interface AuthContextType {
   forgotPassword: (userId: number) => void;
   updatePassword: (data: UpdatePasswordData) => void;
   isAuthenticated: boolean;
-  hasPermission: (permission: String) => boolean;
+  hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userName, setUserName] = useState<String>('');
-  const [email, setEmail] = useState<String>('');
+  const [userName, setUserName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [token, setToken] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [roles, setRoles] = useState<String[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
 
   const handleAuthRequest = async (endpoint: string, data: LoginData | SignupData) => {
     try {
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(token);
       setUserName(decodedToken.name);
       setEmail(decodedToken.email);
-      setIsAdmin(roles.includes('ROLE_ADMIN'));
+      setIsAdmin(decodedToken.is_admin || false);
       setRoles(roles);
       localStorage.setItem('authToken', token);
     } catch (error) {
@@ -81,9 +82,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             case 400:
               throw new Error('Datos inválidos');
             case 401:
-              throw new Error(data?.error || 'No autorizado');
+              throw new Error(data?.error || data?.detail || 'No autorizado');
             case 403:
-              throw new Error('Acceso prohibido');
+              const mensaje = (data?.error || data?.detail) ? "Credenciales Incorrectas." : 'Acceso prohibido';
+              throw new Error(mensaje);
             case 404:
               throw new Error('Recurso no encontrado');
             case 500:
@@ -110,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePassword = async (data: UpdatePasswordData) => {
      try {
-      const response = await axios.post(`${API_BASE_URL}${updatePasswordEndpoint}`, data, {
+      await axios.post(`${API_BASE_URL}${updatePasswordEndpoint}`, data, {
         headers: {
           'Content-Type': 'application/json',
           credentials: 'include',
@@ -145,13 +147,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const forgotPassword = async (userId: number) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}${forgotPasswordEndpoint}`, userId, {
-        headers: {
-          'Content-Type': 'application/json',
-          credentials: 'include',
-        },
-      });
-  
+      const response = await axios.post(`${API_BASE_URL}${forgotPasswordEndpoint}`,
+        {"userId": userId},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            credentials: 'include',
+            },
+        }
+      );
       if (response.status === 200) {
       } else {
         throw new Error("Error al enviar el correo de restablecimiento.");
@@ -192,7 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('authToken');
   };
 
-  const hasPermission = (permission: String) => {
+  const hasPermission = (permission: string) => {
     return roles.includes(permission);
   };
 
@@ -223,4 +227,4 @@ export const useAuth = () => {
   return context;
 };
 
-export type { AuthContextType, LoginData };
+export type { AuthContextType, LoginData, SignupData };

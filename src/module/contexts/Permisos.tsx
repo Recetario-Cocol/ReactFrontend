@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import useAxiosWithAuthentication from "../core/useAxiosWithAuthentication";
 import { API_BASE_URL } from '../../config';
 
-const apiEndpoint = API_BASE_URL + '/Permisos';
+const apiEndpoint = API_BASE_URL + '/users/permissions/';
 
 export interface Rol {
   code: string;
@@ -10,8 +10,9 @@ export interface Rol {
 }
 
 export interface Permiso {
-  code: string;
-  nombre: string;
+  id: number;
+  codename: string;
+  name: string;
   descripcion: string;
 }
 
@@ -26,16 +27,12 @@ export const allRoles : Rol[] = [
   { code: "ROLE_USER", nombre: "Pasteleria" },
 ];
 
-export const createRolesArray = (rolesCodes: String[]) => {
+export const createRolesArray = (rolesCodes: string[]) => {
   return allRoles.filter((rol) => rolesCodes.includes(rol.code));
 }
 
-export const createPermisosArray = (permisosCodes: string[], permisosContext: Permisos) => {
-  return permisosCodes.map((code) => ({
-    code,
-    nombre: permisosContext[code] || "Desconocido",
-    descripcion: "",
-  }));
+export const createPermisosArray = (permisosCodes: number[]) => {
+  return permisosCodes;
 };
 
 const PermisosContext = createContext<Permisos | undefined>(undefined);
@@ -49,13 +46,11 @@ export const PermisosProvider: React.FC<{ children: ReactNode }> = ({ children }
       try {
         const response = await axiosWithAuthentication.get(apiEndpoint);
         const permisosData: Permiso[] = response.data;
-        console.log('Permisos recibidos:', permisosData);
         // Construimos el objeto de permisos basado en los datos recibidos
         const newPermisos: Permisos = permisosData.reduce((acc, permiso) => {
-          acc[permiso.code] = permiso.code; // Mapear código del permiso a sí mismo
+          acc[permiso.codename] = permiso.codename; // Mapear código del permiso a sí mismo
           return acc;
         }, {} as Permisos);
-        
         setPermisos(newPermisos);
       } catch (error) {
         console.warn('Error al cargar los permisos:', error);

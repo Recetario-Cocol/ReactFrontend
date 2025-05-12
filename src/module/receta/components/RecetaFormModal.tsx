@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, ChangeEvent, FormEvent, JSX, Fragment } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
 import { DataGrid, GridColDef, GridColumnVisibilityModel, GridFooterContainer, GridRowSelectionModel, useGridApiRef,} from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
@@ -43,7 +43,7 @@ interface UnidadFormModalProps {
 
 class Row {
   id: number;
-  paqueteId?: number;
+  productoId?: number;
   cantidad: number;
   unidadId?: number;
   precio?: string;
@@ -51,20 +51,20 @@ class Row {
   constructor(
     id: number,
     cantidad = 0,
-    paqueteId?: number,
+    productoId?: number,
     unidadId?: number,
     precio?: string
   ) {
     this.id = id;
     this.cantidad = cantidad;
-    this.paqueteId = paqueteId;
+    this.productoId = productoId;
     this.unidadId = unidadId;
     this.precio = precio;
   }
 }
 
 export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFormModalProps) {
-    const [ingredienteSeleccionado, setIngredienteSeleccionado] = React.useState<Ingrediente | undefined>(undefined);
+    const [ingredienteSeleccionado, setIngredienteSeleccionado] = useState<Ingrediente | undefined>(undefined);
     const [id, setId] = useState<number>(0);
     const [open, setOpen] = useState(openArg);
     const [form, setForm] = useState<Receta>(new Receta());
@@ -85,21 +85,21 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     };
     const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
-    const [mensajeDeError, setMensajeDeError] = useState<String>("");
+    const [mensajeDeError, setMensajeDeError] = useState<string>("");
     const [total, setTotal] = useState<number>(0);
-    const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({id: false, unidadId: false});
+    const [columnVisibilityModel, ] = useState<GridColumnVisibilityModel>({id: false, unidadId: false});
 
     const addRowFromIngrediente = (ingrediente: Ingrediente) => {
-      const producto = productos.find((row) => row.id === ingrediente.paqueteId);
+      const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
       const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1) * ingrediente.cantidad);
       const newRow: Row = {
         id: ingrediente.id,
-        paqueteId: ingrediente.paqueteId,
+        productoId: ingrediente.productoId,
         unidadId: ingrediente.unidadId,
         cantidad: ingrediente.cantidad,
         precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
       };    
-      setRows((prevRows) => {
+      setRows((prevRows: Row[]) => {
         const existingRowIndex = prevRows.findIndex((row:Row) => row.id === newRow.id);
         if (existingRowIndex !== -1) {
           const updatedRows = [...prevRows];
@@ -113,7 +113,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     };
 
     const actualizarTotal = () => {
-      setTotal(rows.reduce((total, row) => {
+      setTotal(rows.reduce((total: number, row: Row) => {
         if (typeof row.precio === 'string') {
           const precioNumerico = parseFloat(
             row.precio.replace(/[^0-9,-]+/g, '').replace(',', '.')
@@ -130,22 +130,22 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     }
 
     const handleIngredienteCloseDialog = (id: number) => {
-      setRows((prevRows) => {return prevRows.filter(row => row.id !== id);});
+      setRows((prevRows: Row[]) => {return prevRows.filter(row => row.id !== id);});
       actualizarTotal();
     }
 
     const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
-      const selectedRowId = newSelectionModel[0];
+      const selectedRowId = Array.from(newSelectionModel.ids)[0];
       const selectedRowData = rows.find((row:Row) => row.id === selectedRowId);
       if (selectedRowData) {
         let cantidad = 0;
         if (typeof selectedRowData.cantidad === 'string') {
-          const cantidadString: String = selectedRowData.cantidad;
+          const cantidadString: string = selectedRowData.cantidad;
           cantidad = parseFloat(cantidadString.split(' ')[0]) || 0;
         } else if (typeof selectedRowData.cantidad === 'number') {
           cantidad = selectedRowData.cantidad;
         }
-        setIngredienteSeleccionado(new Ingrediente( Number(selectedRowData.id), selectedRowData.paqueteId, selectedRowData.unidadId, cantidad));
+        setIngredienteSeleccionado(new Ingrediente( Number(selectedRowData.id), selectedRowData.productoId, selectedRowData.unidadId, cantidad));
         setIsRowSelected(true);
       } else {
         setIsRowSelected(false);
@@ -160,22 +160,19 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       if (idToOpen && productos.length > 0 && idToOpen !== id && unidades.length > 0) {
         try {
           setId(idToOpen);
-          const result = await RecetaService.get(idToOpen);
-          const item = result.data;
-          setForm(new Receta(item.id, item.nombre, item.rinde, item.ingredientes, item.observaciones ?? ''));
-          const nuevasFilas = item.ingredientes.map((ingrediente: Ingrediente) => {
-            const producto = productos.find((row) => row.id === ingrediente.paqueteId);
+          const result: Receta = await RecetaService.get(idToOpen);
+          setForm(result);
+          const nuevasFilas = result.ingredientes.map((ingrediente: Ingrediente) => {
+            const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
             const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
             totalFetchData += precio;
-  
-            const unidad = unidades.find((p) => p.id === producto?.unidadId);
-            return {
-              id: ingrediente.id,
-              paqueteId: ingrediente.paqueteId,
-              cantidad: ingrediente.cantidad + ' ' + unidad?.abreviacion,
-              unidadId: ingrediente.unidadId,
-              precio: precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }),
-            };
+            return new Row(
+              ingrediente.id,
+              ingrediente.cantidad,
+              ingrediente.productoId,
+              ingrediente.unidadId,
+              precio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }),
+            );
           });
           setRows(nuevasFilas);
           setTotal(totalFetchData); // Actualizar el total una sola vez aquí
@@ -199,9 +196,9 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
         setLoadingProducts(true);
         try {
           const productosResponse = await ProductoService.getAll();
-          setProductos(productosResponse.data);
+          setProductos(productosResponse);
           const unidadesResponse = await UnidadService.getUnidades();
-          setUnidades(unidadesResponse.data);
+          setUnidades(unidadesResponse);
         } catch (error) {
           console.error('Error al cargar los productos/unidades:', error);
         } finally {
@@ -213,53 +210,58 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
 
     const columns: GridColDef<TypeOfRow>[] = [
       {field: 'id', headerName: 'IngredienteId', width: 10, type: 'number', editable: false, disableColumnMenu: true}, 
-      {field: 'paqueteId', headerName: 'Paquete', flex: 2,  minWidth: 150, type: 'singleSelect', editable: true, disableColumnMenu: true, 
+      {field: 'productoId', headerName: 'Paquete', flex: 2,  minWidth: 150, type: 'singleSelect', editable: true, disableColumnMenu: true, 
         renderCell: (params) => {
-          const producto = productos.find((p) => p.id === params.value);
+          const producto = productos.find((p: Producto) => p.id === params.value);
           return producto ? producto.nombre : 'Seleccionar producto';
         }
       },
-      {field: 'unidadId', headerName: 'unidadId', width: 100, editable: false, disableColumnMenu: true, valueGetter: (value, row) => {
-        const producto = productos.find((p) => p.id === row.paqueteId);
+      {field: 'unidadId', headerName: 'unidadId', width: 100, editable: false, disableColumnMenu: true, valueGetter: (_, row) => {
+        const producto = productos.find((p: Producto) => p.id === row.productoId);
         return producto?.unidadId;
       }},
       {field: 'cantidad', headerName: 'Cantidad', flex: 1, minWidth: 100, type: 'number', editable: true, disableColumnMenu: true}, 
       {field: 'precio', headerName: 'Precio', flex:1 ,minWidth: 100, editable: false, disableColumnMenu: true}
     ];
 
-    const handleClose = (event?: any, reason?: string) => {
+    const handleClose = (reason?: string) => {
       if (!reason || reason !== 'backdropClick') {
         if(onClose) onClose();
         setOpen(false);
       }
     }
 
-    const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = e.target;
-      setForm((prevForm) => new Receta(prevForm.id,  value || '', prevForm.rinde, prevForm.ingredientes, prevForm.observaciones));
+    const handleCloseClick = (event: React.SyntheticEvent) => {
+      event.preventDefault();
+      handleClose();
     }
 
-    const handlerChangeRinde = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlerChangeNombre = (e: ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Receta(prevForm.id,  prevForm.nombre, Number(value) || 0, prevForm.ingredientes, prevForm.observaciones));
+      setForm((prevForm: Receta) => new Receta(prevForm.id,  value || '', prevForm.rinde, prevForm.ingredientes, prevForm.observaciones));
     }
 
-    const handlerChangeObservaciones = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlerChangeRinde = (e: ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setForm((prevForm) => new Receta(prevForm.id,  prevForm.nombre, prevForm.rinde, prevForm.ingredientes, value || ''));
+      setForm((prevForm: Receta) => new Receta(prevForm.id,  prevForm.nombre, Number(value) || 0, prevForm.ingredientes, prevForm.observaciones));
     }
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handlerChangeObservaciones = (e: ChangeEvent<HTMLInputElement>) => {
+      const { value } = e.target;
+      setForm((prevForm: Receta) => new Receta(prevForm.id,  prevForm.nombre, prevForm.rinde, prevForm.ingredientes, value || ''));
+    }
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      form.ingredientes = rows.map((row: Row, index: number) => {
+      form.ingredientes = rows.map((row: Row) => {
         let cantidad = 0;
         if (typeof row.cantidad === 'string') {
-          const cantidadString: String = row.cantidad;
+          const cantidadString: string = row.cantidad;
           cantidad = parseFloat(cantidadString.split(' ')[0]) || 0;
         } else if (typeof row.cantidad === 'number') {
           cantidad = row.cantidad;
         }
-        return new Ingrediente(row.id, row.paqueteId, row.unidadId, cantidad);
+        return new Ingrediente(row.id, row.productoId, row.unidadId, cantidad);
       });
 
       if (!form.nombre){
@@ -278,13 +280,9 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
       }
 
       if (id) {
-        RecetaService.actualizar(id, form).then((result)=>{
-          handleClose();
-        });
+        RecetaService.actualizar(id, form).then(() => handleClose());
       } else {
-        RecetaService.crear(form).then((result)=>{
-          handleClose();
-        });
+        RecetaService.crear(form).then(() => handleClose());
       }
     };
 
@@ -323,7 +321,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
     
     return (
       <div>
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={open} onClose={handleCloseClick}>
           <>
           <Box component="form" onSubmit={handleSubmit}  sx={style}>
             <Box
@@ -341,7 +339,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
             >
               <Typography variant="h6" component="h2">
                 Receta
-                <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8, }}>
+                <IconButton aria-label="close" onClick={handleCloseClick} sx={{position: 'absolute', right: 8, top: 8, }}>
                   <CloseIcon />
                 </IconButton>
               </Typography>
@@ -439,7 +437,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen}: UnidadFor
               }}
             >  
               <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
-              <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+              <Button variant="outlined" color="error" onClick={handleCloseClick} sx={{m:1}}>Cancelar</Button>
             </Box>   
           </Box>
           <Box>
@@ -469,13 +467,13 @@ type AlertDialogBorrarRecetaProps = {
   onClose?: () => void;
 };
 
-export function AlertDialogBorrarReceta({ paramId, onClose }: AlertDialogBorrarRecetaProps): React.JSX.Element {
-  const [open, setOpen] = React.useState(true);
-  const [id,] = React.useState(paramId);
+export function AlertDialogBorrarReceta({ paramId, onClose }: AlertDialogBorrarRecetaProps): JSX.Element {
+  const [open, setOpen] = useState(true);
+  const [id,] = useState(paramId);
   const RecetaService = useRecetaService();
 
   const handlerClickSi = () => {
-    RecetaService.eliminar(id).then().then((result)=>{ handleClose();});
+    RecetaService.eliminar(id).then().then( ()=> handleClose());
   }
 
   const handleClose = () => {
@@ -484,7 +482,7 @@ export function AlertDialogBorrarReceta({ paramId, onClose }: AlertDialogBorrarR
   }
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title">
         <DialogTitle id="alert-dialog-title">
           {"¿Desea Borrar la Receta?"}
@@ -494,6 +492,6 @@ export function AlertDialogBorrarReceta({ paramId, onClose }: AlertDialogBorrarR
           <Button onClick={handlerClickSi}>Si</Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </Fragment>
   );
 }

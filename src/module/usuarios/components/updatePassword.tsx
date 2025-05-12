@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Box, TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -6,6 +6,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import HeaderApp from '../../core/components/HeaderApp';
 import { passwordValidationRules, confirmPasswordValidation } from '../../../utils/validationRules';
+
+interface RequestForgotPassword {
+    token: string;
+    passwordValidate: string;
+    password: string;
+}
 
 const UpdatePassword = () => {
     const { updatePassword } = useAuth();
@@ -18,21 +24,19 @@ const UpdatePassword = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordValidate, setShowPasswordValidate] = useState(false);
 
-    const { register, handleSubmit, formState, watch } = useForm();
+    const { register, handleSubmit, formState, watch } = useForm<RequestForgotPassword>();
     const password = watch('password'); // Observa el valor del campo 'password'
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
     const togglePasswordValidateVisibility = () => setShowPasswordValidate(!showPasswordValidate);
 
-    const onLoginSubmit = async (data: any) => {
+    const onLoginSubmit = async (data: RequestForgotPassword) => {
         setError('');
         try {
             if (!token) {
                 throw new Error('Token no encontrado en la URL');
             }
-            data.token = token;
-            delete data.passwordValidate;
-            await updatePassword(data);
+            await updatePassword({ token: token, password: data.password });
             navigate('/home');
         } catch (err) {
             if (err instanceof Error) {

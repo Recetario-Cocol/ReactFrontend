@@ -1,8 +1,8 @@
-import { DataGrid, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import React, { useEffect, useState } from 'react';
+import {useEffect, useState, SyntheticEvent } from 'react';
 import {Box, Button, Snackbar, SnackbarCloseReason} from '@mui/material';
 import UnidadFormModal, { AlertDialogBorrarUnidad } from './unidadFormModal';
 import {useUnidadService} from '../useUnidadService';
@@ -12,25 +12,23 @@ import { usePermisos } from '../../contexts/Permisos';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function UnidadGrilla() {
-  const [seleccionado, setSeleccionado] = React.useState(false);
-  const [canBeDelete, setCanBeDelete] = React.useState(false);
+  const [seleccionado, setSeleccionado] = useState(false);
+  const [canBeDelete, setCanBeDelete] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<Unidad[]>([]); 
   const UnidadService = useUnidadService();
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
-  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
-  const { SAVE_UNIDAD, CREATE_UNIDAD, DELETE_UNIDAD } = usePermisos();
+  const [columnVisibilityModel, ] = useState<GridColumnVisibilityModel>({can_be_deleted: false, id: false});
+  const { change_unidad, add_unidad, delete_unidad } = usePermisos();
   const { hasPermission } = useAuth();
 
-  const handleSeleccion = (
-    rowSelectionModel: GridRowSelectionModel,
-    details: GridCallbackDetails<any>
-  ) => {
-    const selectedRow = rows.find((row) => row.id === rowSelectionModel[0]);
-    setCanBeDelete(!!selectedRow?.canBeDeleted);
-    setSeleccionado(rowSelectionModel.length > 0);
+  const handleSeleccion = ( rowSelectionModel: GridRowSelectionModel ) => {
+    const firstId = Array.from(rowSelectionModel.ids)[0];
+    const selectedRow = rows.find((row: Unidad) => row.id === firstId);
+    setCanBeDelete(!!selectedRow?.can_be_deleted);
+    setSeleccionado(rowSelectionModel.ids.size > 0);
   };
 
   const handleCloseModal = () => {
@@ -50,14 +48,7 @@ export default function UnidadGrilla() {
 
   function fetchRows(){
     UnidadService.getUnidades()
-    .then((result) => {
-      const unidadesApi = result.data ? 
-        result.data.map((item: any) => 
-          new Unidad(item.id, item.nombre, item.abreviacion, item.canBeDeleted)
-        ):
-        [];
-      setRows(unidadesApi);
-    }); 
+    .then((result: Unidad[]) => setRows(result)); 
   }
 
   const GrillaRef = useGridApiRef();
@@ -65,7 +56,7 @@ export default function UnidadGrilla() {
     {field: 'id', headerName: 'Id', width: 80, disableColumnMenu: true},
     {field: 'abreviacion', headerName: 'Abrev.', width: 100, editable: false, disableColumnMenu: true},
     {field: 'nombre', headerName: 'Nombre', width: 200, editable: false,  disableColumnMenu: true},
-    {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
+    {field: 'can_be_deleted', headerName: 'can_be_deleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 
   function getSelectedRowId(): number {
@@ -94,7 +85,7 @@ export default function UnidadGrilla() {
     setOpenBorrarUnidad(true);
   }
 
-  function handleSnackBarClose(event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
+  function handleSnackBarClose(_: SyntheticEvent | Event, reason?: SnackbarCloseReason) {
     if (reason === 'clickaway') { 
       return;
     }
@@ -105,9 +96,9 @@ export default function UnidadGrilla() {
       <HeaderApp titulo="Unidades" />
       <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={!hasPermission(CREATE_UNIDAD)} onClick={agregar}>Agregar</Button>
-          <Button startIcon={<EditIcon />} disabled={!hasPermission(SAVE_UNIDAD) || !seleccionado} onClick={modificar}>Modificar</Button>
-          <Button startIcon={<DeleteIcon />} disabled={!hasPermission(DELETE_UNIDAD) || !canBeDelete} onClick={eliminar}>Eliminar</Button>
+          <Button startIcon={<AddIcon />} disabled={!hasPermission(add_unidad)} onClick={agregar}>Agregar</Button>
+          <Button startIcon={<EditIcon />} disabled={!hasPermission(change_unidad) || !seleccionado} onClick={modificar}>Modificar</Button>
+          <Button startIcon={<DeleteIcon />} disabled={!hasPermission(delete_unidad) || !canBeDelete} onClick={eliminar}>Eliminar</Button>
         </Box>
         <Snackbar open={mensajesModalBorrar !== ""} autoHideDuration={5000} message={mensajesModalBorrar} onClose={handleSnackBarClose}/>
         <Box sx={{ flex: 1}}>

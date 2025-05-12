@@ -1,13 +1,13 @@
 export default class Ingrediente {
     private _id: number;
-    private _paqueteId: number;
+    private _productoId: number;
     private _unidadId: number;
     private _cantidad: number;
 
-    constructor(id: number = 0, paqueteId: number = 0, unidadId: number = 0, cantidad: number = 0) {
+    constructor(id: number = 0, productoId: number = 0, unidadId: number = 0, cantidad: number = 0) {
         this._id = id;
         this._unidadId = unidadId;
-        this._paqueteId = paqueteId;
+        this._productoId = productoId;
         this._cantidad = cantidad;
     }
 
@@ -19,12 +19,12 @@ export default class Ingrediente {
         this._cantidad = value;
     }
     
-    public get paqueteId(): number {
-        return this._paqueteId;
+    public get productoId(): number {
+        return this._productoId;
     }
     
-    public set paqueteId(value: number) {
-        this._paqueteId = value;
+    public set productoId(value: number) {
+        this._productoId = value;
     }  
       
     public get unidadId(): number {
@@ -47,12 +47,12 @@ export default class Ingrediente {
         return {
             id: this._id < 0 ? null : this._id,
             unidadId: this._unidadId,
-            paqueteId: this._paqueteId,
+            productoId: this._productoId,
             cantidad: this._cantidad,
         };
     }
 
     public clone(): Ingrediente {
-        return new Ingrediente(this._id, this._paqueteId, this._unidadId, this._cantidad);
+        return new Ingrediente(this._id, this._productoId, this._unidadId, this._cantidad);
     }
 }

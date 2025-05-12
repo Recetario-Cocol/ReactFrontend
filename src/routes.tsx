@@ -12,7 +12,7 @@ import UpdatePassword from './module/usuarios/components/updatePassword';
 
 interface PrivateRouteProps {
   children: ReactNode;
-  asAdmin?: Boolean;
+  asAdmin?: boolean;
   requiredPermission?: string[];
 }
 
@@ -33,13 +33,13 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, asAdmin = false, 
 
 
 function PrivateRoutes() {
-  const { VIEW_PAQUETE, VIEW_RECETA, VIEW_UNIDAD } = usePermisos();
+  const { view_producto, view_receta, view_unidad } = usePermisos();
   return (
     <Routes>
       <Route path="/Home" element={<PrivateRoute><Home /></PrivateRoute>} />
-      <Route path="/Unidades" element={<PrivateRoute requiredPermission={[VIEW_UNIDAD]}><UnidadGrilla /></PrivateRoute>} />
-      <Route path="/Paquetes" element={<PrivateRoute requiredPermission={[VIEW_PAQUETE]}><ProductoGrilla /></PrivateRoute>} />
-      <Route path="/Recetas" element={<PrivateRoute requiredPermission={[VIEW_RECETA]}><RecetaGrilla /></PrivateRoute>} />
+      <Route path="/Unidades" element={<PrivateRoute requiredPermission={[view_unidad]}><UnidadGrilla /></PrivateRoute>} />
+      <Route path="/Paquetes" element={<PrivateRoute requiredPermission={[view_producto]}><ProductoGrilla /></PrivateRoute>} />
+      <Route path="/Recetas" element={<PrivateRoute requiredPermission={[view_receta]}><RecetaGrilla /></PrivateRoute>} />
       <Route path="/Usuarios" element={<PrivateRoute asAdmin><UsuariosGrilla /></PrivateRoute>} />
     </Routes>
   );
@@ -50,7 +50,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
-        <Route path="/updatePassword" element={<UpdatePassword />} />
+      <Route path="/updatePassword" element={<UpdatePassword />} />
       <Route path="/*" element={<PermisosProvider><PrivateRoutes /></PermisosProvider>}/>
       <Route path="*" element={<Login />} />
     </Routes>

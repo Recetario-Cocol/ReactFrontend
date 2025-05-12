@@ -1,4 +1,4 @@
-import { DataGrid, GridCallbackDetails, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnVisibilityModel, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -13,25 +13,26 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export default function UsuariosGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
-  const [canBeDelete, setCanBeDelete] = React.useState(false);
+  const [can_be_deleted, setCan_be_deleted] = React.useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarUsuario, setOpenBorrarUsuario] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<Usuario[]>([]); 
   const UserService = useUserService();
   const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
-  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
+  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({can_be_deleted: false, id: false});
   const { isAdmin, forgotPassword } = useAuth();
   const [openForgotPasswordModal, setOpenForgotPasswordModal] = useState(false);
 
-  const handleSeleccion = (
-    rowSelectionModel: GridRowSelectionModel,
-    details: GridCallbackDetails<any>
-  ) => {
-    const selectedRow = rows.find((row) => row.id === rowSelectionModel[0]);
-    setCanBeDelete(!!selectedRow?.canBeDeleted);
-    setSeleccionado(rowSelectionModel.length > 0);
-  };
+const handleSeleccion = (
+  rowSelectionModel: GridRowSelectionModel
+) => {
+  const firstId = Array.from(rowSelectionModel.ids)[0];
+  const selectedRow = rows.find((row: Usuario) => row.id === firstId);
+
+  setCan_be_deleted(!!selectedRow?.can_be_deleted);
+  setSeleccionado(rowSelectionModel.ids.size > 0);
+};
 
   const handleCloseModal = () => {
     fetchRows();
@@ -50,22 +51,15 @@ export default function UsuariosGrilla() {
 
   function fetchRows(){
     UserService.getUsuarios()
-    .then((result) => {
-      const usuariosApi = result.data ? 
-        result.data.map((item: any) => 
-          new Usuario(item.id, item.fullName, item.email, item.canBeDeleted)
-        ):
-        [];
-      setRows(usuariosApi);
-    }); 
+    .then((result: Usuario[]) => setRows(result)); 
   }
 
   const GrillaRef = useGridApiRef();
   const columns: GridColDef<(typeof rows)[number]>[] = [
     {field: 'id', headerName: 'Id', width: 80, disableColumnMenu: true},
-    {field: 'fullName', headerName: 'fullName.', width: 100, editable: false, disableColumnMenu: true},
+    {field: 'name', headerName: 'Name', width: 100, editable: false, disableColumnMenu: true},
     {field: 'email', headerName: 'Email', width: 200, editable: false,  disableColumnMenu: true},
-    {field: 'canBeDeleted', headerName: 'canBeDeleted', width: 150, editable: false,  disableColumnMenu: true}
+    {field: 'can_be_deleted', headerName: 'can_be_deleted', width: 150, editable: false,  disableColumnMenu: true}
   ];
 
   function getSelectedRowId(): number {
@@ -110,7 +104,7 @@ export default function UsuariosGrilla() {
     setOpenForgotPasswordModal(false);
   }
 
-  function handleSnackBarClose(event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
+  function handleSnackBarClose(_: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) {
     if (reason === 'clickaway') {
       return;
     }
@@ -123,7 +117,7 @@ export default function UsuariosGrilla() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
           <Button startIcon={<AddIcon />} disabled={true || !isAdmin} onClick={agregar}>Agregar</Button>
           <Button startIcon={<EditIcon />} disabled={!isAdmin || !seleccionado} onClick={modificar}>Modificar</Button>
-          <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !canBeDelete} onClick={eliminar}>Eliminar</Button>
+          <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !can_be_deleted} onClick={eliminar}>Eliminar</Button>
           <Button startIcon={<DeleteIcon />} disabled={!isAdmin || !seleccionado} onClick={eliminar}>Eliminar Con Dependencias</Button>
           <Button startIcon={<LockResetIcon />} disabled={!isAdmin || !seleccionado} onClick={limpiarContrasenias}>Restablecer Contraseña</Button>
         </Box>
@@ -148,7 +142,7 @@ export default function UsuariosGrilla() {
         </Box> 
         <div>
            {openModal && <UserFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen}/>}
-          {openBorrarUsuario && <AlertDialogBorrarUsuario paramId={idToOpen} onClose={handleCloseDialog} forced={!canBeDelete}/>}
+          {openBorrarUsuario && <AlertDialogBorrarUsuario paramId={idToOpen} onClose={handleCloseDialog} forced={!can_be_deleted}/>}
         </div>
       </Box>
 

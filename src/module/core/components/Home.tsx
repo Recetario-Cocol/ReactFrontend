@@ -41,11 +41,11 @@ export default function Home() {
         const updatedCards = cards.map((card) => {
             switch (card.id) {
                 case 1:
-                    return { ...card, cant: totalesResponse.data.totalUnidades };
+                    return { ...card, cant: totalesResponse.unidades };
                 case 2:
-                    return { ...card, cant: totalesResponse.data.totalPaquetes };
+                    return { ...card, cant: totalesResponse.productos };
                 case 3:
-                    return { ...card, cant: totalesResponse.data.totalRecetas };
+                    return { ...card, cant: totalesResponse.recetas };
                 default:
                     return card;
             }

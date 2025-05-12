@@ -30,28 +30,29 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
   const [id,] = useState<number>(idToOpen);
   const [open, setOpen] = useState<boolean>(openArg);
   const [form, setForm] = useState<Unidad>(new Unidad());
-  const [mensajeDeError, setMensajeDeError] = useState<String>("");
+  const [mensajeDeError, setMensajeDeError] = useState<string>("");
   const UnidadService = useUnidadService();
   
   useEffect(() => {
     if (id) {
-      UnidadService.getUnidad(id).then((result) => {
-        const item =  result.data;
-        const unidadesApi = new Unidad(item.id, item.nombre, item.abreviacion);
-        setForm(unidadesApi);
-      });  
+      UnidadService.getUnidad(id).then((result: Unidad) => setForm(result));  
     } else {
       setForm(new Unidad(0, '', ''));
     }
   }, [id]);
   
   
-  const handleClose = (event?: any, reason?: string) => {
+  const handleClose = (reason?: string) => {
     if (!reason || reason !== 'backdropClick') {
       if(onClose) onClose();
       setOpen(false);
     }
-  }
+  };
+  
+  const handleCloseEvent = (event: React.SyntheticEvent)=> {
+    event.stopPropagation();
+    handleClose();
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,11 +78,11 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
     }
   };
   
-  return <Modal open={open} onClose={handleClose}>
+  return <Modal open={open} onClose={handleCloseEvent}>
     <Box sx={style}>
       <Typography variant="h6" component="h2">
         Unidad
-        <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8}}>
+        <IconButton aria-label="close" onClick={handleCloseEvent} sx={{position: 'absolute', right: 8, top: 8}}>
           <CloseIcon />
         </IconButton>
       </Typography>
@@ -96,7 +97,7 @@ export default function UnidadFormModal({openArg, onClose, idToOpen}: UnidadForm
         />
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
           <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
-          <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+          <Button variant="outlined" color="error" onClick={handleCloseEvent} sx={{m:1}}>Cancelar</Button>
         </Box>
       </Box>
     </Box>

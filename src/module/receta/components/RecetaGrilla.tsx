@@ -1,34 +1,34 @@
-import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, useGridApiRef, GridColumnVisibilityModel} from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowSelectionModel, useGridApiRef, GridColumnVisibilityModel} from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {Box, Button} from '@mui/material';
 import RecetaFormModal, {AlertDialogBorrarReceta} from './RecetaFormModal';
-import { useRecetaService } from '../useRecetaService';
+import { GrillaReceta, useRecetaService } from '../useRecetaService';
 import HeaderApp from '../../core/components/HeaderApp';
 import { usePermisos } from '../../contexts/Permisos';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function RecetaGrilla() {
-  const [seleccionado, setSeleccionado] = React.useState(false);
-  const [, setSelectionModel] = React.useState<GridRowSelectionModel>();
+  const [seleccionado, setSeleccionado] = useState(false);
+  const [, setSelectionModel] = useState<GridRowSelectionModel>();
   const [openModal, setOpenModal] = useState(false);
   const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
-  const [rows, setRows] = useState<any[]>([]); 
+  const [rows, setRows] = useState<GrillaReceta[]>([]); 
   const RecetaService = useRecetaService();
-  const [columnVisibilityModel, ] = React.useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
-  const { SAVE_RECETA, CREATE_RECETA, DELETE_RECETA } = usePermisos();
+  const [columnVisibilityModel, ] = useState<GridColumnVisibilityModel>({canBeDeleted: false, id: false});
+  const { change_receta, add_receta, delete_receta } = usePermisos();
   const { hasPermission } = useAuth();
 
   const handleSeleccion = (
     rowSelectionModel: GridRowSelectionModel,
-    details: GridCallbackDetails<any>
   ) => {
-    setSeleccionado(rowSelectionModel.length > 0);
+    setSeleccionado(rowSelectionModel.ids.size > 0);
     setSelectionModel(rowSelectionModel);
   };
+
 
   const handleCloseModal = () => {
     fetchRows();
@@ -42,12 +42,9 @@ export default function RecetaGrilla() {
 
   async function fetchRows() {
     try {
-      const result = await RecetaService.getGrilla();
-      if (result.data) {
-        setRows(result.data);
-      } else {
-        setRows([]);
-      }
+      setRows([]);
+      RecetaService.getGrilla()
+        .then((result: GrillaReceta[]) => setRows(result));  
     } catch (error) {
       console.error("Error al cargar los paquetes:", error);
       setRows([]);
@@ -95,9 +92,9 @@ export default function RecetaGrilla() {
     <HeaderApp titulo="Recetas" />
     <Box sx={{display: 'flex', flexDirection: 'column', flex: 1, width: '100%', maxWidth: 800}}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Button startIcon={<AddIcon />} disabled={!hasPermission(CREATE_RECETA)} onClick={agregar}>Agregar</Button>
-        <Button startIcon={<EditIcon />} disabled={!hasPermission(SAVE_RECETA) || !seleccionado} onClick={modificar}>Modificar</Button>
-        <Button startIcon={<DeleteIcon />} disabled={!hasPermission(DELETE_RECETA) || !seleccionado} onClick={eliminar}>Eliminar</Button>
+        <Button startIcon={<AddIcon />} disabled={!hasPermission(add_receta)} onClick={agregar}>Agregar</Button>
+        <Button startIcon={<EditIcon />} disabled={!hasPermission(change_receta) || !seleccionado} onClick={modificar}>Modificar</Button>
+        <Button startIcon={<DeleteIcon />} disabled={!hasPermission(delete_receta) || !seleccionado} onClick={eliminar}>Eliminar</Button>
       </Box>
       <Box sx={{ flex: 1}}>
         <DataGrid

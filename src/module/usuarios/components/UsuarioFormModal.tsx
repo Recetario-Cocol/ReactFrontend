@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, Alert} from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUserService } from '../useUserService';
 import { Usuario } from '../Usuario';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
-import PermisososAutoComplete from './PermisososAutoComplete';
+import PermisosAutoComplete from './PermisososAutoComplete';
 import RolesAutoComplete from './RolesAutoComplete';
 import { useForm } from 'react-hook-form';
-import { createPermisosArray, createRolesArray, usePermisos } from '../../contexts/Permisos';
 
 const style = {
   position: 'absolute',
@@ -30,55 +29,44 @@ interface UserFormModalProps {
   idToOpen: number;
 }
 
-export default function UserFormModal({openArg, onClose, idToOpen}: UserFormModalProps) {
-  const [id,] = useState<number>(idToOpen);
+export default function UserFormModal({ openArg, onClose, idToOpen }: UserFormModalProps) {
+  const [id, setId] = useState<number>(0);
   const [open, setOpen] = useState<boolean>(openArg);
   const [form, setForm] = useState<Usuario>(new Usuario());
   const { handleSubmit, setError, clearErrors, formState: { errors } } = useForm();
 
-  const [mensajeDeError, setMensajeDeError] = useState<String>("");
+  const [mensajeDeError, setMensajeDeError] = useState<string>("");
   const userService = useUserService();
-  const permisosContext = usePermisos();
 
-  
   useEffect(() => {
-    if (id) {
-      userService.getUsuario(id).then((result) => {
-        const item =  result.data;
-        const userFromApi = new Usuario(
-          item.id,
-          item.fullName,
-          item.email,
-          new Date(item.createdAt),
-          new Date(item.updatedAt),
-          createPermisosArray(item.permissions, permisosContext),
-          createRolesArray(item.roles)
-        );
-        setForm(userFromApi);
-      });  
+    if (idToOpen) {
+      setId(idToOpen);
+      userService.getUsuario(idToOpen).then((result) => {
+        setForm(result);
+      });
     } else {
       setForm(new Usuario(0, '', ''));
     }
-  }, [id]);
-  
-  const handleClose = (event?: any, reason?: string) => {
+  }, [idToOpen]);
+
+  const handleClose = (reason?: string) => {
     if (!reason || reason !== 'backdropClick') {
-      if(onClose) onClose();
+      if (onClose) onClose();
       setOpen(false);
     }
   }
 
-  const onSubmit = () => {    
-    if (false && form.permisos.length === 0) {
-      setError("permisos", { message: "Debes seleccionar al menos un Permiso" });
-      return;
-    }
+  const handleCloseClick = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    handleClose();
+  }
 
-    if (form.roles.length === 0) {
-      setError("roles", { message: "Debes seleccionar al menos un Rol}" });
+  const onSubmit = () => {
+    if (false && form.roles.length === 0) {
+      setError("roles", { message: "Debes seleccionar al menos un Rol" });
       return;
     }
-    if(!form.fullName) {
+    if (!form.name) {
       setMensajeDeError("Ingrese un nombre.");
       return;
     }
@@ -87,78 +75,110 @@ export default function UserFormModal({openArg, onClose, idToOpen}: UserFormModa
       setMensajeDeError("Ingrese un email.");
       return;
     }
-  
+
     if (id) {
       userService.actualizarUsuario(id, form).then(
-        ()=>handleClose()
+        () => handleClose()
       );
     } else {
       userService.crearUsuario(form).then(
-        ()=>handleClose()
+        () => handleClose()
       );
     }
     clearErrors("permisos");
     clearErrors("roles");
   };
-    
-  return <Modal open={open} onClose={handleClose}>
-    <Box sx={style}>
-      <Typography variant="h6" component="h2">
-        User
-        <IconButton aria-label="close" onClick={handleClose} sx={{position: 'absolute', right: 8, top: 8}}>
-          <CloseIcon />
-        </IconButton>
-      </Typography>
-      {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}    
-      <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-        <TextField label="Id" name="id" value={form.id} fullWidth margin="dense" disabled/>
-        <TextField label="Nombre" name="nombre" value={form.fullName} fullWidth margin="dense"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(
-            (prevForm) => new Usuario(
-              prevForm.id,
-              e.target.value || '',
-              prevForm.email,
-              prevForm.createdAt,
-              prevForm.updatedAt,
-              prevForm.permisos,
-              prevForm.roles
-            ))}
-        />
-        <TextField label="Email" name="email" value={form.email} fullWidth margin="dense"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(
-            (prevForm) => new Usuario(
-              prevForm.id,
-              prevForm.fullName,
-              e.target.value || '',
-              prevForm.createdAt,
-              prevForm.updatedAt,
-              prevForm.permisos,
-              prevForm.roles
-            ))}
-        />
-        <PermisososAutoComplete
-          value={form.permisos}
-          onChange={(newValue) => {
-            setForm((prevForm) => new Usuario(prevForm.id, prevForm.fullName, prevForm.email, prevForm.createdAt, prevForm.updatedAt, newValue, prevForm.roles));
-          }}
-          error={typeof errors.permisos?.message === "string" ? errors.permisos.message : undefined}
-        />
-        <RolesAutoComplete
-          value={form.roles}
-          onChange={(newValue) => {
-            setForm((prevForm) => new Usuario(prevForm.id, prevForm.fullName, prevForm.email, prevForm.createdAt, prevForm.updatedAt, prevForm.permisos, newValue));
-          }}
-          error={typeof errors.roles?.message === "string" ? errors.roles.message : undefined}
-         />
-        <Typography variant="overline" gutterBottom sx={{ display: 'block' }}>Creado: {form.createdAt.toLocaleString()}</Typography>
-        <Typography variant="overline" gutterBottom sx={{ display: 'block' }}>Actualizado: {form.updatedAt.toLocaleString()}</Typography>
-        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
-          <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
-          <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+
+  return (
+    <Modal open={open} onClose={handleCloseClick}>
+      <Box sx={style}>
+        <Typography variant="h6" component="h2">
+          User
+          <IconButton aria-label="close" onClick={handleCloseClick} sx={{ position: 'absolute', right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+        </Typography>
+        {mensajeDeError && <Alert severity="success" color="warning">{mensajeDeError}</Alert>}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <TextField label="Id" name="id" value={form.id} fullWidth margin="dense" disabled />
+          <TextField
+            label="Nombre"
+            name="nombre"
+            value={form.name}
+            fullWidth
+            margin="dense"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(
+              (prevForm) => new Usuario(
+                prevForm.id,
+                e.target.value || '',
+                prevForm.email,
+                prevForm.createdAt,
+                prevForm.updatedAt,
+                prevForm.permisosIds,
+                prevForm.roles
+              ))}
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={form.email}
+            fullWidth
+            margin="dense"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(
+              (prevForm) => new Usuario(
+                prevForm.id,
+                prevForm.name,
+                e.target.value || '',
+                prevForm.createdAt,
+                prevForm.updatedAt,
+                prevForm.permisosIds,
+                prevForm.roles
+              ))}
+          />
+          <PermisosAutoComplete
+            value={form.permisosIds}
+            onChange={(newValue) => {
+              setForm((prevForm) => new Usuario(
+                prevForm.id,
+                prevForm.name,
+                prevForm.email,
+                prevForm.createdAt,
+                prevForm.updatedAt,
+                newValue.map((permiso) => permiso.id),
+                prevForm.roles
+              ));
+            }}
+            error={typeof errors.permisos?.message === "string" ? errors.permisos.message : undefined}
+          />
+          <RolesAutoComplete
+            value={form.roles}
+            onChange={(newValue) => {
+              setForm((prevForm) => new Usuario(
+                prevForm.id,
+                prevForm.name,
+                prevForm.email,
+                prevForm.createdAt,
+                prevForm.updatedAt,
+                prevForm.permisosIds,
+                newValue
+              ));
+            }}
+            error={typeof errors.roles?.message === "string" ? errors.roles.message : undefined}
+          />
+          <Typography variant="overline" gutterBottom sx={{ display: 'block' }}>
+            Creado: {form.createdAt.toLocaleString()}
+          </Typography>
+          <Typography variant="overline" gutterBottom sx={{ display: 'block' }}>
+            Actualizado: {form.updatedAt.toLocaleString()}
+          </Typography>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+            <Button type="submit" variant="contained" color="primary" sx={{ m: 1 }}>Enviar</Button>
+            <Button variant="outlined" color="error" onClick={handleCloseClick} sx={{ m: 1 }}>Cancelar</Button>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  </Modal>;
+    </Modal>
+  );
 }
 
 type AlertDialogBorrarUsuarioProps = {

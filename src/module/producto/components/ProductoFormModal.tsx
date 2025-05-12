@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { MenuItem} from "@mui/material";
 import { useProductoService } from '../useProductoService';
+import {Unidad} from '../../unidad/Unidad'
 
 const style = {
   position: 'absolute',
@@ -35,30 +36,29 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
     const [form, setForm] = useState<Producto>(new Producto());
     const UnidadService = useUnidadService();
     const ProductoService = useProductoService();
-    const [mensajeDeError, setMensajeDeError] = useState<String>("");
-    const [unidadesOptions, setUnidadesOptions] = useState([]);
+    const [mensajeDeError, setMensajeDeError] = useState<string>("");
+    const [unidadesOptions, setUnidadesOptions] = useState<Unidad[]>([]);
+
     useEffect(() => {
       if (id) {
-        ProductoService.get(id).then((result) => {
-          const item :Producto =  result.data;
-          const paqueteFromApi = new Producto(item.id || 0, item.nombre || '', item.unidadId || 0, item.precio || 0, item.cantidad || 0);
-          setForm(paqueteFromApi);
-        });  
+        ProductoService.get(id).then((result) => setForm(result));  
       } else {
        setForm(new Producto(0, '', 0, 0, 0));
       }
       UnidadService.getUnidades()
-      .then((result) => {
-        const options = result.data ? result.data.map((item: any) => ({"id": item.id, "name": item.abreviacion})) : [];
-        setUnidadesOptions(options);
-      }); 
+      .then((result) => setUnidadesOptions(result)); 
     }, [id]);
   
-    const handleClose = (event?: any, reason?: string) => {
+    const handleClose = (reason?: string) => {
       if (!reason || reason !== 'backdropClick') {
         if(onClose) onClose();
         setOpen(false);
       }
+    }
+
+    const handleCloseClick = (event: React.SyntheticEvent) => {
+      event.stopPropagation();
+      handleClose();
     }
 
     const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,10 +112,10 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
   
     return (
       <div>
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={open} onClose={handleCloseClick}>
           <Box sx={style}>
             <Typography variant="h6" component="h2">Producto
-              <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8}}>
+              <IconButton aria-label="close" onClick={handleCloseClick} sx={{ position: 'absolute', right: 8, top: 8}}>
                 <CloseIcon />
               </IconButton>
             </Typography>
@@ -132,9 +132,9 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
                 <InputLabel id="unidad-label">Unidad</InputLabel>
                 <Select label="Unidad" labelId="unidad-label" id="unidad" value={form.unidadId} onChange={handleChangeUnidad}>
                   <MenuItem value={"0"}>Vacio</MenuItem>
-                  {unidadesOptions.map((option : any) => (
+                  {unidadesOptions.map((option : Unidad) => (
                     <MenuItem key={option.id} value={option.id}>
-                      {option.name}
+                      {option.nombre}
                     </MenuItem>
                   ))}
                 </Select>
@@ -143,7 +143,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen}: UnidadFo
               <TextField label="Precio" name="precio" value={form.precio} onChange={handlerChangePrecio} fullWidth margin="normal" />
               <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
                 <Button type="submit" variant="contained" color="primary" sx={{m:1}}>Enviar</Button>
-                <Button variant="outlined" color="error" onClick={handleClose} sx={{m:1}}>Cancelar</Button>
+                <Button variant="outlined" color="error" onClick={handleCloseClick} sx={{m:1}}>Cancelar</Button>
               </Box>
             </Box>
           </Box>
