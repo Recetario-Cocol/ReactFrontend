@@ -5,10 +5,6 @@ import {
   GridRowSelectionModel,
   useGridApiRef,
 } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import LockResetIcon from "@mui/icons-material/LockReset";
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -26,6 +22,7 @@ import HeaderApp from "../../core/components/HeaderApp";
 import { useUserService } from "../useUserService";
 import UserFormModal, { AlertDialogBorrarUsuario } from "./UsuarioFormModal";
 import { useAuth } from "../../contexts/AuthContext";
+import Actionbuttons from "../../core/components/ActionButtons";
 
 export default function UsuariosGrilla() {
   const [seleccionado, setSeleccionado] = React.useState(false);
@@ -167,35 +164,13 @@ export default function UsuariosGrilla() {
           maxWidth: 800,
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={true || !isAdmin} onClick={agregar}>
-            Agregar
-          </Button>
-          <Button startIcon={<EditIcon />} disabled={!isAdmin || !seleccionado} onClick={modificar}>
-            Modificar
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            disabled={!isAdmin || !can_be_deleted}
-            onClick={eliminar}
-          >
-            Eliminar
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            disabled={!isAdmin || !seleccionado}
-            onClick={eliminar}
-          >
-            Eliminar Con Dependencias
-          </Button>
-          <Button
-            startIcon={<LockResetIcon />}
-            disabled={!isAdmin || !seleccionado}
-            onClick={limpiarContrasenias}
-          >
-            Restablecer Contraseña
-          </Button>
-        </Box>
+        <Actionbuttons 
+          agregar={{isDisabled: (true || !isAdmin), onClick: agregar}}
+          modificar={{isDisabled: (!isAdmin || !seleccionado), onClick: modificar}}
+          borrar={{ isDisabled: (!isAdmin || !can_be_deleted), onClick: eliminar}}
+          borrarConDependencias={{ isDisabled: (!isAdmin || !seleccionado), onClick: eliminar}}
+          limpiarContrasenias={{ isDisabled: (!isAdmin || !seleccionado), onClick:limpiarContrasenias }}
+        />
         <Snackbar
           open={mensajesModalBorrar !== ""}
           autoHideDuration={5000}

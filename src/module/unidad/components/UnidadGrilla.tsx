@@ -5,17 +5,15 @@ import {
   GridRowSelectionModel,
   useGridApiRef,
 } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState, SyntheticEvent } from "react";
-import { Box, Button, Snackbar, SnackbarCloseReason } from "@mui/material";
+import { Box, Snackbar, SnackbarCloseReason } from "@mui/material";
 import UnidadFormModal, { AlertDialogBorrarUnidad } from "./unidadFormModal";
 import { useUnidadService } from "../useUnidadService";
 import { Unidad } from "../Unidad";
 import HeaderApp from "../../core/components/HeaderApp";
 import { usePermisos } from "../../contexts/Permisos";
 import { useAuth } from "../../contexts/AuthContext";
+import Actionbuttons from "../../core/components/ActionButtons";
 
 export default function UnidadGrilla() {
   const [seleccionado, setSeleccionado] = useState(false);
@@ -98,17 +96,17 @@ export default function UnidadGrilla() {
     return 0;
   }
 
-  function agregar() {
+  function agregar(): void {
     setIdToOpen(0);
     setOpenModal(true);
   }
 
-  function modificar() {
+  function modificar(): void {
     setIdToOpen(getSelectedRowId());
     setOpenModal(true);
   }
 
-  function eliminar() {
+  function eliminar(): void {
     setIdToOpen(getSelectedRowId());
     setOpenBorrarUnidad(true);
   }
@@ -140,25 +138,11 @@ export default function UnidadGrilla() {
           maxWidth: 800,
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={!hasPermission(add_unidad)} onClick={agregar}>
-            Agregar
-          </Button>
-          <Button
-            startIcon={<EditIcon />}
-            disabled={!hasPermission(change_unidad) || !seleccionado}
-            onClick={modificar}
-          >
-            Modificar
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            disabled={!hasPermission(delete_unidad) || !canBeDelete}
-            onClick={eliminar}
-          >
-            Eliminar
-          </Button>
-        </Box>
+        <Actionbuttons 
+          agregar={{isDisabled: !hasPermission(add_unidad), onClick: agregar}}
+          modificar={{isDisabled: (!hasPermission(change_unidad) || !seleccionado), onClick: modificar}}
+          borrar={{ isDisabled: (!hasPermission(delete_unidad) || !canBeDelete), onClick: eliminar}}
+        />
         <Snackbar
           open={mensajesModalBorrar !== ""}
           autoHideDuration={5000}

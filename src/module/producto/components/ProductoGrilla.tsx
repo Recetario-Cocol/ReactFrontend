@@ -5,11 +5,8 @@ import {
   GridRowSelectionModel,
   useGridApiRef,
 } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState, SyntheticEvent } from "react";
-import { Box, Button, Snackbar, SnackbarCloseReason } from "@mui/material";
+import { Box, Snackbar, SnackbarCloseReason } from "@mui/material";
 import PaqueteFormModal, { AlertDialogBorrarProducto } from "./ProductoFormModal";
 import { useProductoService } from "../useProductoService";
 import { useUnidadService } from "../../unidad/useUnidadService";
@@ -17,6 +14,7 @@ import Producto from "../Producto";
 import HeaderApp from "../../core/components/HeaderApp";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePermisos } from "../../contexts/Permisos";
+import Actionbuttons from "../../core/components/ActionButtons";
 
 interface Row {
   id: number;
@@ -183,25 +181,11 @@ export default function ProductoGrilla() {
           maxWidth: 800,
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={!hasPermission(add_producto)} onClick={agregar}>
-            Agregar
-          </Button>
-          <Button
-            startIcon={<EditIcon />}
-            disabled={!hasPermission(change_producto) || !estaSelecionado}
-            onClick={modificar}
-          >
-            Modificar
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            disabled={!hasPermission(delete_producto) || !canBeDelete}
-            onClick={eliminar}
-          >
-            Eliminar
-          </Button>
-        </Box>
+        <Actionbuttons 
+          agregar={{isDisabled: !hasPermission(add_producto), onClick: agregar}}
+          modificar={{isDisabled: (!hasPermission(change_producto) || !estaSelecionado), onClick: modificar}}
+          borrar={{ isDisabled: (!hasPermission(delete_producto) || !canBeDelete), onClick: eliminar}}
+        />
         <Snackbar
           open={mensajesModalBorrar !== ""}
           autoHideDuration={5000}
