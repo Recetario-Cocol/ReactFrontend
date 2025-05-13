@@ -57,4 +57,7 @@ jobs:
             REACT_APP_API_URL=http://recetascocol.com.ar
 
       - name: Inspect Docker image size
-        run: docker image inspect ${{ secrets.DOCKER_USERNAME }}/frontend:latest --format='{{.Size}} bytes'
+        if: success() && steps.build-and-push.outputs.image != ''
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+          docker image inspect ${{ secrets.DOCKER_USERNAME }}/frontend:latest --format='{{.Size}} bytes'
