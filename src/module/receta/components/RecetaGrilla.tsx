@@ -5,16 +5,15 @@ import {
   useGridApiRef,
   GridColumnVisibilityModel,
 } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
-import { Box, Button } from "@mui/material";
-import RecetaFormModal, { AlertDialogBorrarReceta } from "./RecetaFormModal";
+import { Box } from "@mui/material";
+import RecetaFormModal from "./RecetaFormModal";
+import AlertDialogBorrarReceta from "./AlertDialogBorrarReceta";
 import { GrillaReceta, useRecetaService } from "../useRecetaService";
 import HeaderApp from "../../core/components/HeaderApp";
 import { usePermisos } from "../../contexts/Permisos";
 import { useAuth } from "../../contexts/AuthContext";
+import Actionbuttons from "../../core/components/ActionButtons";
 
 export default function RecetaGrilla() {
   const [seleccionado, setSeleccionado] = useState(false);
@@ -32,8 +31,11 @@ export default function RecetaGrilla() {
   const { hasPermission } = useAuth();
 
   const handleSeleccion = (rowSelectionModel: GridRowSelectionModel) => {
+    const firstId = Array.from(rowSelectionModel.ids)[0];
+    const selectedRow = rows.find((row: GrillaReceta) => row.id === firstId);
     setSeleccionado(rowSelectionModel.ids.size > 0);
     setSelectionModel(rowSelectionModel);
+    if (selectedRow?.id) setIdToOpen(selectedRow?.id);
   };
 
   const handleCloseModal = () => {
@@ -85,31 +87,16 @@ export default function RecetaGrilla() {
     },
   ];
 
-  function getSelectedRowId(): number {
-    if (GrillaRef.current) {
-      const selectedRows = GrillaRef.current.getSelectedRows();
-      if (selectedRows && selectedRows.size > 0) {
-        const firstSelectedRow = selectedRows.entries().next().value?.[0] ?? 0;
-        return typeof firstSelectedRow === "number"
-          ? firstSelectedRow
-          : Number(firstSelectedRow) || 0;
-      }
-    }
-    return 0;
-  }
-
   function agregar() {
     setIdToOpen(0);
     setOpenModal(true);
   }
 
   function modificar() {
-    setIdToOpen(getSelectedRowId());
     setOpenModal(true);
   }
 
   function eliminar() {
-    setIdToOpen(getSelectedRowId());
     setOpenBorrarUnidad(true);
   }
 
@@ -121,8 +108,7 @@ export default function RecetaGrilla() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-      }}
-    >
+      }}>
       <HeaderApp titulo="Recetas" />
       <Box
         sx={{
@@ -131,27 +117,15 @@ export default function RecetaGrilla() {
           flex: 1,
           width: "100%",
           maxWidth: 800,
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-          <Button startIcon={<AddIcon />} disabled={!hasPermission(add_receta)} onClick={agregar}>
-            Agregar
-          </Button>
-          <Button
-            startIcon={<EditIcon />}
-            disabled={!hasPermission(change_receta) || !seleccionado}
-            onClick={modificar}
-          >
-            Modificar
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            disabled={!hasPermission(delete_receta) || !seleccionado}
-            onClick={eliminar}
-          >
-            Eliminar
-          </Button>
-        </Box>
+        }}>
+        <Actionbuttons
+          agregar={{ isDisabled: !hasPermission(add_receta), onClick: agregar }}
+          modificar={{
+            isDisabled: !hasPermission(change_receta) || !seleccionado,
+            onClick: modificar,
+          }}
+          borrar={{ isDisabled: !hasPermission(delete_receta) || !seleccionado, onClick: eliminar }}
+        />
         <Box sx={{ flex: 1 }}>
           <DataGrid
             rows={rows}

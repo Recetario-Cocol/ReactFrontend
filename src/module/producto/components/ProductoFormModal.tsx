@@ -14,9 +14,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useUnidadService } from "../../unidad/useUnidadService";
 import Producto from "../Producto";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogTitle from "@mui/material/DialogTitle";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { MenuItem } from "@mui/material";
 import { useProductoService } from "../useProductoService";
@@ -165,8 +162,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
             <IconButton
               aria-label="close"
               onClick={handleCloseClick}
-              sx={{ position: "absolute", right: 8, top: 8 }}
-            >
+              sx={{ position: "absolute", right: 8, top: 8 }}>
               <CloseIcon />
             </IconButton>
           </Typography>
@@ -189,8 +185,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
               sx={{
                 width: { xs: "100%", md: "calc(100% - (10% + 16px))" },
                 ml: { xs: 0, md: 2 },
-              }}
-            >
+              }}>
               <TextField
                 label="Nombre"
                 name="nombre"
@@ -213,16 +208,14 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
             />
             <FormControl
               error={!form.unidadId}
-              sx={{ width: { xs: "100%", md: "40%" }, my: { xs: 0, md: 2 } }}
-            >
+              sx={{ width: { xs: "100%", md: "40%" }, my: { xs: 0, md: 2 } }}>
               <InputLabel id="unidad-label">Unidad</InputLabel>
               <Select
                 label="Unidad"
                 labelId="unidad-label"
                 id="unidad"
                 value={form.unidadId}
-                onChange={handleChangeUnidad}
-              >
+                onChange={handleChangeUnidad}>
                 <MenuItem value={"0"}>Vacio</MenuItem>
                 {unidadesOptions.map((option: Unidad) => (
                   <MenuItem key={option.id} value={option.id}>
@@ -245,8 +238,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
                 width: "100%",
                 display: "flex",
                 justifyContent: "flex-end",
-              }}
-            >
+              }}>
               <Button type="submit" variant="contained" color="primary" sx={{ m: 1 }}>
                 Enviar
               </Button>
@@ -258,60 +250,5 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
         </Box>
       </Modal>
     </div>
-  );
-}
-
-type AlertDialogBorrarProductoProps = {
-  paramId: number;
-  onClose?: (mensaje: string) => void;
-};
-
-export function AlertDialogBorrarProducto({
-  paramId,
-  onClose,
-}: AlertDialogBorrarProductoProps): React.JSX.Element {
-  const [open, setOpen] = React.useState(true);
-  const [id] = React.useState(paramId);
-  const ProductoService = useProductoService();
-
-  const handlerClickSi = async () => {
-    try {
-      await ProductoService.eliminar(id);
-      handleClose("Producto eliminado correctamente.");
-    } catch (error) {
-      let mensajeError = "Ocurrió un error inesperado al intentar eliminar el producto.";
-      const axiosError = error as { response?: { status: number } };
-      if (axiosError.response) {
-        const { status } = axiosError.response;
-        if (status === 409) {
-          mensajeError =
-            "No se puede eliminar el producto porque está relacionada con alguna receta.";
-        } else if (status === 404) {
-          mensajeError = "El producto que intentas eliminar no existe.";
-        }
-      } else {
-        mensajeError = "Error de conexión. Intenta de nuevo más tarde.";
-      }
-      handleClose(mensajeError);
-    }
-  };
-
-  const handleClose = (mensaje: string) => {
-    if (onClose) onClose(mensaje);
-    setOpen(false);
-  };
-
-  return (
-    <React.Fragment>
-      <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title">
-        <DialogTitle id="alert-dialog-title">{"¿Desea Borrar el Paquete?"}</DialogTitle>
-        <DialogActions>
-          <Button onClick={() => handleClose("")} autoFocus>
-            No
-          </Button>
-          <Button onClick={handlerClickSi}>Si</Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
   );
 }

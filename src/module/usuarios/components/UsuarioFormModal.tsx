@@ -98,8 +98,7 @@ export default function UserFormModal({ openArg, onClose, idToOpen }: UserFormMo
           <IconButton
             aria-label="close"
             onClick={handleCloseClick}
-            sx={{ position: "absolute", right: 8, top: 8 }}
-          >
+            sx={{ position: "absolute", right: 8, top: 8 }}>
             <CloseIcon />
           </IconButton>
         </Typography>
@@ -277,8 +276,7 @@ export function AlertDialogBorrarUsuario({
       <Dialog
         open={confirmAgain}
         onClose={() => handleClose("")}
-        aria-labelledby="alert-dialog-title"
-      >
+        aria-labelledby="alert-dialog-title">
         <DialogTitle id="alert-dialog-title">
           {
             "Esta acción es irreversible. ¿Seguro que desea borrar el Usuario y Todas las entidades de este usuario?"

@@ -1,11 +1,8 @@
-import { useEffect, useState, JSX, Fragment } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useUnidadService } from "../useUnidadService";
 import { Unidad } from "../Unidad";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogTitle from "@mui/material/DialogTitle";
 
 const style = {
   position: "absolute",
@@ -81,8 +78,7 @@ export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFo
           <IconButton
             aria-label="close"
             onClick={handleCloseEvent}
-            sx={{ position: "absolute", right: 8, top: 8 }}
-          >
+            sx={{ position: "absolute", right: 8, top: 8 }}>
             <CloseIcon />
           </IconButton>
         </Typography>
@@ -92,7 +88,7 @@ export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFo
           </Alert>
         )}
         <Box component="form" onSubmit={handleSubmit}>
-          <TextField label="ID" name="id" value={form.id} fullWidth margin="normal" disabled />
+          <TextField label="Id" name="id" value={form.id} fullWidth margin="normal" disabled />
           <TextField
             label="Nombre"
             name="nombre"
@@ -126,60 +122,5 @@ export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFo
         </Box>
       </Box>
     </Modal>
-  );
-}
-
-type AlertDialogBorrarUnidadProps = {
-  paramId: number;
-  onClose?: (mensaje: string) => void;
-};
-
-export function AlertDialogBorrarUnidad({
-  paramId,
-  onClose,
-}: AlertDialogBorrarUnidadProps): JSX.Element {
-  const [open, setOpen] = useState<boolean>(true);
-  const [id] = useState<number>(paramId);
-  const UnidadService = useUnidadService();
-
-  const handlerClickSi = async () => {
-    try {
-      await UnidadService.eliminarUnidad(id);
-      handleClose("Unidad eliminada correctamente.");
-    } catch (error) {
-      let mensajeError = "Ocurrió un error inesperado al intentar eliminar la unidad.";
-      const axiosError = error as { response?: { status: number } };
-      if (axiosError.response) {
-        const { status } = axiosError.response;
-        if (status === 409) {
-          mensajeError =
-            "No se puede eliminar la unidad porque está relacionada con otros recursos.";
-        } else if (status === 404) {
-          mensajeError = "La unidad que intentas eliminar no existe.";
-        }
-      } else {
-        mensajeError = "Error de conexión. Intenta de nuevo más tarde.";
-      }
-      handleClose(mensajeError);
-    }
-  };
-
-  const handleClose = (mensaje: string) => {
-    if (onClose) onClose(mensaje);
-    setOpen(false);
-  };
-
-  return (
-    <Fragment>
-      <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title">
-        <DialogTitle id="alert-dialog-title">{"¿Desea Borrar la Unidad?"}</DialogTitle>
-        <DialogActions>
-          <Button onClick={() => handleClose("")} autoFocus>
-            No
-          </Button>
-          <Button onClick={handlerClickSi}>Si</Button>
-        </DialogActions>
-      </Dialog>
-    </Fragment>
   );
 }

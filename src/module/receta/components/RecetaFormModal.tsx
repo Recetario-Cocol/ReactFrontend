@@ -1,4 +1,4 @@
-import { useEffect, useState, ChangeEvent, FormEvent, JSX, Fragment } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@mui/material";
 import {
   DataGrid,
@@ -12,9 +12,6 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogTitle from "@mui/material/DialogTitle";
 import Receta from "../Receta";
 import { useRecetaService } from "../useRecetaService";
 import { useProductoService } from "../../producto/useProductoService";
@@ -423,15 +420,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                 justifyContent: "space-between",
                 p: 2,
                 borderBottom: "1px solid #ccc",
-              }}
-            >
+              }}>
               <Typography variant="h6" component="h2">
                 Receta
                 <IconButton
                   aria-label="close"
                   onClick={handleCloseClick}
-                  sx={{ position: "absolute", right: 8, top: 8 }}
-                >
+                  sx={{ position: "absolute", right: 8, top: 8 }}>
                   <CloseIcon />
                 </IconButton>
               </Typography>
@@ -446,8 +441,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                 flexGrow: 1,
                 overflow: "auto",
                 p: 2,
-              }}
-            >
+              }}>
               <Box sx={{ width: "100%" }}>
                 <TextField
                   label="ID"
@@ -491,8 +485,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   height: "100%",
                   maxHeight: "500px",
                   flexDirection: { xs: "column", md: "row" },
-                }}
-              >
+                }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -500,8 +493,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                     width: { xs: "100%", md: "50%" },
                     flex: 1,
                   }}
-                  id="grillaIngredientes"
-                >
+                  id="grillaIngredientes">
                   <Typography variant="body1" sx={{ mb: 1 }}>
                     Ingredientes
                   </Typography>
@@ -510,8 +502,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                       display: "flex",
                       justifyContent: "space-between",
                       mb: 1,
-                    }}
-                  >
+                    }}>
                     <Button
                       startIcon={<AddIcon />}
                       onClick={agregarIngrediente}
@@ -519,8 +510,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                         display: { xs: "flex", md: "inline-flex" },
                         minWidth: { xs: "auto", md: "64px" },
                         justifyContent: "center",
-                      }}
-                    >
+                      }}>
                       <Box sx={{ display: { xs: "none", md: "inline" } }}>Agregar</Box>
                     </Button>
                     <Button
@@ -531,8 +521,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                         display: { xs: "flex", md: "inline-flex" },
                         minWidth: { xs: "auto", md: "64px" },
                         justifyContent: "center",
-                      }}
-                    >
+                      }}>
                       <Box sx={{ display: { xs: "none", md: "inline" } }}>Modificar</Box>
                     </Button>
                     <Button
@@ -543,8 +532,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                         display: { xs: "flex", md: "inline-flex" },
                         minWidth: { xs: "auto", md: "64px" },
                         justifyContent: "center",
-                      }}
-                    >
+                      }}>
                       <Box sx={{ display: { xs: "none", md: "inline" } }}>Eliminar</Box>
                     </Button>
                   </Box>
@@ -576,8 +564,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                     flex: 1,
                     width: { xs: "100%", md: "calc(50% - (32px))" },
                   }}
-                  id="BoxObservaciones"
-                >
+                  id="BoxObservaciones">
                   <Typography variant="body1" sx={{ mb: { xs: 0, md: 1 } }}>
                     Observaciones/Receta:
                   </Typography>
@@ -617,8 +604,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                 justifyContent: "flex-end",
                 p: 2,
                 borderTop: "1px solid #ccc",
-              }}
-            >
+              }}>
               <Button type="submit" variant="contained" color="primary" sx={{ m: 1 }}>
                 Enviar
               </Button>
@@ -649,44 +635,5 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
         </>
       </Modal>
     </div>
-  );
-}
-
-type AlertDialogBorrarRecetaProps = {
-  paramId: number;
-  onClose?: () => void;
-};
-
-export function AlertDialogBorrarReceta({
-  paramId,
-  onClose,
-}: AlertDialogBorrarRecetaProps): JSX.Element {
-  const [open, setOpen] = useState(true);
-  const [id] = useState(paramId);
-  const RecetaService = useRecetaService();
-
-  const handlerClickSi = () => {
-    RecetaService.eliminar(id)
-      .then()
-      .then(() => handleClose());
-  };
-
-  const handleClose = () => {
-    if (onClose) onClose();
-    setOpen(false);
-  };
-
-  return (
-    <Fragment>
-      <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title">
-        <DialogTitle id="alert-dialog-title">{"¿Desea Borrar la Receta?"}</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleClose} autoFocus>
-            No
-          </Button>
-          <Button onClick={handlerClickSi}>Si</Button>
-        </DialogActions>
-      </Dialog>
-    </Fragment>
   );
 }

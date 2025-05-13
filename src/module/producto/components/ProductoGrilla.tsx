@@ -7,7 +7,8 @@ import {
 } from "@mui/x-data-grid";
 import { useEffect, useState, SyntheticEvent } from "react";
 import { Box, Snackbar, SnackbarCloseReason } from "@mui/material";
-import PaqueteFormModal, { AlertDialogBorrarProducto } from "./ProductoFormModal";
+import PaqueteFormModal from "./ProductoFormModal";
+import AlertDialogBorrarProducto from "./AlertDialogBorrarProducto";
 import { useProductoService } from "../useProductoService";
 import { useUnidadService } from "../../unidad/useUnidadService";
 import Producto from "../Producto";
@@ -48,6 +49,7 @@ export default function ProductoGrilla() {
     const firstSelectedRow = Array.from(rowSelectionModel.ids)[0];
     const selectedRow = rows.find((row: Row) => row.id === firstSelectedRow);
     setCanBeDelete(!!selectedRow?.can_be_deleted);
+    if (selectedRow?.id) setIdToOpen(selectedRow?.id);
   };
 
   const handleCloseModal = () => {
@@ -126,32 +128,9 @@ export default function ProductoGrilla() {
     },
   ];
 
-  function getSelectedRowId(): number {
-    if (GrillaRef.current) {
-      const selectedRows = GrillaRef.current.getSelectedRows();
-      if (selectedRows && selectedRows.size > 0) {
-        const firstSelectedRow = selectedRows.entries().next().value?.[0] ?? 0;
-        return typeof firstSelectedRow === "number"
-          ? firstSelectedRow
-          : Number(firstSelectedRow) || 0;
-      }
-    }
-    return 0;
-  }
-
   function agregar(): void {
     setIdToOpen(0);
     setOpenModal(true);
-  }
-
-  function modificar(): void {
-    setIdToOpen(getSelectedRowId());
-    setOpenModal(true);
-  }
-
-  function eliminar(): void {
-    setIdToOpen(getSelectedRowId());
-    setOpenBorrarProducto(true);
   }
 
   function handleSnackBarClose(_: SyntheticEvent | Event, reason?: SnackbarCloseReason) {
@@ -169,8 +148,7 @@ export default function ProductoGrilla() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-      }}
-    >
+      }}>
       <HeaderApp titulo="Productos" />
       <Box
         sx={{
@@ -179,12 +157,21 @@ export default function ProductoGrilla() {
           flex: 1,
           width: "100%",
           maxWidth: 800,
-        }}
-      >
-        <Actionbuttons 
-          agregar={{isDisabled: !hasPermission(add_producto), onClick: agregar}}
-          modificar={{isDisabled: (!hasPermission(change_producto) || !estaSelecionado), onClick: modificar}}
-          borrar={{ isDisabled: (!hasPermission(delete_producto) || !canBeDelete), onClick: eliminar}}
+        }}>
+        <Actionbuttons
+          agregar={{ isDisabled: !hasPermission(add_producto), onClick: agregar }}
+          modificar={{
+            isDisabled: !hasPermission(change_producto) || !estaSelecionado,
+            onClick: () => {
+              setOpenModal(true);
+            },
+          }}
+          borrar={{
+            isDisabled: !hasPermission(delete_producto) || !canBeDelete,
+            onClick: () => {
+              setOpenBorrarProducto(true);
+            },
+          }}
         />
         <Snackbar
           open={mensajesModalBorrar !== ""}

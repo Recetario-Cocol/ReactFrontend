@@ -216,8 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         forgotPassword,
         isAuthenticated: !!token,
         hasPermission,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

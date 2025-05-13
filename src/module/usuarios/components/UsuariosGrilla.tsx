@@ -152,8 +152,7 @@ export default function UsuariosGrilla() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-      }}
-    >
+      }}>
       <HeaderApp titulo="Usuarios" />
       <Box
         sx={{
@@ -162,14 +161,16 @@ export default function UsuariosGrilla() {
           flex: 1,
           width: "100%",
           maxWidth: 800,
-        }}
-      >
-        <Actionbuttons 
-          agregar={{isDisabled: (true || !isAdmin), onClick: agregar}}
-          modificar={{isDisabled: (!isAdmin || !seleccionado), onClick: modificar}}
-          borrar={{ isDisabled: (!isAdmin || !can_be_deleted), onClick: eliminar}}
-          borrarConDependencias={{ isDisabled: (!isAdmin || !seleccionado), onClick: eliminar}}
-          limpiarContrasenias={{ isDisabled: (!isAdmin || !seleccionado), onClick:limpiarContrasenias }}
+        }}>
+        <Actionbuttons
+          agregar={{ isDisabled: true || !isAdmin, onClick: agregar }}
+          modificar={{ isDisabled: !isAdmin || !seleccionado, onClick: modificar }}
+          borrar={{ isDisabled: !isAdmin || !can_be_deleted, onClick: eliminar }}
+          borrarConDependencias={{ isDisabled: !isAdmin || !seleccionado, onClick: eliminar }}
+          limpiarContrasenias={{
+            isDisabled: !isAdmin || !seleccionado,
+            onClick: limpiarContrasenias,
+          }}
         />
         <Snackbar
           open={mensajesModalBorrar !== ""}

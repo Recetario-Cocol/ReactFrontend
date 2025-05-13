@@ -120,8 +120,7 @@ export default function IngredienteModal({
             <IconButton
               aria-label="close"
               onClick={handleCloseOnclick}
-              sx={{ position: "absolute", right: 8, top: 8 }}
-            >
+              sx={{ position: "absolute", right: 8, top: 8 }}>
               <CloseIcon />
             </IconButton>
           </Typography>
@@ -145,16 +144,14 @@ export default function IngredienteModal({
                 width: { xs: "100%", md: "calc(100% - (20% + 16px))" },
                 ml: { xs: 0, md: 2 },
                 mt: { xs: 0, md: 2 },
-              }}
-            >
+              }}>
               <InputLabel id="producto-label">Producto</InputLabel>
               <Select
                 label="Producto"
                 labelId="producto-label"
                 name="producto"
                 value={producto?.id.toString() ?? "0"}
-                onChange={handleProductoChange}
-              >
+                onChange={handleProductoChange}>
                 <MenuItem value={"0"}>Seleccione un Paquete</MenuItem>
                 {productos.map((paquete: Producto) => (
                   <MenuItem key={paquete.id} value={paquete.id}>
@@ -192,8 +189,7 @@ export default function IngredienteModal({
                 width: "100%",
                 display: "flex",
                 justifyContent: "flex-end",
-              }}
-            >
+              }}>
               <Button type="submit" variant="contained" color="primary" sx={{ m: 1 }}>
                 Enviar
               </Button>

@@ -63,8 +63,7 @@ export default function Home() {
         flexDirection: "column",
         justifyContent: "flex-start",
         alignItems: "center",
-      }}
-    >
+      }}>
       <HeaderApp titulo="Recetas" />
       <Box
         sx={{
@@ -78,8 +77,7 @@ export default function Home() {
           justifyItems: "center",
           paddingX: "20px",
           boxSizing: "border-box",
-        }}
-      >
+        }}>
         {cards.map((card) => (
           <Card key={card.id} sx={{ width: 1 }}>
             <CardActionArea onClick={() => navigate(card.url)} sx={{ height: "100%" }}>

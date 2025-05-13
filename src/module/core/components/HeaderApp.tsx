@@ -81,8 +81,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
                 color="inherit"
                 aria-label="menu"
                 sx={{ mr: 2 }}
-                onClick={toggleDrawer(true)}
-              >
+                onClick={toggleDrawer(true)}>
                 <MenuIcon />
               </IconButton>
               <Drawer open={openLeftBar} onClose={toggleDrawer(false)}>
@@ -102,8 +101,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
               height: "32px",
               margin: "0 12px",
               overflow: "hidden",
-            }}
-          >
+            }}>
             {userName}
           </Typography>
           {isAuthenticated && (
@@ -114,8 +112,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
                 onClick={handleMenu}
-                color="inherit"
-              >
+                color="inherit">
                 <AccountCircle />
               </IconButton>
               <Menu
@@ -125,8 +122,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
                 keepMounted
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
                 open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
+                onClose={handleClose}>
                 {isAdmin && (
                   <MenuItem onClick={() => handleClick(popupState, "/Usuarios")}>Usuarios</MenuItem>
                 )}

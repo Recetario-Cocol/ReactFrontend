@@ -58,8 +58,7 @@ const UpdatePassword = () => {
           flexDirection: "column",
           alignItems: "center",
           margin: "0 auto",
-        }}
-      >
+        }}>
         <Box sx={{ width: "100%", maxWidth: 400 }}>
           <form onSubmit={handleSubmit(onLoginSubmit)}>
             {error && <div className="text-red-500">{error}</div>}

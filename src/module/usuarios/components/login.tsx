@@ -24,8 +24,7 @@ function CustomTabPanel(props: TabPanelProps) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
-      style={{ width: "100%" }}
-    >
+      style={{ width: "100%" }}>
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
@@ -103,8 +102,7 @@ const Login = () => {
           flexDirection: "column",
           alignItems: "center",
           margin: "0 auto",
-        }}
-      >
+        }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Inicia Sesión" {...a11yProps(0)} />

@@ -7,7 +7,8 @@ import {
 } from "@mui/x-data-grid";
 import { useEffect, useState, SyntheticEvent } from "react";
 import { Box, Snackbar, SnackbarCloseReason } from "@mui/material";
-import UnidadFormModal, { AlertDialogBorrarUnidad } from "./unidadFormModal";
+import UnidadFormModal from "./unidadFormModal";
+import AlertDialogBorrarUnidad from "./AlertDialogBorrarUnidad";
 import { useUnidadService } from "../useUnidadService";
 import { Unidad } from "../Unidad";
 import HeaderApp from "../../core/components/HeaderApp";
@@ -36,6 +37,7 @@ export default function UnidadGrilla() {
     const selectedRow = rows.find((row: Unidad) => row.id === firstId);
     setCanBeDelete(!!selectedRow?.can_be_deleted);
     setSeleccionado(rowSelectionModel.ids.size > 0);
+    if (selectedRow?.id) setIdToOpen(selectedRow?.id);
   };
 
   const handleCloseModal = () => {
@@ -83,32 +85,17 @@ export default function UnidadGrilla() {
     },
   ];
 
-  function getSelectedRowId(): number {
-    if (GrillaRef.current) {
-      const selectedRows = GrillaRef.current.getSelectedRows();
-      if (selectedRows && selectedRows.size > 0) {
-        const firstSelectedRow = selectedRows.entries().next().value?.[0] ?? 0;
-        return typeof firstSelectedRow === "number"
-          ? firstSelectedRow
-          : Number(firstSelectedRow) || 0;
-      }
-    }
-    return 0;
-  }
-
   function agregar(): void {
     setIdToOpen(0);
     setOpenModal(true);
   }
 
   function modificar(): void {
-    setIdToOpen(getSelectedRowId());
-    setOpenModal(true);
+    if (seleccionado) setOpenModal(true);
   }
 
   function eliminar(): void {
-    setIdToOpen(getSelectedRowId());
-    setOpenBorrarUnidad(true);
+    if (seleccionado) setOpenBorrarUnidad(true);
   }
 
   function handleSnackBarClose(_: SyntheticEvent | Event, reason?: SnackbarCloseReason) {
@@ -126,8 +113,7 @@ export default function UnidadGrilla() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-      }}
-    >
+      }}>
       <HeaderApp titulo="Unidades" />
       <Box
         sx={{
@@ -136,12 +122,14 @@ export default function UnidadGrilla() {
           flex: 1,
           width: "100%",
           maxWidth: 800,
-        }}
-      >
-        <Actionbuttons 
-          agregar={{isDisabled: !hasPermission(add_unidad), onClick: agregar}}
-          modificar={{isDisabled: (!hasPermission(change_unidad) || !seleccionado), onClick: modificar}}
-          borrar={{ isDisabled: (!hasPermission(delete_unidad) || !canBeDelete), onClick: eliminar}}
+        }}>
+        <Actionbuttons
+          agregar={{ isDisabled: !hasPermission(add_unidad), onClick: agregar }}
+          modificar={{
+            isDisabled: !hasPermission(change_unidad) || !seleccionado,
+            onClick: modificar,
+          }}
+          borrar={{ isDisabled: !hasPermission(delete_unidad) || !canBeDelete, onClick: eliminar }}
         />
         <Snackbar
           open={mensajesModalBorrar !== ""}
