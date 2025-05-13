@@ -52,9 +52,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ignaciolatronico/frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
           build-args: |
             REACT_APP_API_URL=http://recetascocol.com.ar
 
       - name: Inspect Docker image size
-        run: docker image inspect ignaciolatronico/frontend:latest --format='{{.Size}} bytes'
+        run: docker image inspect ${{ secrets.DOCKER_USERNAME }}/frontend:latest --format='{{.Size}} bytes'
