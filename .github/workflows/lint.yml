@@ -32,7 +32,8 @@ jobs:
   docker:
     needs: lint-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    env:
+      REACT_APP_API_URL: http://recetascocol.com.ar:8000
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

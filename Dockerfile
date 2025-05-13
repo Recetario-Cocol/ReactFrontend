@@ -1,5 +1,5 @@
 # Etapa de build
-FROM node:18-alpine AS build
+FROM node:alpine3.21 AS build
 WORKDIR /app
 
 COPY package*.json ./
@@ -9,10 +9,11 @@ COPY . .
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 
+
 RUN npm run build
 
 # Imagen final
-FROM node:18-alpine
+FROM node:alpine3.21
 WORKDIR /app
 
 RUN npm install -g serve
