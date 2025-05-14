@@ -1,5 +1,5 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@mui/material";
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert, CircularProgress } from "@mui/material";
 import {
   DataGrid,
   GridColDef,
@@ -85,6 +85,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     setOpenIngredienteModal(false);
   };
   const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
   const [mensajeDeError, setMensajeDeError] = useState<string>("");
   const [total, setTotal] = useState<number>(0);
@@ -183,6 +184,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
           const precio =
             ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
           totalFetchData += precio;
+          setLoading(false);
           return new Row(
             ingrediente.id,
             ingrediente.cantidad,
@@ -634,6 +636,21 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
           </Box>
         </>
       </Modal>
+      {(loading || loadingProducts) && (
+        <Modal open={true}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100vh",
+              width: "100vw",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </Modal>
+      )}
     </div>
   );
 }
