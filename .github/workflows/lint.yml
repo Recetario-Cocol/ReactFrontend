@@ -55,7 +55,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
           build-args: |
-            REACT_APP_API_URL=http://recetascocol.com.ar
+            REACT_APP_API_URL=http://recetascocol.com.ar:8000
 
       - name: Inspect Docker image size
         if: success() && steps.build-and-push.outputs.image != ''
