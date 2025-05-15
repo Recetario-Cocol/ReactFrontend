@@ -178,63 +178,65 @@ export default function GrillaIngredientes({
     },
   ];
 
-  return <>
-    <Typography variant="body1" sx={{ mb: 1 }}>
-      Ingredientes
-    </Typography>
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        mb: 1,
-      }}>
-      <Actionbuttons
-        agregar={{
-          isDisabled: false,
-          onClick: onIngredienteAdded,
-          sx: {
-            display: { xs: "flex", md: "inline-flex" },
-            minWidth: { xs: "auto", md: "64px" },
-            justifyContent: "center",
+  return (
+    <>
+      <Typography variant="body1" sx={{ mb: 1 }}>
+        Ingredientes
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mb: 1,
+        }}>
+        <Actionbuttons
+          agregar={{
+            isDisabled: false,
+            onClick: onIngredienteAdded,
+            sx: {
+              display: { xs: "flex", md: "inline-flex" },
+              minWidth: { xs: "auto", md: "64px" },
+              justifyContent: "center",
+            },
+          }}
+          modificar={{
+            isDisabled: !isRowSelected,
+            onClick: onIngredienteEdited,
+            sx: {
+              display: { xs: "flex", md: "inline-flex" },
+              minWidth: { xs: "auto", md: "64px" },
+              justifyContent: "center",
+            },
+          }}
+          borrar={{
+            isDisabled: !isRowSelected,
+            onClick: onIngredienteDeleted,
+            sx: {
+              display: { xs: "flex", md: "inline-flex" },
+              minWidth: { xs: "auto", md: "64px" },
+              justifyContent: "center",
+            },
+          }}
+        />
+      </Box>
+      <DataGrid
+        rows={rows}
+        apiRef={GrillaRef}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: -1,
+            },
           },
         }}
-        modificar={{
-          isDisabled: !isRowSelected,
-          onClick: onIngredienteEdited,
-          sx: {
-            display: { xs: "flex", md: "inline-flex" },
-            minWidth: { xs: "auto", md: "64px" },
-            justifyContent: "center",
-          },
-        }}
-        borrar={{
-          isDisabled: !isRowSelected,
-          onClick: onIngredienteDeleted,
-          sx: {
-            display: { xs: "flex", md: "inline-flex" },
-            minWidth: { xs: "auto", md: "64px" },
-            justifyContent: "center",
-          },
+        sx={{ height: "50vh" }}
+        onRowSelectionModelChange={handleRowSelection}
+        columnVisibilityModel={columnVisibilityModel}
+        slots={{
+          footer: () => <CustomFooter total={total} rinde={rinde ?? 1} />,
         }}
       />
-    </Box>
-    <DataGrid
-      rows={rows}
-      apiRef={GrillaRef}
-      columns={columns}
-      initialState={{
-        pagination: {
-          paginationModel: {
-            pageSize: -1,
-          },
-        },
-      }}
-      sx={{ height: "50vh" }}
-      onRowSelectionModelChange={handleRowSelection}
-      columnVisibilityModel={columnVisibilityModel}
-      slots={{
-        footer: () => <CustomFooter total={total} rinde={rinde ?? 1} />,
-      }}
-    />
-  </>;
+    </>
+  );
 }
