@@ -10,7 +10,6 @@ import {
   FormControl,
   FormHelperText,
   Alert,
-  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useUnidadService } from "../../unidad/useUnidadService";
@@ -19,6 +18,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { MenuItem } from "@mui/material";
 import { useProductoService } from "../useProductoService";
 import { Unidad } from "../../unidad/Unidad";
+import LoadingModel from "../../core/components/LoadingModel";
 
 const style = {
   position: "absolute",
@@ -254,21 +254,7 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
           </Box>
         </Box>
       </Modal>
-      {loading && (
-        <Modal open={true}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100vh",
-              width: "100vw",
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        </Modal>
-      )}
+      {loading && <LoadingModel />}
     </div>
   );
 }

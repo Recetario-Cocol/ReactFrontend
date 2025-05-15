@@ -1,16 +1,5 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { Modal, Box, Typography, TextField, Button, IconButton, Alert, CircularProgress } from "@mui/material";
-import {
-  DataGrid,
-  GridColDef,
-  GridColumnVisibilityModel,
-  GridFooterContainer,
-  GridRowSelectionModel,
-  useGridApiRef,
-} from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Receta from "../Receta";
 import { useRecetaService } from "../useRecetaService";
@@ -22,6 +11,10 @@ import Ingrediente from "../../ingrediente/Ingrediente";
 import IngredienteModal, {
   AlertDialogBorrarIngrediente,
 } from "../../ingrediente/components/IngredienteModal";
+import GrillaIngredientes, {
+  GrillaIngredientesRow,
+} from "../../ingrediente/components/GrillaIngredientes";
+import LoadingModel from "../../core/components/LoadingModel";
 
 const style = {
   position: "absolute",
@@ -46,22 +39,6 @@ interface UnidadFormModalProps {
   idToOpen: number;
 }
 
-class Row {
-  id: number;
-  productoId?: number;
-  cantidad: number;
-  unidadId?: number;
-  precio?: string;
-
-  constructor(id: number, cantidad = 0, productoId?: number, unidadId?: number, precio?: string) {
-    this.id = id;
-    this.cantidad = cantidad;
-    this.productoId = productoId;
-    this.unidadId = unidadId;
-    this.precio = precio;
-  }
-}
-
 export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFormModalProps) {
   const [ingredienteSeleccionado, setIngredienteSeleccionado] = useState<Ingrediente | undefined>(
     undefined,
@@ -69,8 +46,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
   const [id, setId] = useState<number>(0);
   const [open, setOpen] = useState(openArg);
   const [form, setForm] = useState<Receta>(new Receta());
-  const [rows, setRows] = useState<Row[]>([]);
-  const [isRowSelected, setIsRowSelected] = useState<boolean>(false);
+  const [rows, setRows] = useState<GrillaIngredientesRow[]>([]);
   const RecetaService = useRecetaService();
   const ProductoService = useProductoService();
   const UnidadService = useUnidadService();
@@ -88,16 +64,11 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
   const [mensajeDeError, setMensajeDeError] = useState<string>("");
-  const [total, setTotal] = useState<number>(0);
-  const [columnVisibilityModel] = useState<GridColumnVisibilityModel>({
-    id: false,
-    unidadId: false,
-  });
 
   const addRowFromIngrediente = (ingrediente: Ingrediente) => {
     const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
     const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
-    const newRow: Row = {
+    const newRow: GrillaIngredientesRow = {
       id: ingrediente.id,
       productoId: ingrediente.productoId,
       unidadId: ingrediente.unidadId,
@@ -107,8 +78,11 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
         currency: "ARS",
       }),
     };
-    setRows((prevRows: Row[]) => {
-      const existingRowIndex = prevRows.findIndex((row: Row) => row.id === newRow.id);
+
+    setRows((prevRows: GrillaIngredientesRow[]) => {
+      const existingRowIndex = prevRows.findIndex(
+        (row: GrillaIngredientesRow) => row.id === newRow.id,
+      );
       if (existingRowIndex !== -1) {
         const updatedRows = [...prevRows];
         updatedRows[existingRowIndex] = newRow;
@@ -117,100 +91,70 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
         return [...prevRows, newRow];
       }
     });
-    actualizarTotal();
-  };
-
-  const actualizarTotal = () => {
-    setTotal(
-      rows.reduce((total: number, row: Row) => {
-        if (typeof row.precio === "string") {
-          const precioNumerico = parseFloat(row.precio.replace(/[^0-9,-]+/g, "").replace(",", "."));
-          return total + (isNaN(precioNumerico) ? 0 : precioNumerico);
-        }
-        return total;
-      }, 0),
-    );
   };
 
   const handleIngredienteCloseDialogClose = () => {
     setOpenBorrarIngrediente(false);
-    actualizarTotal();
   };
 
   const handleIngredienteCloseDialog = (id: number) => {
-    setRows((prevRows: Row[]) => {
+    setRows((prevRows: GrillaIngredientesRow[]) => {
       return prevRows.filter((row) => row.id !== id);
     });
-    actualizarTotal();
   };
 
-  const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
-    const selectedRowId = Array.from(newSelectionModel.ids)[0];
-    const selectedRowData = rows.find((row: Row) => row.id === selectedRowId);
-    if (selectedRowData) {
-      let cantidad = 0;
-      if (typeof selectedRowData.cantidad === "string") {
-        const cantidadString: string = selectedRowData.cantidad;
-        cantidad = parseFloat(cantidadString.split(" ")[0]) || 0;
-      } else if (typeof selectedRowData.cantidad === "number") {
-        cantidad = selectedRowData.cantidad;
-      }
-      setIngredienteSeleccionado(
-        new Ingrediente(
-          Number(selectedRowData.id),
-          selectedRowData.productoId,
-          selectedRowData.unidadId,
-          cantidad,
-        ),
-      );
-      setIsRowSelected(true);
-    } else {
-      setIsRowSelected(false);
+  const agregarIngrediente = () => {
+    setIngredienteSeleccionado(undefined);
+    setOpenIngredienteModal(true);
+  };
+
+  const modificarIngrediente = () => {
+    setOpenIngredienteModal(true);
+  };
+
+  const eliminarIngrediente = () => {
+    if (ingredienteSeleccionado?.id) {
+      setIngredienteIdToDelete(ingredienteSeleccionado.id);
+      setOpenBorrarIngrediente(true);
     }
   };
 
-  type TypeOfRow = (typeof rows)[number];
-  const GrillaRef = useGridApiRef();
-
   const fetchData = async () => {
-    let totalFetchData = 0;
-    if (idToOpen && productos.length > 0 && idToOpen !== id && unidades.length > 0) {
-      try {
-        setId(idToOpen);
-        const result: Receta = await RecetaService.get(idToOpen);
-        setForm(result);
-        const nuevasFilas = result.ingredientes.map((ingrediente: Ingrediente) => {
-          const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
-          const precio =
-            ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
-          totalFetchData += precio;
-          setLoading(false);
-          return new Row(
-            ingrediente.id,
-            ingrediente.cantidad,
-            ingrediente.productoId,
-            ingrediente.unidadId,
-            precio.toLocaleString("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            }),
-          );
-        });
-        setRows(nuevasFilas);
-        setTotal(totalFetchData); // Actualizar el total una sola vez aquí
-      } catch (error) {
-        console.error("Error fetching receta:", error);
+    if (idToOpen) {
+      if (productos.length > 0 && idToOpen !== id && unidades.length > 0) {
+        try {
+          setId(idToOpen);
+          const result: Receta = await RecetaService.get(idToOpen);
+          setForm(result);
+          const nuevasFilas = result.ingredientes.map((ingrediente: Ingrediente) => {
+            const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
+            const precio =
+              ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
+            setLoading(false);
+            return new GrillaIngredientesRow(
+              ingrediente.id,
+              ingrediente.cantidad,
+              ingrediente.productoId,
+              ingrediente.unidadId,
+              precio.toLocaleString("es-AR", {
+                style: "currency",
+                currency: "ARS",
+              }),
+            );
+          });
+          setRows(nuevasFilas);
+        } catch (error) {
+          console.error("Error fetching receta:", error);
+        }
       }
+    } else {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchData();
   }, [idToOpen, productos, unidades]);
-
-  useEffect(() => {
-    actualizarTotal();
-  }, [rows]);
 
   useEffect(() => {
     const cargarProductosYUnidades = async () => {
@@ -228,58 +172,6 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     };
     cargarProductosYUnidades();
   }, []);
-
-  const columns: GridColDef<TypeOfRow>[] = [
-    {
-      field: "id",
-      headerName: "IngredienteId",
-      width: 10,
-      type: "number",
-      editable: false,
-      disableColumnMenu: true,
-    },
-    {
-      field: "productoId",
-      headerName: "Paquete",
-      flex: 2,
-      minWidth: 150,
-      type: "singleSelect",
-      editable: true,
-      disableColumnMenu: true,
-      renderCell: (params) => {
-        const producto = productos.find((p: Producto) => p.id === params.value);
-        return producto ? producto.nombre : "Seleccionar producto";
-      },
-    },
-    {
-      field: "unidadId",
-      headerName: "unidadId",
-      width: 100,
-      editable: false,
-      disableColumnMenu: true,
-      valueGetter: (_, row) => {
-        const producto = productos.find((p: Producto) => p.id === row.productoId);
-        return producto?.unidadId;
-      },
-    },
-    {
-      field: "cantidad",
-      headerName: "Cantidad",
-      flex: 1,
-      minWidth: 100,
-      type: "number",
-      editable: true,
-      disableColumnMenu: true,
-    },
-    {
-      field: "precio",
-      headerName: "Precio",
-      flex: 1,
-      minWidth: 100,
-      editable: false,
-      disableColumnMenu: true,
-    },
-  ];
 
   const handleClose = (reason?: string) => {
     if (!reason || reason !== "backdropClick") {
@@ -337,7 +229,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    form.ingredientes = rows.map((row: Row) => {
+    form.ingredientes = rows.map((row: GrillaIngredientesRow) => {
       let cantidad = 0;
       if (typeof row.cantidad === "string") {
         const cantidadString: string = row.cantidad;
@@ -368,42 +260,6 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     } else {
       RecetaService.crear(form).then(() => handleClose());
     }
-  };
-
-  const agregarIngrediente = () => {
-    setIngredienteSeleccionado(undefined);
-    setOpenIngredienteModal(true);
-  };
-
-  const modificarIngrediente = () => {
-    setOpenIngredienteModal(true);
-  };
-
-  const eliminarIngrediente = () => {
-    if (ingredienteSeleccionado?.id) {
-      setIngredienteIdToDelete(ingredienteSeleccionado.id);
-      setOpenBorrarIngrediente(true);
-    }
-  };
-
-  const CustomFooter = ({ total, rinde }: { total: number; rinde: number }) => {
-    const totalAsString = (subtotal?: number) => {
-      return (subtotal ?? total).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      });
-    };
-
-    return (
-      <GridFooterContainer>
-        <Box sx={{ p: 1, display: "flex", justifyContent: "end" }}>
-          <Typography variant="body2">
-            Total: {totalAsString()} <br />
-            Por Porción: {totalAsString(total / (rinde || 1))}
-          </Typography>
-        </Box>
-      </GridFooterContainer>
-    );
   };
 
   return (
@@ -496,65 +352,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                     flex: 1,
                   }}
                   id="grillaIngredientes">
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Ingredientes
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      mb: 1,
-                    }}>
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={agregarIngrediente}
-                      sx={{
-                        display: { xs: "flex", md: "inline-flex" },
-                        minWidth: { xs: "auto", md: "64px" },
-                        justifyContent: "center",
-                      }}>
-                      <Box sx={{ display: { xs: "none", md: "inline" } }}>Agregar</Box>
-                    </Button>
-                    <Button
-                      startIcon={<EditIcon />}
-                      disabled={!isRowSelected}
-                      onClick={modificarIngrediente}
-                      sx={{
-                        display: { xs: "flex", md: "inline-flex" },
-                        minWidth: { xs: "auto", md: "64px" },
-                        justifyContent: "center",
-                      }}>
-                      <Box sx={{ display: { xs: "none", md: "inline" } }}>Modificar</Box>
-                    </Button>
-                    <Button
-                      startIcon={<DeleteIcon />}
-                      disabled={!isRowSelected}
-                      onClick={eliminarIngrediente}
-                      sx={{
-                        display: { xs: "flex", md: "inline-flex" },
-                        minWidth: { xs: "auto", md: "64px" },
-                        justifyContent: "center",
-                      }}>
-                      <Box sx={{ display: { xs: "none", md: "inline" } }}>Eliminar</Box>
-                    </Button>
-                  </Box>
-                  <DataGrid
-                    rows={rows}
-                    apiRef={GrillaRef}
-                    columns={columns}
-                    initialState={{
-                      pagination: {
-                        paginationModel: {
-                          pageSize: -1,
-                        },
-                      },
-                    }}
-                    sx={{ height: "50vh" }}
-                    onRowSelectionModelChange={handleRowSelection}
-                    columnVisibilityModel={columnVisibilityModel}
-                    slots={{
-                      footer: () => <CustomFooter total={total} rinde={form.rinde ?? 1} />,
-                    }}
+                  <GrillaIngredientes
+                    onIngredienteAdded={agregarIngrediente}
+                    onIngredienteEdited={modificarIngrediente}
+                    onIngredienteDeleted={eliminarIngrediente}
+                    onIngredienteSelecionado={setIngredienteSeleccionado}
+                    rowsFromReceta={rows}
+                    rindeFromReceta={form.rinde}
+                    productosFromReceta={productos}
                   />
                 </Box>
                 <Box
@@ -636,21 +441,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
           </Box>
         </>
       </Modal>
-      {(loading || loadingProducts) && (
-        <Modal open={true}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100vh",
-              width: "100vw",
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        </Modal>
-      )}
+      {(loading || loadingProducts) && <LoadingModel />}
     </div>
   );
 }
