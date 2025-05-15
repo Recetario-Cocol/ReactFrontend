@@ -16,22 +16,22 @@ import GrillaIngredientes, {
 } from "../../ingrediente/components/GrillaIngredientes";
 import LoadingModel from "../../core/components/LoadingModel";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: { xs: "calc(100% - 4px)", md: "1000px" }, // Ancho completo en móvil menos 4px para borde
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 0, // Sin padding externo (lo manejamos en los elementos internos)
-  overflow: "hidden", // Evita que el contenido se salga
-  maxHeight: "90%", // Limita la altura máxima
-  maxWidth: "90%", // Limita el ancho máximo en pantallas más grandes
-  display: "flex",
-  flexDirection: "column", // Asegura que el contenido sea un flujo vertical
-};
+// Importar los estilos extraídos
+import {
+  modalStyle,
+  headerBoxStyle,
+  idTextFieldStyle,
+  nombreTextFieldStyle,
+  rindeTextFieldStyle,
+  mainBoxStyle,
+  ingredientesObservacionesBoxStyle,
+  grillaIngredientesBoxStyle,
+  observacionesBoxStyle,
+  observacionesLabelStyle,
+  observacionesTextFieldStyle,
+  footerBoxStyle,
+  buttonStyle,
+} from "./recetaFormModalStyles";
 
 interface UnidadFormModalProps {
   openArg: boolean;
@@ -266,19 +266,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     <div>
       <Modal open={open} onClose={handleCloseClick}>
         <>
-          <Box component="form" onSubmit={handleSubmit} sx={style}>
-            <Box
-              sx={{
-                position: "sticky",
-                top: 0,
-                bgcolor: "background.paper",
-                zIndex: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                p: 2,
-                borderBottom: "1px solid #ccc",
-              }}>
+          <Box component="form" onSubmit={handleSubmit} sx={modalStyle}>
+            <Box sx={headerBoxStyle}>
               <Typography variant="h6" component="h2">
                 Receta
                 <IconButton
@@ -294,12 +283,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                 </Alert>
               )}
             </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-                overflow: "auto",
-                p: 2,
-              }}>
+            <Box sx={mainBoxStyle}>
               <Box sx={{ width: "100%" }}>
                 <TextField
                   label="ID"
@@ -307,7 +291,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   value={form.id}
                   margin="normal"
                   disabled
-                  sx={{ width: { xs: "100%", md: "20%" } }}
+                  sx={idTextFieldStyle}
                 />
                 <TextField
                   label="Nombre"
@@ -315,10 +299,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   value={form.nombre}
                   onChange={handlerChangeNombre}
                   margin="normal"
-                  sx={{
-                    width: { xs: "100%", md: "60%" },
-                    mx: { xs: 0, md: 2 },
-                  }}
+                  sx={nombreTextFieldStyle}
                 />
                 <TextField
                   label="Rinde Cuantas porciones"
@@ -327,31 +308,11 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   onChange={handlerChangeRinde}
                   fullWidth
                   margin="normal"
-                  sx={{
-                    width: {
-                      xs: "100%",
-                      md: "calc(100% - (20% + 60% + 32px))",
-                    },
-                  }}
+                  sx={rindeTextFieldStyle}
                 />
               </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  width: "100%",
-                  minHeight: "400px",
-                  height: "100%",
-                  maxHeight: "500px",
-                  flexDirection: { xs: "column", md: "row" },
-                }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    width: { xs: "100%", md: "50%" },
-                    flex: 1,
-                  }}
-                  id="grillaIngredientes">
+              <Box sx={ingredientesObservacionesBoxStyle}>
+                <Box sx={grillaIngredientesBoxStyle} id="grillaIngredientes">
                   <GrillaIngredientes
                     onIngredienteAdded={agregarIngrediente}
                     onIngredienteEdited={modificarIngrediente}
@@ -362,17 +323,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                     productosFromReceta={productos}
                   />
                 </Box>
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    mx: { xs: 0, md: 2 },
-                    flex: 1,
-                    width: { xs: "100%", md: "calc(50% - (32px))" },
-                  }}
-                  id="BoxObservaciones">
-                  <Typography variant="body1" sx={{ mb: { xs: 0, md: 1 } }}>
+                <Box sx={observacionesBoxStyle} id="BoxObservaciones">
+                  <Typography variant="body1" sx={observacionesLabelStyle}>
                     Observaciones/Receta:
                   </Typography>
                   <TextField
@@ -384,38 +336,16 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                     multiline
                     fullWidth
                     margin="normal"
-                    sx={{
-                      flexGrow: 1,
-                      flex: 1,
-                      minHeight: 0,
-                      "& .MuiInputBase-root": {
-                        height: "100%",
-                        alignItems: "flex-start",
-                      },
-                      "& .MuiInputBase-input": {
-                        height: "100%",
-                        overflow: "auto",
-                      },
-                    }}
+                    sx={observacionesTextFieldStyle}
                   />
                 </Box>
               </Box>
             </Box>
-            <Box
-              sx={{
-                position: "sticky",
-                bottom: 0,
-                bgcolor: "background.paper",
-                zIndex: 2,
-                display: "flex",
-                justifyContent: "flex-end",
-                p: 2,
-                borderTop: "1px solid #ccc",
-              }}>
-              <Button type="submit" variant="contained" color="primary" sx={{ m: 1 }}>
+            <Box sx={footerBoxStyle}>
+              <Button type="submit" variant="contained" color="primary" sx={buttonStyle}>
                 Enviar
               </Button>
-              <Button variant="outlined" color="error" onClick={handleCloseClick} sx={{ m: 1 }}>
+              <Button variant="outlined" color="error" onClick={handleCloseClick} sx={buttonStyle}>
                 Cancelar
               </Button>
             </Box>
