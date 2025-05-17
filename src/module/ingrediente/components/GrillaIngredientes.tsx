@@ -20,7 +20,13 @@ export class GrillaIngredientesRow {
   unidadId?: number;
   precio?: string;
 
-  constructor(id: number, cantidad : string = "", productoId?: number, unidadId?: number, precio?: string) {
+  constructor(
+    id: number,
+    cantidad: string = "",
+    productoId?: number,
+    unidadId?: number,
+    precio?: string,
+  ) {
     this.id = id;
     this.cantidad = cantidad;
     this.productoId = productoId;
@@ -117,9 +123,7 @@ export default function GrillaIngredientes({
           <Typography variant="body2">
             Por Porción: {totalAsString(total / (rinde || 1))}
           </Typography>
-          <Typography variant="body2">
-            Total: {totalAsString()}
-          </Typography>
+          <Typography variant="body2">Total: {totalAsString()}</Typography>
         </Box>
       </GridFooterContainer>
     );
@@ -181,7 +185,7 @@ export default function GrillaIngredientes({
   ];
 
   return (
-    <Box sx={{ width: "100%", display: 'flex', flexDirection: 'column', minHeight: 400 }}>
+    <Box sx={{ width: "100%", display: "flex", flexDirection: "column", minHeight: 400 }}>
       <Typography variant="body1" sx={{ mb: 1 }}>
         Ingredientes
       </Typography>

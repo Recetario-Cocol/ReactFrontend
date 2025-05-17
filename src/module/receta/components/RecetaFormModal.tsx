@@ -1,5 +1,14 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { Modal, Box, Typography, TextField, Button, IconButton, Alert, Tooltip } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  Alert,
+  Tooltip,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Receta from "../Receta";
 import { useRecetaService } from "../useRecetaService";
@@ -65,13 +74,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
 
   const addRowFromIngrediente = (ingrediente: Ingrediente) => {
     const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
-    const unidad = unidades.find((row : Unidad) => row.id === producto?.unidadId);
+    const unidad = unidades.find((row: Unidad) => row.id === producto?.unidadId);
     const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
     const newRow: GrillaIngredientesRow = {
       id: ingrediente.id,
       productoId: ingrediente.productoId,
       unidadId: ingrediente.unidadId,
-      cantidad:  ingrediente.cantidad + (unidad ? " " + unidad?.abreviacion : ""),
+      cantidad: ingrediente.cantidad + (unidad ? " " + unidad?.abreviacion : ""),
       precio: precio.toLocaleString("es-AR", {
         style: "currency",
         currency: "ARS",
@@ -127,7 +136,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
           setForm(result);
           const nuevasFilas = result.ingredientes.map((ingrediente: Ingrediente) => {
             const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
-            const unidad = unidades.find((row : Unidad) => row.id === producto?.unidadId);
+            const unidad = unidades.find((row: Unidad) => row.id === producto?.unidadId);
             const precio =
               ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
             setLoading(false);
