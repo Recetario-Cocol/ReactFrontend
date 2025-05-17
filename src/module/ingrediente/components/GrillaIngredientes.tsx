@@ -16,11 +16,11 @@ import Producto from "../../producto/Producto";
 export class GrillaIngredientesRow {
   id: number;
   productoId?: number;
-  cantidad: number;
+  cantidad: string;
   unidadId?: number;
   precio?: string;
 
-  constructor(id: number, cantidad = 0, productoId?: number, unidadId?: number, precio?: string) {
+  constructor(id: number, cantidad : string = "", productoId?: number, unidadId?: number, precio?: string) {
     this.id = id;
     this.cantidad = cantidad;
     this.productoId = productoId;
@@ -113,10 +113,12 @@ export default function GrillaIngredientes({
 
     return (
       <GridFooterContainer>
-        <Box sx={{ p: 1, display: "flex", justifyContent: "end" }}>
+        <Box sx={{ p: 1, display: "flex", justifyContent: "space-between", width: "100%" }}>
           <Typography variant="body2">
-            Total: {totalAsString()} <br />
             Por Porción: {totalAsString(total / (rinde || 1))}
+          </Typography>
+          <Typography variant="body2">
+            Total: {totalAsString()}
           </Typography>
         </Box>
       </GridFooterContainer>
@@ -164,7 +166,7 @@ export default function GrillaIngredientes({
       headerName: "Cantidad",
       flex: 1,
       minWidth: 100,
-      type: "number",
+      type: "string",
       editable: true,
       disableColumnMenu: true,
     },
@@ -179,7 +181,7 @@ export default function GrillaIngredientes({
   ];
 
   return (
-    <>
+    <Box sx={{ width: "100%", display: 'flex', flexDirection: 'column', minHeight: 400 }}>
       <Typography variant="body1" sx={{ mb: 1 }}>
         Ingredientes
       </Typography>
@@ -230,13 +232,12 @@ export default function GrillaIngredientes({
             },
           },
         }}
-        sx={{ height: "50vh" }}
         onRowSelectionModelChange={handleRowSelection}
         columnVisibilityModel={columnVisibilityModel}
         slots={{
           footer: () => <CustomFooter total={total} rinde={rinde ?? 1} />,
         }}
       />
-    </>
+    </Box>
   );
 }

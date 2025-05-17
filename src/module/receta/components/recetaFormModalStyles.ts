@@ -14,7 +14,7 @@ export const footerBoxStyle = {
 export const grillaIngredientesBoxStyle = {
   display: "flex",
   flexDirection: "column",
-  width: { xs: "100%", md: "50%" },
+  width: "100%",
   flex: 1,
 };
 
@@ -30,15 +30,13 @@ export const headerBoxStyle = {
   borderBottom: "1px solid #ccc",
 };
 
-export const idTextFieldStyle = { width: { xs: "100%", md: "20%" } };
-
 export const ingredientesObservacionesBoxStyle = {
   display: "flex",
   width: "100%",
   minHeight: "400px",
   height: "100%",
   maxHeight: "500px",
-  flexDirection: { xs: "column", md: "row" },
+  flexDirection: "column",
 };
 
 export const mainBoxStyle = {
@@ -52,16 +50,17 @@ export const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: { xs: "calc(100% - 4px)", md: "1000px" },
+    width: { xs: "calc(100% - 4px)", md: "600px" },
+    maxWidth: "90vw",
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
   p: 0,
   overflow: "hidden",
   maxHeight: "90%",
-  maxWidth: "90%",
   display: "flex",
   flexDirection: "column",
+  borderRadius: 1,
 };
 
 export const nombreTextFieldStyle = {
@@ -73,9 +72,9 @@ export const observacionesBoxStyle = {
   flexGrow: 1,
   display: "flex",
   flexDirection: "column",
-  mx: { xs: 0, md: 2 },
+  mx: 0,
   flex: 1,
-  width: { xs: "100%", md: "calc(50% - (32px))" },
+  width: "100%",
 };
 
 export const observacionesLabelStyle = { mb: { xs: 0, md: 1 } };
@@ -97,6 +96,6 @@ export const observacionesTextFieldStyle = {
 export const rindeTextFieldStyle = {
   width: {
     xs: "100%",
-    md: "calc(100% - (20% + 60% + 32px))",
+    md: "calc(100% - (60% + 32px))",
   },
 };

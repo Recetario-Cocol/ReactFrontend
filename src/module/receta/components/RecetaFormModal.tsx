@@ -1,5 +1,5 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@mui/material";
+import { Modal, Box, Typography, TextField, Button, IconButton, Alert, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Receta from "../Receta";
 import { useRecetaService } from "../useRecetaService";
@@ -16,11 +16,9 @@ import GrillaIngredientes, {
 } from "../../ingrediente/components/GrillaIngredientes";
 import LoadingModel from "../../core/components/LoadingModel";
 
-// Importar los estilos extraídos
 import {
   modalStyle,
   headerBoxStyle,
-  idTextFieldStyle,
   nombreTextFieldStyle,
   rindeTextFieldStyle,
   mainBoxStyle,
@@ -67,12 +65,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
 
   const addRowFromIngrediente = (ingrediente: Ingrediente) => {
     const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
+    const unidad = unidades.find((row : Unidad) => row.id === producto?.unidadId);
     const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
     const newRow: GrillaIngredientesRow = {
       id: ingrediente.id,
       productoId: ingrediente.productoId,
       unidadId: ingrediente.unidadId,
-      cantidad: ingrediente.cantidad,
+      cantidad:  ingrediente.cantidad + (unidad ? " " + unidad?.abreviacion : ""),
       precio: precio.toLocaleString("es-AR", {
         style: "currency",
         currency: "ARS",
@@ -128,12 +127,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
           setForm(result);
           const nuevasFilas = result.ingredientes.map((ingrediente: Ingrediente) => {
             const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
+            const unidad = unidades.find((row : Unidad) => row.id === producto?.unidadId);
             const precio =
               ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
             setLoading(false);
             return new GrillaIngredientesRow(
               ingrediente.id,
-              ingrediente.cantidad,
+              ingrediente.cantidad.toString() + (unidad ? " " + unidad?.abreviacion : ""),
               ingrediente.productoId,
               ingrediente.unidadId,
               precio.toLocaleString("es-AR", {
@@ -246,7 +246,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     }
 
     if (!form.rinde) {
-      setMensajeDeError("Ingrese cuantas rinde la receta.");
+      setMensajeDeError("Ingrese cuantas porciones rinde la receta.");
       return;
     }
 
@@ -277,22 +277,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   <CloseIcon />
                 </IconButton>
               </Typography>
+            </Box>
+            <Box sx={mainBoxStyle}>
               {mensajeDeError && (
                 <Alert severity="success" color="warning">
                   {mensajeDeError}
                 </Alert>
               )}
-            </Box>
-            <Box sx={mainBoxStyle}>
               <Box sx={{ width: "100%" }}>
-                <TextField
-                  label="ID"
-                  name="id"
-                  value={form.id}
-                  margin="normal"
-                  disabled
-                  sx={idTextFieldStyle}
-                />
                 <TextField
                   label="Nombre"
                   name="nombre"
@@ -301,15 +293,17 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   margin="normal"
                   sx={nombreTextFieldStyle}
                 />
-                <TextField
-                  label="Rinde Cuantas porciones"
-                  name="rinde"
-                  value={form.rinde}
-                  onChange={handlerChangeRinde}
-                  fullWidth
-                  margin="normal"
-                  sx={rindeTextFieldStyle}
-                />
+                <Tooltip title="Cuantas Porciones rinde la receta">
+                  <TextField
+                    label="Rinde:"
+                    name="rinde"
+                    value={form.rinde}
+                    onChange={handlerChangeRinde}
+                    fullWidth
+                    margin="normal"
+                    sx={rindeTextFieldStyle}
+                  />
+                </Tooltip>
               </Box>
               <Box sx={ingredientesObservacionesBoxStyle}>
                 <Box sx={grillaIngredientesBoxStyle} id="grillaIngredientes">
@@ -334,6 +328,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                     variant="outlined"
                     label="Observaciones"
                     multiline
+                    minRows={5}
                     fullWidth
                     margin="normal"
                     sx={observacionesTextFieldStyle}
