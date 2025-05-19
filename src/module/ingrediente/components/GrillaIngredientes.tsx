@@ -83,7 +83,9 @@ export default function GrillaIngredientes({
 
   const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
     const selectedRowId = Array.from(newSelectionModel.ids)[0];
-    const selectedRowData = rowsFromReceta.find((row: GrillaIngredientesRow) => row.id === selectedRowId);
+    const selectedRowData = rowsFromReceta.find(
+      (row: GrillaIngredientesRow) => row.id === selectedRowId,
+    );
     if (selectedRowData) {
       let cantidad = 0;
       if (typeof selectedRowData.cantidad === "string") {
