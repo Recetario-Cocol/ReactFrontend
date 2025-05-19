@@ -119,7 +119,7 @@ export const useRecetaService = () => {
       try {
         const response = await axiosWithAuthentication.post<Receta, AxiosResponse<Receta>>(
           apiEndpoint,
-          receta,
+          receta.toJSON(),
         );
         return response.data;
       } catch (error: unknown) {

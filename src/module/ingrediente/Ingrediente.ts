@@ -45,10 +45,10 @@ export default class Ingrediente {
 
   public toJSON() {
     return {
-      id: this._id < 0 ? null : this._id,
-      unidadId: this._unidadId,
-      productoId: this._productoId,
-      cantidad: this._cantidad,
+      id: this.id,
+      productoId: this.productoId,
+      unidadId: this.unidadId,
+      cantidad: this.cantidad,
     };
   }
 

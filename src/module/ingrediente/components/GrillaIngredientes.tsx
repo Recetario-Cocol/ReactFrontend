@@ -54,11 +54,9 @@ export default function GrillaIngredientes({
   onIngredienteEdited,
   onIngredienteSelecionado,
 }: GrillaIngredientesProps) {
-  const [rows, setRows] = useState<GrillaIngredientesRow[]>(rowsFromReceta);
   const [total, setTotal] = useState<number>(0);
   const [productos, setProductos] = useState<Producto[]>(productosFromReceta);
   const [isRowSelected, setIsRowSelected] = useState<boolean>(false);
-  const [rinde] = useState(rindeFromReceta);
 
   const [columnVisibilityModel] = useState<GridColumnVisibilityModel>({
     id: false,
@@ -67,7 +65,7 @@ export default function GrillaIngredientes({
 
   const actualizarTotal = () => {
     setTotal(
-      rows.reduce((total: number, row: GrillaIngredientesRow) => {
+      rowsFromReceta.reduce((total: number, row: GrillaIngredientesRow) => {
         if (typeof row.precio === "string") {
           const precioNumerico = parseFloat(row.precio.replace(/[^0-9,-]+/g, "").replace(",", "."));
           return total + (isNaN(precioNumerico) ? 0 : precioNumerico);
@@ -77,15 +75,15 @@ export default function GrillaIngredientes({
     );
   };
 
-  useEffect(() => actualizarTotal(), [rows]);
-
-  useEffect(() => setRows(rowsFromReceta), [rowsFromReceta]);
+  useEffect(() => {
+    actualizarTotal();
+  }, [rowsFromReceta]);
 
   useEffect(() => setProductos(productosFromReceta), [productosFromReceta]);
 
   const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
     const selectedRowId = Array.from(newSelectionModel.ids)[0];
-    const selectedRowData = rows.find((row: GrillaIngredientesRow) => row.id === selectedRowId);
+    const selectedRowData = rowsFromReceta.find((row: GrillaIngredientesRow) => row.id === selectedRowId);
     if (selectedRowData) {
       let cantidad = 0;
       if (typeof selectedRowData.cantidad === "string") {
@@ -129,7 +127,7 @@ export default function GrillaIngredientes({
     );
   };
 
-  type TypeOfRow = (typeof rows)[number];
+  type TypeOfRow = (typeof rowsFromReceta)[number];
   const GrillaRef = useGridApiRef();
 
   const columns: GridColDef<TypeOfRow>[] = [
@@ -226,7 +224,7 @@ export default function GrillaIngredientes({
         />
       </Box>
       <DataGrid
-        rows={rows}
+        rows={rowsFromReceta}
         apiRef={GrillaRef}
         columns={columns}
         initialState={{
@@ -239,7 +237,7 @@ export default function GrillaIngredientes({
         onRowSelectionModelChange={handleRowSelection}
         columnVisibilityModel={columnVisibilityModel}
         slots={{
-          footer: () => <CustomFooter total={total} rinde={rinde ?? 1} />,
+          footer: () => <CustomFooter total={total} rinde={rindeFromReceta ?? 1} />,
         }}
       />
     </Box>

@@ -127,9 +127,28 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     }
   };
 
-  const fetchData = async () => {
-    if (idToOpen) {
-      if (productos.length > 0 && idToOpen !== id && unidades.length > 0) {
+  // Cargar productos y unidades SOLO una vez al montar
+  useEffect(() => {
+    const cargarProductosYUnidades = async () => {
+      setLoadingProducts(true);
+      try {
+        const productosResponse = await ProductoService.getAll();
+        setProductos(productosResponse);
+        const unidadesResponse = await UnidadService.getUnidades();
+        setUnidades(unidadesResponse);
+      } catch (error) {
+        console.error("Error al cargar los productos/unidades:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    cargarProductosYUnidades();
+  }, []);
+
+  // Cargar receta solo cuando productos y unidades estén listos y el id cambie
+  useEffect(() => {
+    const fetchData = async () => {
+      if (idToOpen && productos.length > 0 && unidades.length > 0 && idToOpen !== id) {
         try {
           setId(idToOpen);
           const result: Receta = await RecetaService.get(idToOpen);
@@ -155,32 +174,12 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
         } catch (error) {
           console.error("Error fetching receta:", error);
         }
-      }
-    } else {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [idToOpen, productos, unidades]);
-
-  useEffect(() => {
-    const cargarProductosYUnidades = async () => {
-      setLoadingProducts(true);
-      try {
-        const productosResponse = await ProductoService.getAll();
-        setProductos(productosResponse);
-        const unidadesResponse = await UnidadService.getUnidades();
-        setUnidades(unidadesResponse);
-      } catch (error) {
-        console.error("Error al cargar los productos/unidades:", error);
-      } finally {
-        setLoadingProducts(false);
+      } else if (!idToOpen) {
+        setLoading(false);
       }
     };
-    cargarProductosYUnidades();
-  }, []);
+    fetchData();
+  }, [idToOpen, productos, unidades]); // Dependencias correctas
 
   const handleClose = (reason?: string) => {
     if (!reason || reason !== "backdropClick") {
@@ -209,13 +208,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
   };
 
   const handlerChangeRinde = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+    const value = e.target.value;
     setForm(
       (prevForm: Receta) =>
         new Receta(
           prevForm.id,
           prevForm.nombre,
-          Number(value) || 0,
+          value === "" ? 0 : Number(value),
           prevForm.ingredientes,
           prevForm.observaciones,
         ),
@@ -306,6 +305,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   <TextField
                     label="Rinde:"
                     name="rinde"
+                    type="number"
                     value={form.rinde}
                     onChange={handlerChangeRinde}
                     fullWidth

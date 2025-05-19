@@ -63,11 +63,11 @@ export default class Receta {
 
   public toJSON() {
     return {
-      id: this._id,
-      nombre: this._nombre,
-      rinde: this._rinde,
-      ingredientes: this._ingredientes.map((ingrediente) => ingrediente.toJSON()),
-      observaciones: this._observaciones,
+      id: this.id,
+      nombre: this.nombre,
+      rinde: Number(this.rinde),
+      ingredientes: this.ingredientes.map((ingrediente) => ingrediente.toJSON()),
+      observaciones: this.observaciones,
     };
   }
 }
