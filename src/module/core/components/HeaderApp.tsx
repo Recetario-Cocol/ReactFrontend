@@ -13,7 +13,7 @@ import { To, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
-interface HeaderAppProps {
+export interface HeaderAppProps {
   titulo: string;
 }
 

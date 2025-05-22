@@ -15,7 +15,14 @@ export default defineConfig([
   // Configuración general para JS/TS
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    ignores: ["**/*.json", "**/*.md", "eslint.config.mjs", "webpack.config.js"],
+    ignores: [
+      "**/*.json",
+      "**/*.md",
+      "eslint.config.mjs",
+      "webpack.config.js",
+      "jest.config.js",
+      "coverage/**",
+    ],
     languageOptions: {
       parser,
       parserOptions: {

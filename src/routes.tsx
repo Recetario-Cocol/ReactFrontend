@@ -7,7 +7,7 @@ import RecetaGrilla from "./module/receta/components/RecetaGrilla";
 import { ReactNode } from "react";
 import Home from "./module/core/components/Home";
 import UsuariosGrilla from "./module/usuarios/components/UsuariosGrilla";
-import { PermisosProvider, usePermisos } from "./module/contexts/Permisos";
+import { PermisosProvider } from "./module/contexts/Permisos";
 import UpdatePassword from "./module/usuarios/components/updatePassword";
 
 interface PrivateRouteProps {
@@ -36,54 +36,6 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   return <>{children}</>;
 };
 
-function PrivateRoutes() {
-  const { view_producto, view_receta, view_unidad } = usePermisos();
-  return (
-    <Routes>
-      <Route
-        path="/Home"
-        element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/Unidades"
-        element={
-          <PrivateRoute requiredPermission={[view_unidad]}>
-            <UnidadGrilla />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/Paquetes"
-        element={
-          <PrivateRoute requiredPermission={[view_producto]}>
-            <ProductoGrilla />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/Recetas"
-        element={
-          <PrivateRoute requiredPermission={[view_receta]}>
-            <RecetaGrilla />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/Usuarios"
-        element={
-          <PrivateRoute asAdmin>
-            <UsuariosGrilla />
-          </PrivateRoute>
-        }
-      />
-    </Routes>
-  );
-}
-
 export default function AppRoutes() {
   return (
     <Routes>
@@ -91,10 +43,52 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/updatePassword" element={<UpdatePassword />} />
       <Route
-        path="/*"
+        path="/Home"
         element={
           <PermisosProvider>
-            <PrivateRoutes />
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          </PermisosProvider>
+        }
+      />
+      <Route
+        path="/Unidades"
+        element={
+          <PermisosProvider>
+            <PrivateRoute requiredPermission={["view_unidad"]}>
+              <UnidadGrilla />
+            </PrivateRoute>
+          </PermisosProvider>
+        }
+      />
+      <Route
+        path="/Paquetes"
+        element={
+          <PermisosProvider>
+            <PrivateRoute requiredPermission={["view_producto"]}>
+              <ProductoGrilla />
+            </PrivateRoute>
+          </PermisosProvider>
+        }
+      />
+      <Route
+        path="/Recetas"
+        element={
+          <PermisosProvider>
+            <PrivateRoute requiredPermission={["view_receta"]}>
+              <RecetaGrilla />
+            </PrivateRoute>
+          </PermisosProvider>
+        }
+      />
+      <Route
+        path="/Usuarios"
+        element={
+          <PermisosProvider>
+            <PrivateRoute asAdmin>
+              <UsuariosGrilla />
+            </PrivateRoute>
           </PermisosProvider>
         }
       />

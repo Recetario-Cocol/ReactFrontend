@@ -6,7 +6,7 @@ module.exports = {
   entry: "./src/index.tsx", // o tu archivo principal
   output: {
     filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "build"),
     publicPath: "/",
     clean: true,
   },

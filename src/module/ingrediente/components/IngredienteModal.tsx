@@ -94,7 +94,7 @@ export default function IngredienteModal({
         setMensajeDeError("Selecione un producto.");
         return;
       }
-      if (!cantidad) {
+      if (!cantidad || cantidad <= 0) {
         setMensajeDeError("Ingrese una cantidad diferente a 0");
         return;
       }

@@ -4,7 +4,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { Box, Button, SxProps, Theme } from "@mui/material";
 
-interface ActionbuttonsProps {
+export interface ActionbuttonsProps {
   agregar: ActionbuttonsItemProps;
   modificar: ActionbuttonsItemProps;
   borrar: ActionbuttonsItemProps;

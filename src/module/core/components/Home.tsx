@@ -4,9 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDashboardService } from "../../dashboard/useDashboardService";
 
+interface DashboardCard {
+  id: number;
+  title: string;
+  description: string;
+  url: string;
+  cant: number;
+}
+
 export default function Home() {
   const DashboardService = useDashboardService();
-  const [cards, setCards] = useState([
+  const [cards, setCards] = useState<DashboardCard[]>([
     {
       id: 1,
       title: "Unidades",
@@ -40,17 +48,19 @@ export default function Home() {
 
   const fetchData = async () => {
     const totalesResponse = await DashboardService.getTotales();
-    const updatedCards = cards.map((card) => {
+    const updatedCards = cards.map((card: DashboardCard) => {
       switch (card.id) {
         case 1:
-          return { ...card, cant: totalesResponse.unidades };
+          card.cant = totalesResponse.unidades;
+          break;
         case 2:
-          return { ...card, cant: totalesResponse.productos };
+          card.cant = totalesResponse.productos;
+          break;
         case 3:
-          return { ...card, cant: totalesResponse.recetas };
-        default:
-          return card;
+          card.cant = totalesResponse.recetas;
+          break;
       }
+      return card;
     });
     setCards(updatedCards);
   };

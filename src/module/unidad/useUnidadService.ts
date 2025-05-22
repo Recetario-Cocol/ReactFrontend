@@ -38,7 +38,7 @@ export const useUnidadService = () => {
     async getUnidades(): Promise<Unidad[]> {
       try {
         const response = await axiosWithAuthentication.get<Unidad[], AxiosResponse<Unidad[]>>(
-          apiEndpoint,
+          buildUrl(),
         );
         return response.data;
       } catch (error: unknown) {
