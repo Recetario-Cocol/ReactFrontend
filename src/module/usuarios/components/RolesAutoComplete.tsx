@@ -5,7 +5,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { Checkbox, FormControl, FormHelperText } from "@mui/material";
 import { Rol } from "../../contexts/Permisos";
 
-interface RolesAutoCompleteProps {
+export interface RolesAutoCompleteProps {
   value: Rol[];
   onChange: (value: Rol[]) => void;
   error?: string;

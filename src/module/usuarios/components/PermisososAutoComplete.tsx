@@ -10,7 +10,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
 const apiEndpoint = API_BASE_URL + "/users/permissions/";
 
-interface PermisosAutoCompleteProps {
+export interface PermisosAutoCompleteProps {
   value: number[];
   onChange: (value: Permiso[]) => void;
   error?: string;

@@ -1,6 +1,9 @@
 const config = {
   preset: "ts-jest",
   testEnvironment: "jsdom",
+  testEnvironmentOptions: {
+    customExportConditions: [""],
+  },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",

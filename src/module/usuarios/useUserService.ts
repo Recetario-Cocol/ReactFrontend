@@ -36,7 +36,7 @@ export const useUserService = () => {
         const response = await axiosWithAuthentication.get<
           UserFromApi[],
           AxiosResponse<UserFromApi[]>
-        >(apiEndpoint);
+        >(buildUrl());
         return response.data.map((item: UserFromApi) => Usuario.fromJSON(item));
       } catch (error: unknown) {
         console.log(error);
@@ -92,7 +92,7 @@ export const useUserService = () => {
     async crearUsuario(usuario: Usuario): Promise<Usuario> {
       try {
         const response = await axiosWithAuthentication.post<Usuario, AxiosResponse<Usuario>>(
-          apiEndpoint,
+          buildUrl(),
           usuario,
         );
         return response.data;

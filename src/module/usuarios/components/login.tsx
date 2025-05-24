@@ -137,7 +137,10 @@ const Login = () => {
                   input: {
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                        <IconButton
+                          onClick={togglePasswordVisibility}
+                          edge="end"
+                          aria-label="Mostrar contraseña">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -188,7 +191,10 @@ const Login = () => {
                   input: {
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                        <IconButton
+                          onClick={togglePasswordVisibility}
+                          edge="end"
+                          aria-label="Mostrar contraseña">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>

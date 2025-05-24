@@ -20,7 +20,8 @@ import {
 import { Usuario } from "../Usuario";
 import HeaderApp from "../../core/components/HeaderApp";
 import { useUserService } from "../useUserService";
-import UserFormModal, { AlertDialogBorrarUsuario } from "./UsuarioFormModal";
+import UserFormModal from "./UsuarioFormModal";
+import AlertDialogBorrarUsuario from "./AlertDialogBorrarUsuario";
 import { useAuth } from "../../contexts/AuthContext";
 import Actionbuttons from "../../core/components/ActionButtons";
 
@@ -106,11 +107,6 @@ export default function UsuariosGrilla() {
     return 0;
   }
 
-  function agregar() {
-    setIdToOpen(0);
-    setOpenModal(true);
-  }
-
   function modificar() {
     setIdToOpen(getSelectedRowId());
     setOpenModal(true);
@@ -163,7 +159,7 @@ export default function UsuariosGrilla() {
           maxWidth: 800,
         }}>
         <Actionbuttons
-          agregar={{ isDisabled: true || !isAdmin, onClick: agregar }}
+          agregar={{ isDisabled: true, onClick: () => {} }}
           modificar={{ isDisabled: !isAdmin || !seleccionado, onClick: modificar }}
           borrar={{ isDisabled: !isAdmin || !can_be_deleted, onClick: eliminar }}
           borrarConDependencias={{ isDisabled: !isAdmin || !seleccionado, onClick: eliminar }}

@@ -3,9 +3,6 @@ import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@m
 import CloseIcon from "@mui/icons-material/Close";
 import { useUserService } from "../useUserService";
 import { Usuario } from "../Usuario";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogTitle from "@mui/material/DialogTitle";
 import PermisosAutoComplete from "./PermisososAutoComplete";
 import RolesAutoComplete from "./RolesAutoComplete";
 import { useForm } from "react-hook-form";
@@ -35,7 +32,6 @@ export default function UserFormModal({ openArg, onClose, idToOpen }: UserFormMo
   const [form, setForm] = useState<Usuario>(new Usuario());
   const {
     handleSubmit,
-    setError,
     clearErrors,
     formState: { errors },
   } = useForm();
@@ -67,10 +63,6 @@ export default function UserFormModal({ openArg, onClose, idToOpen }: UserFormMo
   };
 
   const onSubmit = () => {
-    if (false && form.roles.length === 0) {
-      setError("roles", { message: "Debes seleccionar al menos un Rol" });
-      return;
-    }
     if (!form.name) {
       setMensajeDeError("Ingrese un nombre.");
       return;
@@ -173,20 +165,7 @@ export default function UserFormModal({ openArg, onClose, idToOpen }: UserFormMo
           />
           <RolesAutoComplete
             value={form.roles}
-            onChange={(newValue) => {
-              setForm(
-                (prevForm) =>
-                  new Usuario(
-                    prevForm.id,
-                    prevForm.name,
-                    prevForm.email,
-                    prevForm.createdAt,
-                    prevForm.updatedAt,
-                    prevForm.permisosIds,
-                    newValue,
-                  ),
-              );
-            }}
+            onChange={() => {}}
             error={typeof errors.roles?.message === "string" ? errors.roles.message : undefined}
           />
           <Typography variant="overline" gutterBottom sx={{ display: "block" }}>
@@ -206,89 +185,5 @@ export default function UserFormModal({ openArg, onClose, idToOpen }: UserFormMo
         </Box>
       </Box>
     </Modal>
-  );
-}
-
-type AlertDialogBorrarUsuarioProps = {
-  paramId: number;
-  onClose?: (mensaje: string) => void;
-  forced?: boolean;
-};
-
-export function AlertDialogBorrarUsuario({
-  paramId,
-  onClose,
-  forced,
-}: AlertDialogBorrarUsuarioProps): React.JSX.Element {
-  const [open, setOpen] = React.useState<boolean>(true);
-  const [confirmAgain, setConfirmAgain] = React.useState<boolean>(false);
-  const [id] = React.useState<number>(paramId);
-  const userService = useUserService();
-
-  const handleFirstConfirmation = () => {
-    if (forced) {
-      setConfirmAgain(true);
-      setOpen(false);
-    } else {
-      handleDelete();
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await userService.eliminarUsuario(id, forced);
-      handleClose("Usuario eliminado correctamente.");
-    } catch (error) {
-      let mensajeError = "Ocurrió un error inesperado al intentar eliminar el Usuario.";
-      const axiosError = error as { response?: { status: number } };
-      if (axiosError.response) {
-        const { status } = axiosError.response;
-        if (status === 409) {
-          mensajeError =
-            "No se puede eliminar el usuario porque está relacionado con otros recursos.";
-        } else if (status === 404) {
-          mensajeError = "El usuario que intentas eliminar no existe.";
-        }
-      } else {
-        mensajeError = "Error de conexión. Intenta de nuevo más tarde.";
-      }
-      handleClose(mensajeError);
-    }
-  };
-
-  const handleClose = (mensaje: string) => {
-    if (onClose) onClose(mensaje);
-    setOpen(false);
-    setConfirmAgain(false);
-  };
-
-  return (
-    <>
-      <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title">
-        <DialogTitle id="alert-dialog-title">{"¿Desea Borrar el Usuario?"}</DialogTitle>
-        <DialogActions>
-          <Button onClick={() => handleClose("")} autoFocus>
-            No
-          </Button>
-          <Button onClick={handleFirstConfirmation}>Sí</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={confirmAgain}
-        onClose={() => handleClose("")}
-        aria-labelledby="alert-dialog-title">
-        <DialogTitle id="alert-dialog-title">
-          {
-            "Esta acción es irreversible. ¿Seguro que desea borrar el Usuario y Todas las entidades de este usuario?"
-          }
-        </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => handleClose("")} autoFocus>
-            No
-          </Button>
-          <Button onClick={handleDelete}>Sí, eliminar</Button>
-        </DialogActions>
-      </Dialog>
-    </>
   );
 }

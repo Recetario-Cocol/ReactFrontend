@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React from "react";
 import axios, { AxiosError } from "axios";
 import { jwtDecode } from "jwt-decode";
 import { API_BASE_URL } from "../../config";
@@ -46,14 +46,36 @@ interface AuthContextType {
   hasPermission: (permission: string) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = React.createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userName, setUserName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [token, setToken] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [userName, setUserName] = React.useState<string>("");
+  const [email, setEmail] = React.useState<string>("");
+  const [token, setToken] = React.useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = React.useState<boolean>(false);
+  const [roles, setRoles] = React.useState<string[]>([]);
+
+  // Inicializa el estado desde localStorage si hay token
+  React.useEffect(() => {
+    const storedToken = localStorage.getItem("authToken");
+    if (storedToken) {
+      try {
+        const decodedToken: DecodedToken = jwtDecode<DecodedToken>(storedToken);
+        setToken(storedToken);
+        setUserName(decodedToken.name);
+        setEmail(decodedToken.email);
+        setIsAdmin(decodedToken.is_admin || false);
+        setRoles(decodedToken.roles || []);
+      } catch {
+        setToken(null);
+        setUserName("");
+        setEmail("");
+        setIsAdmin(false);
+        setRoles([]);
+        localStorage.removeItem("authToken");
+      }
+    }
+  }, []);
 
   const handleAuthRequest = async (endpoint: string, data: LoginData | SignupData) => {
     try {
@@ -148,7 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const forgotPassword = async (userId: number) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE_URL}${forgotPasswordEndpoint}`,
         { userId: userId },
         {
@@ -158,10 +180,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
         },
       );
-      if (response.status === 200) {
-      } else {
-        throw new Error("Error al enviar el correo de restablecimiento.");
-      }
     } catch (error) {
       if (error instanceof AxiosError) {
         if (error.response) {
@@ -223,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth debe ser usado dentro de un AuthProvider");
   }
