@@ -5,13 +5,27 @@ import * as AuthContext from "../../contexts/AuthContext";
 
 // Mock AuthContext
 jest.mock("../../contexts/AuthContext", () => ({
-  useAuth: () => ({
-    login: jest.fn().mockResolvedValue(undefined),
-    signup: jest.fn().mockResolvedValue(undefined),
-  }),
+  useAuth: jest.fn(),
 }));
 
 describe("Login component", () => {
+  beforeEach(() => {
+    // Default mock for useAuth for tests that don't override it
+    (AuthContext.useAuth as jest.Mock).mockImplementation(() => ({
+      login: jest.fn().mockResolvedValue(undefined),
+      signup: jest.fn().mockResolvedValue(undefined),
+      userName: "",
+      email: "",
+      token: "",
+      isAdmin: false,
+      isAuthenticated: false,
+      logout: jest.fn(),
+      forgotPassword: jest.fn(),
+      updatePassword: jest.fn(),
+      hasPermission: jest.fn().mockReturnValue(false),
+    }));
+  });
+
   it("renders login and signup tabs", () => {
     render(
       <BrowserRouter>
@@ -49,8 +63,7 @@ describe("Login component", () => {
 
   it("calls login API on login submit", async () => {
     const mockLogin = jest.fn().mockResolvedValue(undefined);
-
-    jest.spyOn(AuthContext, "useAuth").mockReturnValue({
+    (AuthContext.useAuth as jest.Mock).mockImplementation(() => ({
       login: mockLogin,
       signup: jest.fn(),
       userName: "",
@@ -62,7 +75,7 @@ describe("Login component", () => {
       forgotPassword: jest.fn(),
       updatePassword: jest.fn(),
       hasPermission: jest.fn().mockReturnValue(false),
-    });
+    }));
 
     render(
       <BrowserRouter>
@@ -86,7 +99,7 @@ describe("Login component", () => {
 
   it("calls signup API on signup submit", async () => {
     const mockSignup = jest.fn().mockResolvedValue(undefined);
-    jest.spyOn(AuthContext, "useAuth").mockReturnValue({
+    (AuthContext.useAuth as jest.Mock).mockImplementation(() => ({
       login: jest.fn(),
       signup: mockSignup,
       userName: "",
@@ -98,7 +111,7 @@ describe("Login component", () => {
       forgotPassword: jest.fn(),
       updatePassword: jest.fn(),
       hasPermission: jest.fn().mockReturnValue(false),
-    });
+    }));
 
     render(
       <BrowserRouter>
@@ -142,7 +155,7 @@ describe("Login component", () => {
 
   it("shows error on login failure", async () => {
     const mockLogin = jest.fn().mockRejectedValue(new Error("Login failed"));
-    jest.spyOn(AuthContext, "useAuth").mockReturnValue({
+    (AuthContext.useAuth as jest.Mock).mockImplementation(() => ({
       login: mockLogin,
       signup: jest.fn(),
       userName: "",
@@ -154,7 +167,7 @@ describe("Login component", () => {
       forgotPassword: jest.fn(),
       updatePassword: jest.fn(),
       hasPermission: jest.fn().mockReturnValue(false),
-    });
+    }));
 
     render(
       <BrowserRouter>
@@ -174,7 +187,7 @@ describe("Login component", () => {
 
   it("shows error on signup failure", async () => {
     const mockSignup = jest.fn().mockRejectedValue(new Error("Signup failed"));
-    jest.spyOn(AuthContext, "useAuth").mockReturnValue({
+    (AuthContext.useAuth as jest.Mock).mockImplementation(() => ({
       login: jest.fn(),
       signup: mockSignup,
       userName: "",
@@ -186,7 +199,7 @@ describe("Login component", () => {
       forgotPassword: jest.fn(),
       updatePassword: jest.fn(),
       hasPermission: jest.fn().mockReturnValue(false),
-    });
+    }));
 
     render(
       <BrowserRouter>
