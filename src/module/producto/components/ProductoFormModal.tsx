@@ -33,13 +33,13 @@ const style = {
   maxWidth: "90%",
 };
 
-interface UnidadFormModalProps {
+interface ProductoFormModalProps {
   openArg: boolean;
   onClose?: () => void;
   idToOpen: number;
 }
 
-export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadFormModalProps) {
+export default function ProductoFormModal({ openArg, onClose, idToOpen }: ProductoFormModalProps) {
   const [id] = useState(idToOpen);
   const [open, setOpen] = useState(openArg);
   const [form, setForm] = useState<Producto>(new Producto());
@@ -55,10 +55,15 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
     } else {
       setForm(new Producto(0, "", 0, 0, 0));
     }
-    UnidadService.getUnidades().then((result) => {
-      setLoading(false);
-      setUnidadesOptions(result);
-    });
+    UnidadService.getUnidades()
+      .then((result) => {
+        setLoading(false);
+        setUnidadesOptions(result);
+      })
+      .catch(() => {
+        setLoading(false);
+        setMensajeDeError("Error al obtener unidades.");
+      });
   }, [id]);
 
   const handleClose = (reason?: string) => {
@@ -152,9 +157,13 @@ export default function PaqueteFormModal({ openArg, onClose, idToOpen }: UnidadF
     }
 
     if (id) {
-      ProductoService.actualizar(id, form).then(() => handleClose());
+      ProductoService.actualizar(id, form)
+        .then(() => handleClose())
+        .catch(() => setMensajeDeError("Error al actualizar el Producto."));
     } else {
-      ProductoService.crear(form).then(() => handleClose());
+      ProductoService.crear(form)
+        .then(() => handleClose())
+        .catch(() => setMensajeDeError("Error al crear un producto."));
     }
   };
 

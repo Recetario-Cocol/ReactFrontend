@@ -29,7 +29,7 @@ export default function AlertDialogBorrarProducto({
         const { status } = axiosError.response;
         if (status === 409) {
           mensajeError =
-            "No se puede eliminar el producto porque está relacionada con alguna receta.";
+            "No se puede eliminar el producto porque está relacionado con alguna receta.";
         } else if (status === 404) {
           mensajeError = "El producto que intentas eliminar no existe.";
         }
@@ -48,7 +48,7 @@ export default function AlertDialogBorrarProducto({
   return (
     <Fragment>
       <Dialog open={open} onClose={() => handleClose("")} aria-labelledby="alert-dialog-title">
-        <DialogTitle id="alert-dialog-title">{"¿Desea Borrar el Paquete?"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">¿Desea Borrar el Producto?</DialogTitle>
         <DialogActions>
           <Button onClick={() => handleClose("")} autoFocus>
             No

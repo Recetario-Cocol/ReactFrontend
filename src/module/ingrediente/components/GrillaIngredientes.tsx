@@ -143,7 +143,7 @@ export default function GrillaIngredientes({
     },
     {
       field: "productoId",
-      headerName: "Paquete",
+      headerName: "Productos",
       flex: 2,
       minWidth: 150,
       type: "singleSelect",

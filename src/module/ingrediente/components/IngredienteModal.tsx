@@ -152,10 +152,10 @@ export default function IngredienteModal({
                 name="producto"
                 value={producto?.id.toString() ?? "0"}
                 onChange={handleProductoChange}>
-                <MenuItem value={"0"}>Seleccione un Paquete</MenuItem>
-                {productos.map((paquete: Producto) => (
-                  <MenuItem key={paquete.id} value={paquete.id}>
-                    {paquete.nombre}
+                <MenuItem value={"0"}>Seleccione un Producto</MenuItem>
+                {productos.map((producto: Producto) => (
+                  <MenuItem key={producto.id} value={producto.id}>
+                    {producto.nombre}
                   </MenuItem>
                 ))}
               </Select>

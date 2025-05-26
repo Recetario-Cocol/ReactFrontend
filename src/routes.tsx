@@ -63,7 +63,7 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/Paquetes"
+        path="/Productos"
         element={
           <PermisosProvider>
             <PrivateRoute requiredPermission={["view_producto"]}>

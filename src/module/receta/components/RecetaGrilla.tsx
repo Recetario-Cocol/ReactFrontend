@@ -53,7 +53,7 @@ export default function RecetaGrilla() {
       setRows([]);
       RecetaService.getGrilla().then((result: GrillaReceta[]) => setRows(result));
     } catch (error) {
-      console.error("Error al cargar los paquetes:", error);
+      console.error("Error al cargar los Productos:", error);
       setRows([]);
     }
   }

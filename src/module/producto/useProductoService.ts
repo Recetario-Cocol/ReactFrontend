@@ -38,7 +38,7 @@ export const useProductoService = () => {
     async getAll(): Promise<Producto[]> {
       try {
         const response = await axiosWithAuthentication.get<Producto[], AxiosResponse<Producto[]>>(
-          apiEndpoint,
+          buildUrl(),
         );
         return response.data;
       } catch (error: unknown) {

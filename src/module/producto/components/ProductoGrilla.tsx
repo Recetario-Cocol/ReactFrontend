@@ -7,7 +7,7 @@ import {
 } from "@mui/x-data-grid";
 import { useEffect, useState, SyntheticEvent } from "react";
 import { Box, Snackbar, SnackbarCloseReason } from "@mui/material";
-import PaqueteFormModal from "./ProductoFormModal";
+import ProductoFormModal from "./ProductoFormModal";
 import AlertDialogBorrarProducto from "./AlertDialogBorrarProducto";
 import { useProductoService } from "../useProductoService";
 import { useUnidadService } from "../../unidad/useUnidadService";
@@ -199,7 +199,7 @@ export default function ProductoGrilla() {
         </Box>
         <>
           {openModal && (
-            <PaqueteFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen} />
+            <ProductoFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen} />
           )}
           {openBorrarProducto && (
             <AlertDialogBorrarProducto paramId={idToOpen} onClose={handleCloseDialog} />

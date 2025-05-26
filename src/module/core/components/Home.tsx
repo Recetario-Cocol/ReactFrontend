@@ -27,7 +27,7 @@ export default function Home() {
       title: "Productos",
       description:
         "Diferentes paquetes de Productos cada uno con su precio para poder elegirlos en las recetas y sacar un costo mas fiable de cada una.",
-      url: "/Paquetes",
+      url: "/Productos",
       cant: 0,
     },
     {

@@ -51,7 +51,7 @@ const HeaderApp = ({ titulo }: HeaderAppProps) => {
   const menuItems: Array<MenuItems> = [
     { text: "Home", url: "/Home" },
     { text: "Unidades", url: "/Unidades" },
-    { text: "Productos", url: "/Paquetes" },
+    { text: "Productos", url: "/Productos" },
     { text: "Recetas", url: "/Recetas" },
   ];
 

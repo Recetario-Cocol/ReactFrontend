@@ -8,7 +8,7 @@ const apiEndpoint = `${API_BASE_URL}/recetario/unidades/`;
 /**
  * Interfaz para representar errores en el servicio
  */
-interface ServiceError {
+export interface ServiceError {
   message: string;
   status?: number;
 }

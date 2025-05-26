@@ -137,7 +137,7 @@ describe("AppRoutes", () => {
     });
     mockUsePermisos();
     render(
-      <MemoryRouter initialEntries={["/Paquetes"]}>
+      <MemoryRouter initialEntries={["/Productos"]}>
         <AppRoutes />
       </MemoryRouter>,
     );
