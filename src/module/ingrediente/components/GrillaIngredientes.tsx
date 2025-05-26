@@ -35,7 +35,7 @@ export class GrillaIngredientesRow {
   }
 }
 
-interface GrillaIngredientesProps {
+export interface GrillaIngredientesProps {
   rowsFromReceta: GrillaIngredientesRow[];
   rindeFromReceta: number;
   productosFromReceta: Producto[];

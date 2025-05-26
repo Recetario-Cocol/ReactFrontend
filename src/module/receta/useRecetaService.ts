@@ -45,7 +45,7 @@ export const useRecetaService = () => {
     async getAll(): Promise<Receta[]> {
       try {
         const response = await axiosWithAuthentication.get<Receta[], AxiosResponse<Receta[]>>(
-          apiEndpoint,
+          buildUrl(),
         );
         return response.data;
       } catch (error: unknown) {
@@ -118,7 +118,7 @@ export const useRecetaService = () => {
     async crear(receta: Receta): Promise<Receta> {
       try {
         const response = await axiosWithAuthentication.post<Receta, AxiosResponse<Receta>>(
-          apiEndpoint,
+          buildUrl(),
           receta.toJSON(),
         );
         return response.data;
@@ -158,8 +158,6 @@ export const useRecetaService = () => {
         );
         return response.data;
       } catch (error: unknown) {
-        console.log(receta);
-        console.log(error);
         if (error instanceof AxiosError) {
           throw {
             message: `Error al actualizar receta ${id}: ${error.message}`,

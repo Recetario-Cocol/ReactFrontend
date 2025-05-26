@@ -6,7 +6,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { useRecetaService } from "../useRecetaService";
 type AlertDialogBorrarRecetaProps = {
   paramId: number;
-  onClose?: () => void;
+  onClose?: (mensaje: string) => void;
 };
 
 export default function AlertDialogBorrarReceta({
@@ -19,12 +19,18 @@ export default function AlertDialogBorrarReceta({
 
   const handlerClickSi = () => {
     RecetaService.eliminar(id)
-      .then()
-      .then(() => handleClose());
+      .then(() => handleClose("Receta eliminada correctamente."))
+      .catch(() => {
+        handleClose("Error al intentar borra la receta. Intenta de nuevo más tarde.");
+      });
   };
 
-  const handleClose = () => {
-    if (onClose) onClose();
+  const handleClose = (mensaje: string | React.MouseEvent) => {
+    if (typeof mensaje === "string") {
+      if (onClose) onClose(mensaje);
+    } else {
+      if (onClose) onClose("");
+    }
     setOpen(false);
   };
 

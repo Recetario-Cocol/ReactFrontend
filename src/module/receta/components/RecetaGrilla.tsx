@@ -5,8 +5,8 @@ import {
   useGridApiRef,
   GridColumnVisibilityModel,
 } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import { useEffect, useState, SyntheticEvent } from "react";
+import { Box, Snackbar, SnackbarCloseReason } from "@mui/material";
 import RecetaFormModal from "./RecetaFormModal";
 import AlertDialogBorrarReceta from "./AlertDialogBorrarReceta";
 import { GrillaReceta, useRecetaService } from "../useRecetaService";
@@ -19,9 +19,10 @@ export default function RecetaGrilla() {
   const [seleccionado, setSeleccionado] = useState(false);
   const [, setSelectionModel] = useState<GridRowSelectionModel>();
   const [openModal, setOpenModal] = useState(false);
-  const [openBorrarUnidad, setOpenBorrarUnidad] = useState(false);
+  const [openBorrarReceta, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<GrillaReceta[]>([]);
+  const [mensajesModalBorrar, setMensajesModalBorrar] = useState<string>("");
   const RecetaService = useRecetaService();
   const [columnVisibilityModel] = useState<GridColumnVisibilityModel>({
     canBeDeleted: false,
@@ -43,9 +44,10 @@ export default function RecetaGrilla() {
     setOpenModal(false);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = (mensaje: string) => {
     fetchRows();
     setOpenBorrarUnidad(false);
+    setMensajesModalBorrar(mensaje);
   };
 
   async function fetchRows() {
@@ -100,6 +102,13 @@ export default function RecetaGrilla() {
     setOpenBorrarUnidad(true);
   }
 
+  function handleSnackBarClose(_: SyntheticEvent | Event, reason?: SnackbarCloseReason) {
+    if (reason === "clickaway") {
+      return;
+    }
+    setMensajesModalBorrar("");
+  }
+
   return (
     <Box
       sx={{
@@ -126,6 +135,12 @@ export default function RecetaGrilla() {
           }}
           borrar={{ isDisabled: !hasPermission(delete_receta) || !seleccionado, onClick: eliminar }}
         />
+        <Snackbar
+          open={mensajesModalBorrar !== ""}
+          autoHideDuration={5000}
+          message={mensajesModalBorrar}
+          onClose={handleSnackBarClose}
+        />
         <Box sx={{ flex: 1 }}>
           <DataGrid
             rows={rows}
@@ -147,8 +162,11 @@ export default function RecetaGrilla() {
           {openModal && (
             <RecetaFormModal openArg={openModal} onClose={handleCloseModal} idToOpen={idToOpen} />
           )}
-          {openBorrarUnidad && (
-            <AlertDialogBorrarReceta paramId={idToOpen} onClose={handleCloseDialog} />
+          {openBorrarReceta && (
+            <AlertDialogBorrarReceta
+              paramId={idToOpen}
+              onClose={(mensaje: string) => handleCloseDialog(mensaje)}
+            />
           )}
         </div>
       </Box>

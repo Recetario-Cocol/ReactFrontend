@@ -264,9 +264,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     }
 
     if (id) {
-      RecetaService.actualizar(id, form).then(() => handleClose());
+      RecetaService.actualizar(id, form)
+        .then(() => handleClose())
+        .catch(() => setMensajeDeError("Error al actualizar la Receta."));
     } else {
-      RecetaService.crear(form).then(() => handleClose());
+      RecetaService.crear(form)
+        .then(() => handleClose())
+        .catch(() => setMensajeDeError("Error al crear la Receta."));
     }
   };
 
@@ -346,10 +350,22 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
               </Box>
             </Box>
             <Box sx={footerBoxStyle}>
-              <Button type="submit" variant="contained" color="primary" sx={buttonStyle}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={buttonStyle}
+                aria-label="Enviar"
+                data-testid="enviar-btn">
                 Enviar
               </Button>
-              <Button variant="outlined" color="error" onClick={handleCloseClick} sx={buttonStyle}>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleCloseClick}
+                sx={buttonStyle}
+                aria-label="Cancelar"
+                data-testid="cancelar-btn">
                 Cancelar
               </Button>
             </Box>
