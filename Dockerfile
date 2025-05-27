@@ -1,26 +1,34 @@
-# Etapa de build
-FROM node:alpine3.21 AS build
+# Etapa de build para React
+FROM node:alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
 ARG REACT_APP_API_URL
-ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ARG ENVIRONMENT=production
+ENV ENVIRONMENT=$ENVIRONMENT
 
-# Aquí deberías ver el resultado del build y si la carpeta se genera
-RUN npm run build && ls -l /app/build
+RUN if [ "$ENVIRONMENT" != "development" ]; then npm run build; fi
 
-# Imagen final
-FROM node:alpine3.21
+# Etapa final
+FROM node:alpine AS runtime
 WORKDIR /app
 
 RUN npm install -g serve
 
+COPY package*.json ./
+RUN npm ci
+
+ARG ENVIRONMENT=production
+ENV ENVIRONMENT=$ENVIRONMENT
+
+# Solo copia el build si no es desarrollo
 COPY --from=build /app/build ./build
-RUN ls -l /app/build
-RUN ls -l ./build
 
 EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000", "--single"]
+
+CMD ["/bin/sh", "-c", "if [ \"$ENVIRONMENT\" = \"development\" ]; then npm run dev; else serve -s build -l 3000 --single; fi"]

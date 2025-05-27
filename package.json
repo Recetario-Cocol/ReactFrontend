@@ -4,13 +4,16 @@
   "scripts": {
     "start": "serve -s build",
     "build": "webpack --mode production",
-    "dev": "webpack --mode development",
+    "dev": "webpack serve --mode development --open --hot --port 3000",
     "test": "jest --watchAll=false",
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@mui/x-data-grid": "^8.2.0",
