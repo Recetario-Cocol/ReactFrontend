@@ -14,11 +14,13 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useUnidadService } from "../../unidad/useUnidadService";
 import Producto from "../Producto";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import { MenuItem } from "@mui/material";
 import { useProductoService } from "../useProductoService";
 import { Unidad } from "../../unidad/Unidad";
 import LoadingModel from "../../core/components/LoadingModel";
+import { showConfirmDialog } from "../../core/components/ConfirmDialog";
+import { Controller, useForm } from "react-hook-form";
 
 const style = {
   position: "absolute",
@@ -40,20 +42,42 @@ interface ProductoFormModalProps {
 }
 
 export default function ProductoFormModal({ openArg, onClose, idToOpen }: ProductoFormModalProps) {
-  const [id] = useState(idToOpen);
-  const [open, setOpen] = useState(openArg);
-  const [form, setForm] = useState<Producto>(new Producto());
   const UnidadService = useUnidadService();
   const ProductoService = useProductoService();
   const [mensajeDeError, setMensajeDeError] = useState<string>("");
   const [unidadesOptions, setUnidadesOptions] = useState<Unidad[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors, isDirty },
+  } = useForm<Producto>({
+    defaultValues: {
+      id: 0,
+      nombre: "",
+      unidadId: 0,
+      precio: 0,
+      cantidad: 0,
+    },
+  });
+
   useEffect(() => {
-    if (id) {
-      ProductoService.get(id).then((result) => setForm(result));
+    setLoading(true);
+    if (idToOpen) {
+      ProductoService.get(idToOpen).then((result) => {
+        reset(result);
+      });
     } else {
-      setForm(new Producto(0, "", 0, 0, 0));
+      reset({
+        id: 0,
+        nombre: "",
+        unidadId: 0,
+        precio: 0,
+        cantidad: 0,
+      });
     }
     UnidadService.getUnidades()
       .then((result) => {
@@ -64,104 +88,34 @@ export default function ProductoFormModal({ openArg, onClose, idToOpen }: Produc
         setLoading(false);
         setMensajeDeError("Error al obtener unidades.");
       });
-  }, [id]);
+  }, [idToOpen, reset]);
 
   const handleClose = (reason?: string) => {
     if (!reason || reason !== "backdropClick") {
       if (onClose) onClose();
-      setOpen(false);
     }
   };
 
   const handleCloseClick = (event: React.SyntheticEvent) => {
     event.stopPropagation();
-    handleClose();
-  };
-
-  const handlerChangeNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setForm(
-      (prevForm) =>
-        new Producto(
-          prevForm.id,
-          value || "",
-          prevForm.unidadId,
-          prevForm.precio,
-          prevForm.cantidad,
-        ),
-    );
-  };
-
-  const handlerChangeCantidad = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setForm(
-      (prevForm) =>
-        new Producto(
-          prevForm.id,
-          prevForm.nombre,
-          prevForm.unidadId,
-          prevForm.precio,
-          Number(value) || 0,
-        ),
-    );
-  };
-
-  const handleChangeUnidad = (event: SelectChangeEvent<number | string>) => {
-    const { value } = event.target;
-    setForm(
-      (prevForm) =>
-        new Producto(
-          prevForm.id,
-          prevForm.nombre,
-          Number(value) || 0,
-          prevForm.precio,
-          prevForm.cantidad,
-        ),
-    );
-  };
-
-  const handlerChangePrecio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setForm(
-      (prevForm) =>
-        new Producto(
-          prevForm.id,
-          prevForm.nombre,
-          prevForm.unidadId,
-          Number(value) || 0,
-          prevForm.cantidad,
-        ),
-    );
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!form.nombre) {
-      setMensajeDeError("Ingrese un nombre.");
-      return;
+    if (isDirty) {
+      showConfirmDialog({
+        question: "Tenés cambios sin guardar. ¿Estás seguro de que querés salir?",
+        onYes: () => handleClose(),
+        onNo: () => {},
+      });
+    } else {
+      handleClose();
     }
+  };
 
-    if (!form.precio) {
-      setMensajeDeError("Ingrese un precio.");
-      return;
-    }
-
-    if (!form.unidadId) {
-      setMensajeDeError("Selecione una unidad.");
-      return;
-    }
-
-    if (form.cantidad <= 0) {
-      setMensajeDeError("Selecione una cantidad valida.");
-      return;
-    }
-
-    if (id) {
-      ProductoService.actualizar(id, form)
+  const onSubmit = (data: Producto) => {
+    if (idToOpen) {
+      ProductoService.actualizar(idToOpen, data)
         .then(() => handleClose())
         .catch(() => setMensajeDeError("Error al actualizar el Producto."));
     } else {
-      ProductoService.crear(form)
+      ProductoService.crear(data)
         .then(() => handleClose())
         .catch(() => setMensajeDeError("Error al crear un producto."));
     }
@@ -169,7 +123,7 @@ export default function ProductoFormModal({ openArg, onClose, idToOpen }: Produc
 
   return (
     <div>
-      <Modal open={open} onClose={handleCloseClick}>
+      <Modal open={openArg} onClose={handleCloseClick}>
         <Box sx={style}>
           <Typography variant="h6" component="h2">
             Producto
@@ -181,71 +135,107 @@ export default function ProductoFormModal({ openArg, onClose, idToOpen }: Produc
             </IconButton>
           </Typography>
           {mensajeDeError && (
-            <Alert severity="success" color="warning">
+            <Alert severity="error" color="warning">
               {mensajeDeError}
             </Alert>
           )}
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)}>
             <TextField
               label="Id"
-              name="id"
-              value={form.id}
+              {...register("id")}
               margin="normal"
               disabled
               sx={{ width: { xs: "100%", md: "10%" } }}
             />
-            <FormControl
-              error={!form.nombre}
-              sx={{
-                width: { xs: "100%", md: "calc(100% - (10% + 16px))" },
-                ml: { xs: 0, md: 2 },
-              }}>
-              <TextField
-                label="Nombre"
-                name="nombre"
-                value={form.nombre}
-                onChange={handlerChangeNombre}
-                margin="normal"
-              />
-              {!form.nombre && <FormHelperText>Por favor ingrese un Nombre.</FormHelperText>}
-            </FormControl>
-            <TextField
-              label="Cantidad"
-              name="cantidad"
-              value={form.cantidad}
-              onChange={handlerChangeCantidad}
-              margin="normal"
-              sx={{
-                width: { xs: "100%", md: "calc(100% - (40% + 16px))" },
-                mr: { xs: 0, md: 2 },
+            <Controller
+              name="nombre"
+              control={control}
+              rules={{
+                required: "Por favor ingrese un Nombre.",
+                minLength: { value: 2, message: "Debe tener al menos 2 caracteres." },
               }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Nombre"
+                  margin="normal"
+                  error={!!errors.nombre}
+                  helperText={errors.nombre?.message}
+                  sx={{
+                    width: { xs: "100%", md: "calc(100% - (10% + 16px))" },
+                    ml: { xs: 0, md: 2 },
+                  }}
+                />
+              )}
+            />
+            <Controller
+              name="cantidad"
+              control={control}
+              rules={{
+                required: "Ingrese una cantidad.",
+                min: { value: 1, message: "Debe ser mayor a 0." },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Cantidad"
+                  type="number"
+                  margin="normal"
+                  error={!!errors.cantidad}
+                  helperText={errors.cantidad?.message}
+                  sx={{
+                    width: { xs: "100%", md: "calc(100% - (40% + 16px))" },
+                    mr: { xs: 0, md: 2 },
+                  }}
+                />
+              )}
             />
             <FormControl
-              error={!form.unidadId}
+              error={!!errors.unidadId}
               sx={{ width: { xs: "100%", md: "40%" }, my: { xs: 0, md: 2 } }}>
               <InputLabel id="unidad-label">Unidad</InputLabel>
-              <Select
-                label="Unidad"
-                labelId="unidad-label"
-                id="unidad"
-                value={form.unidadId}
-                onChange={handleChangeUnidad}>
-                <MenuItem value={"0"}>Vacio</MenuItem>
-                {unidadesOptions.map((option: Unidad) => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-              {!form.unidadId && <FormHelperText>Selecione una Unidad.</FormHelperText>}
+              <Controller
+                name="unidadId"
+                control={control}
+                rules={{
+                  validate: (value) => (value && value !== 0 ? true : "Seleccione una unidad."),
+                }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    label="Unidad"
+                    labelId="unidad-label"
+                    id="unidad"
+                  >
+                    <MenuItem value={0}>Vacio</MenuItem>
+                    {unidadesOptions.map((option: Unidad) => (
+                      <MenuItem key={option.id} value={option.id}>
+                        {option.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+              {errors.unidadId && <FormHelperText>{errors.unidadId.message}</FormHelperText>}
             </FormControl>
-            <TextField
-              label="Precio"
+            <Controller
               name="precio"
-              value={form.precio}
-              onChange={handlerChangePrecio}
-              fullWidth
-              margin="normal"
+              control={control}
+              rules={{
+                required: "Ingrese un precio.",
+                min: { value: 0.01, message: "Debe ser mayor a 0." },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Precio"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.precio}
+                  helperText={errors.precio?.message}
+                />
+              )}
             />
             <Box
               sx={{

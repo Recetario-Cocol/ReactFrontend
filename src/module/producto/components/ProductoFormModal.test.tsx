@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import ProductoFormModal from "./ProductoFormModal";
 import Producto from "../Producto";
 import { Unidad } from "../../unidad/Unidad";
@@ -10,6 +10,11 @@ const mockActualizar = jest.fn().mockResolvedValue({});
 const mockGetUnidades = jest
   .fn()
   .mockResolvedValue([new Unidad(1, "Unidad 1", "u1"), new Unidad(2, "Unidad 2", "u2")]);
+jest.mock("../../core/components/ConfirmDialog", () => ({
+  showConfirmDialog: jest.fn(),
+}));
+import * as ConfirmDialogModule from "../../core/components/ConfirmDialog";
+const mockShowConfirmDialog = ConfirmDialogModule.showConfirmDialog;
 
 jest.mock("../useProductoService", () => ({
   useProductoService: () => ({
@@ -25,6 +30,10 @@ jest.mock("../../unidad/useUnidadService", () => ({
 }));
 
 describe("ProductoFormModal", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("debería renderizar los campos y botones del modal", async () => {
     render(<ProductoFormModal openArg={true} idToOpen={0} onClose={jest.fn()} />);
 
@@ -58,8 +67,12 @@ describe("ProductoFormModal", () => {
       expect(screen.getByRole("button", { name: /Enviar/i })).toBeInTheDocument(),
     );
     fireEvent.change(screen.getByLabelText(/^Nombre$/i), { target: { value: "Test" } });
+    fireEvent.change(screen.getByLabelText(/^Cantidad$/i), { target: { value: "1000" } });
+
     fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
-    expect(await screen.findByText(/Ingrese un precio/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Debe ser mayor a 0\./i)).toBeInTheDocument();
+    });
   });
 
   it("debería mostrar error si se envía sin unidad", async () => {
@@ -70,7 +83,7 @@ describe("ProductoFormModal", () => {
     fireEvent.change(screen.getByLabelText(/^Nombre$/i), { target: { value: "Test" } });
     fireEvent.change(screen.getByLabelText(/^Precio$/i), { target: { value: "10" } });
     fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
-    const errores = await screen.findAllByText(/Selecione una unidad./i);
+    const errores = await screen.findAllByText(/seleccione?\s+una\s+unidad\.?/i);
     expect(errores.length).toBeGreaterThan(0);
   });
 
@@ -85,10 +98,10 @@ describe("ProductoFormModal", () => {
     fireEvent.click(screen.getByText("Unidad 1"));
     fireEvent.change(screen.getByLabelText(/^Cantidad$/i), { target: { value: "0" } });
     fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
-    expect(await screen.findByText(/Selecione una cantidad valida/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Debe ser mayor a 0./i)).toBeInTheDocument();
   });
 
-  it("debería llamar crear con los datos correctos", async () => {
+  it("debería llamar crear with los datos correctos", async () => {
     const onClose = jest.fn();
     render(<ProductoFormModal openArg={true} idToOpen={0} onClose={onClose} />);
     await waitFor(() =>
@@ -162,5 +175,84 @@ describe("ProductoFormModal", () => {
   it("debería llamar get del service de producto si idToOpen > 0", async () => {
     render(<ProductoFormModal openArg={true} idToOpen={2} onClose={jest.fn()} />);
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith(2));
+  });
+
+  it("debería cerrar directamente si no hay cambios en el formulario", async () => {
+    const mockOnClose = jest.fn();
+    render(<ProductoFormModal openArg={true} onClose={mockOnClose} idToOpen={0} />);
+    await waitFor(() => expect(screen.getByLabelText(/^Nombre$/i)).toBeInTheDocument());
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("close"));
+    });
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it("debería mostrar confirmación si hay cambios en el formulario", async () => {
+    const mockOnClose = jest.fn();
+    render(<ProductoFormModal openArg={true} onClose={mockOnClose} idToOpen={0} />);
+    fireEvent.change(await screen.findByLabelText(/Nombre/i), {
+      target: { value: "Harina" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("close"));
+    });
+
+    expect(mockShowConfirmDialog).toHaveBeenCalledWith({
+      question: "Tenés cambios sin guardar. ¿Estás seguro de que querés salir?",
+      onYes: expect.any(Function),
+      onNo: expect.any(Function),
+    });
+  });
+
+  it("debería cerrar si el usuario confirma en el diálogo", async () => {
+    (mockShowConfirmDialog as jest.Mock).mockResolvedValue(true);
+    const mockOnClose = jest.fn();
+    render(<ProductoFormModal openArg={true} onClose={mockOnClose} idToOpen={0} />);
+
+    fireEvent.change(await screen.findByLabelText(/Nombre/i), {
+      target: { value: "Harina" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("close"));
+    });
+
+    // Obtener el onYes pasado al mock correctamente
+    const showConfirmDialogMock = jest.requireMock("../../core/components/ConfirmDialog").showConfirmDialog;
+    const { onYes } = showConfirmDialogMock.mock.calls[0][0];
+
+    await act(async () => {
+      onYes();
+      // Esperar al próximo ciclo de eventos para asegurar que el estado se actualice
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    await waitFor(() => {
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it("no debería cerrar si el usuario elige 'No' en el diálogo", async () => {
+    const mockOnClose = jest.fn();
+    render(<ProductoFormModal openArg={true} onClose={mockOnClose} idToOpen={0} />);
+
+    fireEvent.change(await screen.findByLabelText(/Nombre/i), {
+      target: { value: "Harina" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("close"));
+    });
+
+    // Obtener el onNo pasado al mock correctamente
+    const showConfirmDialogMock = jest.requireMock("../../core/components/ConfirmDialog").showConfirmDialog;
+    const { onNo } = showConfirmDialogMock.mock.calls[0][0];
+
+    act(() => {
+      onNo(); // simular click en "No"
+    });
+
+    expect(mockOnClose).not.toHaveBeenCalled();
   });
 });
