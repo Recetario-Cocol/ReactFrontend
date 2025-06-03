@@ -55,4 +55,8 @@ export class Unidad {
       abreviacion: this._abreviacion,
     };
   }
+
+  public isEmpty(): boolean {
+    return this._id > 0 && this._nombre.trim().length > 0 && this._abreviacion.trim().length > 0;
+  }
 }

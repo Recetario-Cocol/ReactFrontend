@@ -49,4 +49,17 @@ describe("Unidad", () => {
       abreviacion: "s",
     });
   });
+
+  it("has any value", () => {
+    const unidad = new Unidad();
+    expect(unidad.isEmpty());
+    const unidadWithId = new Unidad(1);
+    expect(!unidadWithId.isEmpty());
+    const unidadWithNombre = new Unidad(0, "nombre");
+    expect(!unidadWithNombre.isEmpty());
+    const unidadWithAbreviacion = new Unidad(0, "", "nom");
+    expect(!unidadWithAbreviacion.isEmpty());
+    const unidadWith0idSpacesName = new Unidad(0, "   ", "   ");
+    expect(!unidadWith0idSpacesName.isEmpty());
+  });
 });

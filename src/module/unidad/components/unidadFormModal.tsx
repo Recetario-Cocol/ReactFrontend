@@ -3,6 +3,8 @@ import { Modal, Box, Typography, TextField, Button, IconButton, Alert } from "@m
 import CloseIcon from "@mui/icons-material/Close";
 import { useUnidadService } from "../useUnidadService";
 import { Unidad } from "../Unidad";
+import { showConfirmDialog } from "../../core/components/ConfirmDialog";
+import { Controller, useForm } from "react-hook-form";
 
 const style = {
   position: "absolute",
@@ -24,54 +26,72 @@ interface UnidadFormModalProps {
 }
 
 export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFormModalProps) {
-  const [id] = useState<number>(idToOpen);
-  const [open, setOpen] = useState<boolean>(openArg);
-  const [form, setForm] = useState<Unidad>(new Unidad());
   const [mensajeDeError, setMensajeDeError] = useState<string>("");
   const UnidadService = useUnidadService();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { isDirty, errors },
+  } = useForm<Unidad>({
+    defaultValues: {
+      id: 0,
+      nombre: "",
+      abreviacion: "",
+      can_be_deleted: false,
+    },
+  });
 
   useEffect(() => {
-    if (id) {
-      UnidadService.getUnidad(id).then((result: Unidad) => setForm(result));
+    if (idToOpen) {
+      UnidadService.getUnidad(idToOpen).then((unidad: Unidad) => {
+        reset({
+          id: unidad.id,
+          nombre: unidad.nombre,
+          abreviacion: unidad.abreviacion,
+          can_be_deleted: unidad.can_be_deleted,
+        });
+        console.log("Unidad cargada:", unidad);
+      });
     } else {
-      setForm(new Unidad(0, "", ""));
+      reset();
     }
-  }, [id]);
+  }, [idToOpen, UnidadService, reset]);
 
   const handleClose = (reason?: string) => {
     if (!reason || reason !== "backdropClick") {
       if (onClose) onClose();
-      setOpen(false);
     }
   };
 
   const handleCloseEvent = (event: React.SyntheticEvent) => {
     event.stopPropagation();
-    handleClose();
+    if (isDirty) {
+      showConfirmDialog({
+        question: "Tenés cambios sin guardar. ¿Estás seguro de que querés salir?",
+        onYes: () => handleClose(""),
+        onNo: () => {},
+      });
+    } else {
+      handleClose("");
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!form.nombre) {
-      setMensajeDeError("Ingrese un nombre.");
-      return;
-    }
-
-    if (!form.abreviacion) {
-      setMensajeDeError("Ingrese una abreviacion");
-      return;
-    }
-
-    if (id) {
-      UnidadService.actualizarUnidad(id, form).then(() => handleClose());
+  const onSubmit = (data: Unidad) => {
+    if (idToOpen !== 0) {
+      UnidadService.actualizarUnidad(idToOpen, data)
+        .then(() => handleClose())
+        .catch(() => setMensajeDeError("Error al tratar de actualizar la unidad"));
     } else {
-      UnidadService.crearUnidad(form).then(() => handleClose());
+      UnidadService.crearUnidad(data)
+        .then(() => handleClose())
+        .catch(() => setMensajeDeError("Error al tratar de crear la unidad"));
     }
   };
 
   return (
-    <Modal open={open} onClose={handleCloseEvent}>
+    <Modal open={openArg} onClose={handleCloseEvent}>
       <Box sx={style}>
         <Typography variant="h6" component="h2">
           Unidad
@@ -83,33 +103,53 @@ export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFo
           </IconButton>
         </Typography>
         {mensajeDeError && (
-          <Alert severity="success" color="warning">
+          <Alert color="warning" severity="error">
             {mensajeDeError}
           </Alert>
         )}
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField label="Id" name="id" value={form.id} fullWidth margin="normal" disabled />
-          <TextField
-            label="Nombre"
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <TextField label="Id" fullWidth margin="normal" disabled {...register("id")} />
+          <Controller
             name="nombre"
-            value={form.nombre}
-            fullWidth
-            margin="normal"
-            onChange={(e) =>
-              setForm(
-                (prevForm) => new Unidad(prevForm.id, e.target.value || "", prevForm.abreviacion),
-              )
-            }
+            control={control}
+            rules={{
+              required: "Ingrese un Nombre.",
+              minLength: {
+                value: 2,
+                message: "Debe tener al menos 2 caracteres.",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Nombre"
+                fullWidth
+                margin="normal"
+                error={!!errors.nombre}
+                helperText={errors.nombre?.message}
+              />
+            )}
           />
-          <TextField
-            label="Abreviación"
+          <Controller
             name="abreviacion"
-            value={form.abreviacion}
-            fullWidth
-            margin="normal"
-            onChange={(e) =>
-              setForm((prevForm) => new Unidad(prevForm.id, prevForm.nombre, e.target.value || ""))
-            }
+            control={control}
+            rules={{
+              required: "Ingrese una abreviacion",
+              maxLength: {
+                value: 5,
+                message: "Máximo 5 caracteres.",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Abreviación"
+                fullWidth
+                margin="normal"
+                error={!!errors.abreviacion}
+                helperText={errors.abreviacion?.message}
+              />
+            )}
           />
           <Box sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
             <Button type="submit" variant="contained" color="primary" sx={{ m: 1 }}>
