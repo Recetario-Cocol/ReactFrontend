@@ -201,12 +201,7 @@ export default function ProductoFormModal({ openArg, onClose, idToOpen }: Produc
                   validate: (value) => (value && value !== 0 ? true : "Seleccione una unidad."),
                 }}
                 render={({ field }) => (
-                  <Select
-                    {...field}
-                    label="Unidad"
-                    labelId="unidad-label"
-                    id="unidad"
-                  >
+                  <Select {...field} label="Unidad" labelId="unidad-label" id="unidad">
                     <MenuItem value={0}>Vacio</MenuItem>
                     {unidadesOptions.map((option: Unidad) => (
                       <MenuItem key={option.id} value={option.id}>

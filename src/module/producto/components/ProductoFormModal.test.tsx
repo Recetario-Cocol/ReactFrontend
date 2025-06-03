@@ -219,7 +219,9 @@ describe("ProductoFormModal", () => {
     });
 
     // Obtener el onYes pasado al mock correctamente
-    const showConfirmDialogMock = jest.requireMock("../../core/components/ConfirmDialog").showConfirmDialog;
+    const showConfirmDialogMock = jest.requireMock(
+      "../../core/components/ConfirmDialog",
+    ).showConfirmDialog;
     const { onYes } = showConfirmDialogMock.mock.calls[0][0];
 
     await act(async () => {
@@ -246,7 +248,9 @@ describe("ProductoFormModal", () => {
     });
 
     // Obtener el onNo pasado al mock correctamente
-    const showConfirmDialogMock = jest.requireMock("../../core/components/ConfirmDialog").showConfirmDialog;
+    const showConfirmDialogMock = jest.requireMock(
+      "../../core/components/ConfirmDialog",
+    ).showConfirmDialog;
     const { onNo } = showConfirmDialogMock.mock.calls[0][0];
 
     act(() => {
