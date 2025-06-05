@@ -63,7 +63,6 @@ jest.mock("./ProductoFormModal", () => (props: React.ComponentProps<typeof Produ
 jest.mock(
   "./AlertDialogBorrarProducto",
   () => (props: React.ComponentProps<typeof AlertDialogBorrarProducto>) => {
-    console.log("Mock AlertDialogBorrarProducto render", props);
     return (
       <div data-testid="mock-alert-dialog">
         <DialogTitle id="alert-dialog-title">¿Desea Borrar el Producto?</DialogTitle>

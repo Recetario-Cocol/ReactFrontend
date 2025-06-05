@@ -12,6 +12,10 @@ import {
 import Actionbuttons from "../../core/components/ActionButtons";
 import Ingrediente from "../Ingrediente";
 import Producto from "../../producto/Producto";
+import IngredienteModal, {
+  AlertDialogBorrarIngrediente,
+} from "../../ingrediente/components/IngredienteModal";
+import { Unidad } from "../../unidad/Unidad";
 
 export class GrillaIngredientesRow {
   id: number;
@@ -35,28 +39,96 @@ export class GrillaIngredientesRow {
   }
 }
 
-export interface GrillaIngredientesProps {
-  rowsFromReceta: GrillaIngredientesRow[];
+const actionbuttonsStile = {
+  display: { xs: "flex", md: "inline-flex" },
+  minWidth: { xs: "auto", md: "64px" },
+  justifyContent: "center",
+};
+
+export interface GrillaIngredientesInputProps {
+  value: GrillaIngredientesRow[];
+  onChange: (rows: GrillaIngredientesRow[]) => void;
   rindeFromReceta: number;
   productosFromReceta: Producto[];
-  onIngredienteAdded: () => void;
-  onIngredienteDeleted: () => void;
-  onIngredienteEdited: () => void;
-  onIngredienteSelecionado: (ingrediente: Ingrediente | undefined) => void;
+  unidadesFromReceta: Unidad[];
 }
 
-export default function GrillaIngredientes({
-  rowsFromReceta,
+export default function GrillaIngredientesInput({
+  value,
+  onChange,
   rindeFromReceta,
   productosFromReceta,
-  onIngredienteAdded,
-  onIngredienteDeleted,
-  onIngredienteEdited,
-  onIngredienteSelecionado,
-}: GrillaIngredientesProps) {
+  unidadesFromReceta,
+}: GrillaIngredientesInputProps) {
   const [total, setTotal] = useState<number>(0);
   const [productos, setProductos] = useState<Producto[]>(productosFromReceta);
-  const [isRowSelected, setIsRowSelected] = useState<boolean>(false);
+  const [unidades, setUnidad] = useState<Unidad[]>(unidadesFromReceta);
+  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  const [openIngredienteModal, setOpenIngredienteModal] = useState(false);
+  const [ingredienteSeleccionado, setIngredienteSeleccionado] = useState<Ingrediente | undefined>(
+    undefined,
+  );
+  const [ingredienteIdToDelete, setIngredienteIdToDelete] = useState<number>(0);
+  const [openBorrarIngrediente, setOpenBorrarIngrediente] = useState(false);
+
+  const handleIngredienteCloseDialogClose = () => {
+    setOpenBorrarIngrediente(false);
+  };
+
+  const handleIngredienteCloseDialog = (id: number) => {
+    if (id == null) return;
+    const nuevasFilas = value.filter((row) => row.id !== id);
+    onChange(nuevasFilas);
+    setSelectedRowId(null);
+  };
+
+  const onHanderSubmitIngrediente = (ingrediente: Ingrediente | undefined) => {
+    if (ingrediente) addRowFromIngrediente(ingrediente);
+  };
+
+  const addRowFromIngrediente = (ingrediente: Ingrediente) => {
+    const producto = productos.find((row: Producto) => row.id === ingrediente.productoId);
+    const unidad = unidades.find((row: Unidad) => row.id === producto?.unidadId);
+    const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
+    const newRow: GrillaIngredientesRow = {
+      id: ingrediente.id,
+      productoId: ingrediente.productoId,
+      unidadId: ingrediente.unidadId,
+      cantidad: ingrediente.cantidad + (unidad ? " " + unidad?.abreviacion : ""),
+      precio: precio.toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS",
+      }),
+    };
+    const existingRowIndex = value.findIndex((row: GrillaIngredientesRow) => row.id === newRow.id);
+    if (existingRowIndex !== -1) {
+      const updatedRows = [...value];
+      updatedRows[existingRowIndex] = newRow;
+      onChange(updatedRows);
+    } else {
+      onChange([...value, newRow]);
+    }
+  };
+
+  const handleCloseIngredienteModal = () => {
+    setOpenIngredienteModal(false);
+  };
+
+  const agregarIngrediente = () => {
+    setIngredienteSeleccionado(undefined);
+    setOpenIngredienteModal(true);
+  };
+
+  const modificarIngrediente = () => {
+    setOpenIngredienteModal(true);
+  };
+
+  const eliminarIngrediente = () => {
+    if (ingredienteSeleccionado?.id) {
+      setIngredienteIdToDelete(ingredienteSeleccionado.id);
+      setOpenBorrarIngrediente(true);
+    }
+  };
 
   const [columnVisibilityModel] = useState<GridColumnVisibilityModel>({
     id: false,
@@ -65,7 +137,7 @@ export default function GrillaIngredientes({
 
   const actualizarTotal = () => {
     setTotal(
-      rowsFromReceta.reduce((total: number, row: GrillaIngredientesRow) => {
+      value.reduce((total: number, row: GrillaIngredientesRow) => {
         if (typeof row.precio === "string") {
           const precioNumerico = parseFloat(row.precio.replace(/[^0-9,-]+/g, "").replace(",", "."));
           return total + (isNaN(precioNumerico) ? 0 : precioNumerico);
@@ -77,15 +149,15 @@ export default function GrillaIngredientes({
 
   useEffect(() => {
     actualizarTotal();
-  }, [rowsFromReceta]);
+  }, [value]);
 
   useEffect(() => setProductos(productosFromReceta), [productosFromReceta]);
+  useEffect(() => setUnidad(unidadesFromReceta), [unidadesFromReceta]);
 
   const handleRowSelection = (newSelectionModel: GridRowSelectionModel) => {
     const selectedRowId = Array.from(newSelectionModel.ids)[0];
-    const selectedRowData = rowsFromReceta.find(
-      (row: GrillaIngredientesRow) => row.id === selectedRowId,
-    );
+    const selectedRowData = value.find((row: GrillaIngredientesRow) => row.id === selectedRowId);
+    setSelectedRowId(selectedRowId ? Number(selectedRowId) : null);
     if (selectedRowData) {
       let cantidad = 0;
       if (typeof selectedRowData.cantidad === "string") {
@@ -94,7 +166,7 @@ export default function GrillaIngredientes({
       } else if (typeof selectedRowData.cantidad === "number") {
         cantidad = selectedRowData.cantidad;
       }
-      onIngredienteSelecionado(
+      setIngredienteSeleccionado(
         new Ingrediente(
           Number(selectedRowData.id),
           selectedRowData.productoId,
@@ -102,10 +174,8 @@ export default function GrillaIngredientes({
           cantidad,
         ),
       );
-      setIsRowSelected(true);
     } else {
-      setIsRowSelected(false);
-      onIngredienteSelecionado(undefined);
+      setIngredienteSeleccionado(undefined);
     }
   };
 
@@ -129,7 +199,7 @@ export default function GrillaIngredientes({
     );
   };
 
-  type TypeOfRow = (typeof rowsFromReceta)[number];
+  type TypeOfRow = (typeof value)[number];
   const GrillaRef = useGridApiRef();
 
   const columns: GridColDef<TypeOfRow>[] = [
@@ -149,6 +219,7 @@ export default function GrillaIngredientes({
       type: "singleSelect",
       editable: true,
       disableColumnMenu: true,
+      valueOptions: productos.map((p) => ({ value: p.id, label: p.nombre })),
       renderCell: (params) => {
         const producto = productos.find((p: Producto) => p.id === params.value);
         return producto ? producto.nombre : "Seleccionar producto";
@@ -198,35 +269,23 @@ export default function GrillaIngredientes({
         <Actionbuttons
           agregar={{
             isDisabled: false,
-            onClick: onIngredienteAdded,
-            sx: {
-              display: { xs: "flex", md: "inline-flex" },
-              minWidth: { xs: "auto", md: "64px" },
-              justifyContent: "center",
-            },
+            onClick: agregarIngrediente,
+            sx: actionbuttonsStile,
           }}
           modificar={{
-            isDisabled: !isRowSelected,
-            onClick: onIngredienteEdited,
-            sx: {
-              display: { xs: "flex", md: "inline-flex" },
-              minWidth: { xs: "auto", md: "64px" },
-              justifyContent: "center",
-            },
+            isDisabled: !selectedRowId,
+            onClick: modificarIngrediente,
+            sx: actionbuttonsStile,
           }}
           borrar={{
-            isDisabled: !isRowSelected,
-            onClick: onIngredienteDeleted,
-            sx: {
-              display: { xs: "flex", md: "inline-flex" },
-              minWidth: { xs: "auto", md: "64px" },
-              justifyContent: "center",
-            },
+            isDisabled: !selectedRowId,
+            onClick: eliminarIngrediente,
+            sx: actionbuttonsStile,
           }}
         />
       </Box>
       <DataGrid
-        rows={rowsFromReceta}
+        rows={value}
         apiRef={GrillaRef}
         columns={columns}
         initialState={{
@@ -238,10 +297,30 @@ export default function GrillaIngredientes({
         }}
         onRowSelectionModelChange={handleRowSelection}
         columnVisibilityModel={columnVisibilityModel}
+        getRowClassName={(params) => `fila-ingrediente-${params.id}`}
         slots={{
           footer: () => <CustomFooter total={total} rinde={rindeFromReceta ?? 1} />,
         }}
       />
+      <Box>
+        {openIngredienteModal && (
+          <IngredienteModal
+            openArg={openIngredienteModal}
+            onSubmit={onHanderSubmitIngrediente}
+            ingredienteParam={ingredienteSeleccionado}
+            unidadesParam={unidadesFromReceta}
+            productosParam={productos}
+            onClose={handleCloseIngredienteModal}
+          />
+        )}
+        {openBorrarIngrediente && (
+          <AlertDialogBorrarIngrediente
+            paramId={ingredienteIdToDelete}
+            onSubmit={handleIngredienteCloseDialog}
+            onClose={handleIngredienteCloseDialogClose}
+          />
+        )}
+      </Box>
     </Box>
   );
 }

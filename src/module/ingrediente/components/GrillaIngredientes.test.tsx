@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import GrillaIngredientes, { GrillaIngredientesRow } from "./GrillaIngredientes";
+import GrillaIngredientesInput, { GrillaIngredientesRow } from "./GrillaIngredientes";
 import Producto from "../../producto/Producto";
-import { ActionbuttonsProps } from "../../core/components/ActionButtons";
+import { Unidad } from "../../unidad/Unidad";
 import { useState } from "react";
+import { ActionbuttonsProps } from "../../core/components/ActionButtons";
 
 // Tipos mejorados para los mocks
 type MockDataGridProps = {
@@ -113,6 +114,8 @@ jest.mock("../../core/components/ActionButtons", () => (props: ActionbuttonsProp
   </div>
 ));
 
+const mockUnidades: Unidad[] = [new Unidad(1, "Gramos", "grs")];
+
 const mockProductos = [
   new Producto(1, "Harina", 1, 1500, 1000, true),
   new Producto(2, "Azúcar", 1, 1200, 1000, false),
@@ -123,21 +126,22 @@ const mockRows: GrillaIngredientesRow[] = [
   new GrillaIngredientesRow(2, "200 grs", 2, 1, "$2.400,00"),
 ];
 
-describe("GrillaIngredientes", () => {
-  const mockCallbacks = {
-    onIngredienteAdded: jest.fn(),
-    onIngredienteDeleted: jest.fn(),
-    onIngredienteEdited: jest.fn(),
-    onIngredienteSelecionado: jest.fn(),
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  // Test existentes...
-
-  // Nuevos tests para mayor cobertura
+describe("GrillaIngredientesInput", () => {
+  function renderWithState(rows: GrillaIngredientesRow[], rinde: number = 1) {
+    const Wrapper = () => {
+      const [value, setValue] = useState(rows);
+      return (
+        <GrillaIngredientesInput
+          value={value}
+          onChange={setValue}
+          rindeFromReceta={rinde}
+          productosFromReceta={mockProductos}
+          unidadesFromReceta={mockUnidades}
+        />
+      );
+    };
+    return render(<Wrapper />);
+  }
 
   it("debería manejar correctamente el formato de precios con diferentes formatos", () => {
     const rowsWithDifferentFormats = [
@@ -145,14 +149,7 @@ describe("GrillaIngredientes", () => {
       new GrillaIngredientesRow(4, "75 grs", 2, 1, "2.400"),
     ];
 
-    render(
-      <GrillaIngredientes
-        rowsFromReceta={rowsWithDifferentFormats}
-        rindeFromReceta={1}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
+    renderWithState(rowsWithDifferentFormats);
 
     expect(screen.getByText(/Total:\s*\$ ?3\.900,50/i)).toBeInTheDocument();
   });
@@ -164,103 +161,71 @@ describe("GrillaIngredientes", () => {
       cantidad: "300",
     };
 
-    render(
-      <GrillaIngredientes
-        rowsFromReceta={[numericCantidadRow]}
-        rindeFromReceta={1}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
+    renderWithState([numericCantidadRow]);
 
     fireEvent.click(screen.getByText("Harina"));
-    expect(mockCallbacks.onIngredienteSelecionado).toHaveBeenCalledWith(
-      expect.objectContaining({ cantidad: 300 }),
-    );
+    // El modal no se abre en este test, pero podemos verificar que la selección funciona
+    // No hay callback externo, pero podemos verificar que el row está seleccionado visualmente
+    expect(screen.getByTestId("row-3")).toHaveStyle("background: #eee");
   });
 
   it("debería actualizar los totales cuando cambian las filas", () => {
-    const { rerender } = render(
-      <GrillaIngredientes
-        rowsFromReceta={mockRows}
-        rindeFromReceta={4}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
+    const Wrapper = () => {
+      const [value, setValue] = useState(mockRows);
+      return (
+        <div>
+          <GrillaIngredientesInput
+            value={value}
+            onChange={setValue}
+            rindeFromReceta={4}
+            productosFromReceta={mockProductos}
+            unidadesFromReceta={mockUnidades}
+          />
+          <button
+            onClick={() =>
+              setValue([...value, new GrillaIngredientesRow(3, "300 grs", 1, 1, "$3.000,00")])
+            }>
+            Add Row
+          </button>
+        </div>
+      );
+    };
 
-    const newRows = [...mockRows, new GrillaIngredientesRow(3, "300 grs", 1, 1, "$3.000,00")];
-    rerender(
-      <GrillaIngredientes
-        rowsFromReceta={newRows}
-        rindeFromReceta={4}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
-
+    render(<Wrapper />);
+    expect(screen.getByText(/Total:\s*\$ ?3\.900,00/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Add Row"));
     expect(screen.getByText(/Total:\s*\$ ?6\.900,00/i)).toBeInTheDocument();
     expect(screen.getByText(/Por Porción:\s*\$ ?1\.725,00/i)).toBeInTheDocument();
   });
 
   it("debería manejar rindeFromReceta igual a 0", () => {
-    render(
-      <GrillaIngredientes
-        rowsFromReceta={mockRows}
-        rindeFromReceta={0}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
-
+    renderWithState(mockRows, 0);
     expect(screen.getByText(/Por Porción:\s*\$ ?3\.900,00/i)).toBeInTheDocument();
   });
 
   it("debería manejar la deselección de filas", async () => {
-    render(
-      <GrillaIngredientes
-        rowsFromReceta={mockRows}
-        rindeFromReceta={4}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
+    renderWithState(mockRows, 4);
 
     // Seleccionar y luego deseleccionar
     fireEvent.click(screen.getByText("Harina"));
     fireEvent.click(screen.getByText("Harina")); // Toggle
 
     await waitFor(() => {
-      expect(mockCallbacks.onIngredienteSelecionado).toHaveBeenCalledWith(undefined);
+      expect(screen.getByTestId("row-1")).not.toHaveStyle("background: #eee");
     });
   });
 
   it("debería ocultar las columnas especificadas", () => {
-    render(
-      <GrillaIngredientes
-        rowsFromReceta={mockRows}
-        rindeFromReceta={4}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
+    renderWithState(mockRows, 4);
 
     expect(screen.queryByText("IngredienteId")).not.toBeInTheDocument();
     expect(screen.queryByText("unidadId")).not.toBeInTheDocument();
   });
 
-  it("debería manejar productos no encontrados en valueGetter", () => {
+  it("debería manejar productos no encontrados en renderCell", () => {
     const rowWithInvalidProduct = new GrillaIngredientesRow(3, "100 grs", 999, 1, "$100,00");
 
-    render(
-      <GrillaIngredientes
-        rowsFromReceta={[rowWithInvalidProduct]}
-        rindeFromReceta={1}
-        productosFromReceta={mockProductos}
-        {...mockCallbacks}
-      />,
-    );
-
+    renderWithState([rowWithInvalidProduct]);
     expect(screen.getByText("Seleccionar producto")).toBeInTheDocument();
   });
 });

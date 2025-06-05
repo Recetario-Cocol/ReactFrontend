@@ -52,7 +52,6 @@ export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFo
           abreviacion: unidad.abreviacion,
           can_be_deleted: unidad.can_be_deleted,
         });
-        console.log("Unidad cargada:", unidad);
       });
     } else {
       reset();

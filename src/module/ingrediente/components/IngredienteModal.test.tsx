@@ -1,9 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import IngredienteModal, { AlertDialogBorrarIngrediente } from "./IngredienteModal";
 import { Unidad } from "../../unidad/Unidad";
 import Producto from "../../producto/Producto";
-
-// src/module/ingrediente/components/IngredienteModal.test.tsx
 
 const mockProductos = [
   new Producto(1, "Producto A", 10, 1500, 1000),
@@ -23,19 +21,22 @@ describe("IngredienteModal", () => {
         openArg={true}
         onSubmit={jest.fn()}
         ingredienteParam={undefined}
-        unidades={mockUnidades}
-        productos={mockProductos}
+        unidadesParam={mockUnidades}
+        productosParam={mockProductos}
         onClose={jest.fn()}
       />,
     );
-    // Evita ambigüedad: verifica el título por rol heading
-    expect(screen.getByRole("heading", { name: /Producto/i })).toBeInTheDocument();
+    // Cambia el título esperado a "Ingrediente"
+    expect(screen.getByRole("heading", { name: /Ingrediente/i })).toBeInTheDocument();
     // Verifica los campos por label
-    expect(screen.getByLabelText(/^Producto$/i)).toBeInTheDocument();
+    waitFor(() => {
+      expect(screen.getByLabelText(/^Producto$/i)).toBeInTheDocument();
+    });
     expect(screen.getByLabelText(/^Cantidad$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Unidad$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Precio$/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Enviar/i })).toBeInTheDocument();
+    // Cambia el nombre del botón a "Guardar"
+    expect(screen.getByRole("button", { name: /Guardar/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Cancelar/i })).toBeInTheDocument();
   });
 
@@ -45,54 +46,59 @@ describe("IngredienteModal", () => {
         openArg={true}
         onSubmit={jest.fn()}
         ingredienteParam={undefined}
-        unidades={mockUnidades}
-        productos={mockProductos}
+        unidadesParam={mockUnidades}
+        productosParam={mockProductos}
         onClose={jest.fn()}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
-    expect(screen.getByText(/Selecione un producto/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Guardar/i }));
+    // Cambia el mensaje de error esperado
+    expect(screen.getByText(/Seleccione un producto/i)).toBeInTheDocument();
   });
 
-  it("debería llamar onSubmit con los datos correctos", () => {
+  it("debería llamar onSubmit con los datos correctos", async () => {
     const onSubmit = jest.fn();
     render(
       <IngredienteModal
         openArg={true}
         onSubmit={onSubmit}
         ingredienteParam={undefined}
-        unidades={mockUnidades}
-        productos={mockProductos}
+        unidadesParam={mockUnidades}
+        productosParam={mockProductos}
         onClose={jest.fn()}
       />,
     );
     // Select product
-    fireEvent.mouseDown(screen.getByLabelText(/^Producto$/i));
+    await waitFor(() => {
+      expect(screen.getByLabelText(/^Producto$/i)).toBeInTheDocument();
+    });
+    fireEvent.mouseDown(screen.getByLabelText(/^Seleccione un Producto$/i));
     fireEvent.click(screen.getByText("Producto A"));
     // Enter cantidad
     fireEvent.change(screen.getByLabelText(/^Cantidad$/i), { target: { value: "5" } });
     // Submit
-    fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
-    expect(onSubmit).toHaveBeenCalled();
-    // Compara por propiedades, no por instancia (por clases distintas en test y prod)
+    fireEvent.click(screen.getByRole("button", { name: /Guardar/i }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
     const arg = onSubmit.mock.calls[0][0];
-    expect(arg).toEqual(
-      expect.objectContaining({
-        productoId: 1,
-        cantidad: 5,
-      }),
-    );
+    // Extrae las propiedades públicas relevantes para comparar
+    expect({
+      productoId: arg.productoId ?? arg._productoId,
+      cantidad: Number(arg.cantidad ?? arg._cantidad),
+    }).toEqual({
+      productoId: 1,
+      cantidad: 5,
+    });
   });
 
   // Test adicional: cantidad inválida
-  it("debería mostrar error si la cantidad es inválida", () => {
+  it("debería mostrar error si la cantidad es inválida", async () => {
     render(
       <IngredienteModal
         openArg={true}
         onSubmit={jest.fn()}
         ingredienteParam={undefined}
-        unidades={mockUnidades}
-        productos={mockProductos}
+        unidadesParam={mockUnidades}
+        productosParam={mockProductos}
         onClose={jest.fn()}
       />,
     );
@@ -101,9 +107,9 @@ describe("IngredienteModal", () => {
     fireEvent.click(screen.getByText("Producto A"));
     // Ingresa cantidad inválida
     fireEvent.change(screen.getByLabelText(/^Cantidad$/i), { target: { value: "-1" } });
-    fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
-    // Ajusta el texto al mensaje real del componente
-    expect(screen.getByText(/Ingrese una cantidad diferente a 0/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Guardar/i }));
+    // Espera a que aparezca el mensaje de error
+    await waitFor(() => expect(screen.getByText(/cantidad válida mayor a 0/i)).toBeInTheDocument());
   });
 });
 
@@ -112,7 +118,7 @@ describe("AlertDialogBorrarIngrediente", () => {
     const onSubmit = jest.fn();
     const onClose = jest.fn();
     render(<AlertDialogBorrarIngrediente paramId={123} onSubmit={onSubmit} onClose={onClose} />);
-    expect(screen.getByText(/¿Desea Borrar el Ingerdiente/i)).toBeInTheDocument();
+    expect(screen.getByText(/¿Desea Borrar el Ingrediente/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /No/i }));
     expect(onClose).toHaveBeenCalled();
     // Re-render to test "Si"

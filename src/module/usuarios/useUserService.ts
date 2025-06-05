@@ -39,7 +39,6 @@ export const useUserService = () => {
         >(buildUrl());
         return response.data.map((item: UserFromApi) => Usuario.fromJSON(item));
       } catch (error: unknown) {
-        console.log(error);
         if (error instanceof AxiosError) {
           throw {
             message: `Error al obtener usuarios: ${error.message}`,
