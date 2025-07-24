@@ -56,7 +56,7 @@ export default function UnidadFormModal({ openArg, onClose, idToOpen }: UnidadFo
     } else {
       reset();
     }
-  }, [idToOpen, UnidadService, reset]);
+  }, [idToOpen]);
 
   const handleClose = (reason?: string) => {
     if (!reason || reason !== "backdropClick") {

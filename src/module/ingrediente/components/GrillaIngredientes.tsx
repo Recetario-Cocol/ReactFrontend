@@ -5,7 +5,6 @@ import {
   DataGrid,
   GridColDef,
   GridColumnVisibilityModel,
-  GridFooterContainer,
   GridRowSelectionModel,
   useGridApiRef,
 } from "@mui/x-data-grid";
@@ -56,11 +55,9 @@ export interface GrillaIngredientesInputProps {
 export default function GrillaIngredientesInput({
   value,
   onChange,
-  rindeFromReceta,
   productosFromReceta,
   unidadesFromReceta,
 }: GrillaIngredientesInputProps) {
-  const [total, setTotal] = useState<number>(0);
   const [productos, setProductos] = useState<Producto[]>(productosFromReceta);
   const [unidades, setUnidad] = useState<Unidad[]>(unidadesFromReceta);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
@@ -135,22 +132,6 @@ export default function GrillaIngredientesInput({
     unidadId: false,
   });
 
-  const actualizarTotal = () => {
-    setTotal(
-      value.reduce((total: number, row: GrillaIngredientesRow) => {
-        if (typeof row.precio === "string") {
-          const precioNumerico = parseFloat(row.precio.replace(/[^0-9,-]+/g, "").replace(",", "."));
-          return total + (isNaN(precioNumerico) ? 0 : precioNumerico);
-        }
-        return total;
-      }, 0),
-    );
-  };
-
-  useEffect(() => {
-    actualizarTotal();
-  }, [value]);
-
   useEffect(() => setProductos(productosFromReceta), [productosFromReceta]);
   useEffect(() => setUnidad(unidadesFromReceta), [unidadesFromReceta]);
 
@@ -177,26 +158,6 @@ export default function GrillaIngredientesInput({
     } else {
       setIngredienteSeleccionado(undefined);
     }
-  };
-
-  const CustomFooter = ({ total, rinde }: { total: number; rinde: number }) => {
-    const totalAsString = (subtotal?: number) => {
-      return (subtotal ?? total).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      });
-    };
-
-    return (
-      <GridFooterContainer>
-        <Box sx={{ p: 1, display: "flex", justifyContent: "space-between", width: "100%" }}>
-          <Typography variant="body2">
-            Por Porción: {totalAsString(total / (rinde || 1))}
-          </Typography>
-          <Typography variant="body2">Total: {totalAsString()}</Typography>
-        </Box>
-      </GridFooterContainer>
-    );
   };
 
   type TypeOfRow = (typeof value)[number];
@@ -298,9 +259,6 @@ export default function GrillaIngredientesInput({
         onRowSelectionModelChange={handleRowSelection}
         columnVisibilityModel={columnVisibilityModel}
         getRowClassName={(params) => `fila-ingrediente-${params.id}`}
-        slots={{
-          footer: () => <CustomFooter total={total} rinde={rindeFromReceta ?? 1} />,
-        }}
       />
       <Box>
         {openIngredienteModal && (

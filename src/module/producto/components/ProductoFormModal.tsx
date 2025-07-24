@@ -20,6 +20,7 @@ import { useProductoService } from "../useProductoService";
 import { Unidad } from "../../unidad/Unidad";
 import LoadingModel from "../../core/components/LoadingModel";
 import { showConfirmDialog } from "../../core/components/ConfirmDialog";
+import CurrencyFormatCustom from "../../core/components/CurrencyFormatCustom";
 import { Controller, useForm } from "react-hook-form";
 
 const style = {
@@ -213,25 +214,31 @@ export default function ProductoFormModal({ openArg, onClose, idToOpen }: Produc
               />
               {errors.unidadId && <FormHelperText>{errors.unidadId.message}</FormHelperText>}
             </FormControl>
-            <Controller
-              name="precio"
-              control={control}
-              rules={{
-                required: "Ingrese un precio.",
-                min: { value: 0.01, message: "Debe ser mayor a 0." },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Precio"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.precio}
-                  helperText={errors.precio?.message}
-                />
-              )}
-            />
+              <Controller
+                name="precio"
+                control={control}
+                rules={{
+                  required: 'Ingrese un precio.',
+                  min: { value: 0.01, message: 'El precio debe ser mayor que 0.' },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Precio"
+                    margin="normal"
+                    error={!!errors.precio}
+                    helperText={errors.precio?.message}
+                    InputProps={{
+                      inputComponent: CurrencyFormatCustom as any, // Use inputComponent
+                    }}
+                    inputProps={{
+                      name: field.name,
+                      onChange: field.onChange,
+                      value: field.value,
+                    }}
+                  />
+                )}
+              />
             <Box
               sx={{
                 width: "100%",

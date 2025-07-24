@@ -8,6 +8,7 @@ import {
   IconButton,
   Alert,
   Tooltip,
+  Stack,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Receta from "../Receta";
@@ -27,6 +28,7 @@ import {
   modalStyle,
   headerBoxStyle,
   nombreTextFieldStyle,
+  precioTextFieldStyle,
   rindeTextFieldStyle,
   mainBoxStyle,
   ingredientesObservacionesBoxStyle,
@@ -38,6 +40,7 @@ import {
   buttonStyle,
 } from "./recetaFormModalStyles";
 import { showConfirmDialog } from "../../core/components/ConfirmDialog";
+import CurrencyFormatCustom from "../../core/components/CurrencyFormatCustom";
 
 interface UnidadFormModalProps {
   openArg: boolean;
@@ -56,6 +59,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
   const [mensajeDeError, setMensajeDeError] = useState<string>("");
+  const [costo, setCosto] = useState<number>(0);
 
   const {
     control,
@@ -63,7 +67,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     reset,
     formState: { errors, isDirty },
     watch,
-    setValue, // <-- agrega setValue aquí
+    setValue,
   } = useForm<Receta>({
     defaultValues: {
       id: 0,
@@ -71,11 +75,14 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
       rinde: 0,
       ingredientes: [],
       observaciones: "",
+      precio: 0,
+      precio_unidad: 0,
     },
   });
 
-  // Watch rinde for GrillaIngredientes
   const rindeValue = watch("rinde");
+  const precio = watch("precio");
+  const precio_unidad = watch("precio_unidad");
 
   useEffect(() => {
     const cargarProductosYUnidades = async () => {
@@ -100,13 +107,17 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
         try {
           setId(idToOpen);
           const result: Receta = await RecetaService.get(idToOpen);
+          const ingredienteResult = Array.isArray(result.ingredientes) ? result.ingredientes : [];
           reset({
             id: result.id ?? 0,
             nombre: result.nombre ?? "",
             rinde: result.rinde ?? 0,
-            ingredientes: Array.isArray(result.ingredientes) ? result.ingredientes : [],
+            ingredientes: ingredienteResult,
             observaciones: result.observaciones ?? "",
+            precio: result.precio ?? 0,
+            precio_unidad: result.precio_unidad ?? 0
           });
+          actualizartCostos(ingredienteResult.map((i: Ingrediente) => ingredienteToRow(i)));
         } catch (error) {
           console.error("Error fetching receta:", error);
         } finally {
@@ -114,18 +125,20 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
         }
       } else if (!idToOpen) {
         setLoading(false);
-        setId(0); // <-- Ensure id is reset to 0 for new recipe
+        setId(0);
         reset({
           id: 0,
           nombre: "",
           rinde: 0,
           ingredientes: [],
           observaciones: "",
+          precio: 0,
+          precio_unidad: 0,
         });
       }
     };
     fetchData();
-  }, [idToOpen, productos, unidades, reset]); // Dependencias correctas
+  }, [idToOpen, productos, unidades]);
 
   const handleClose = (reason?: string) => {
     if (!reason || reason !== "backdropClick") {
@@ -155,13 +168,15 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
       data.ingredientes.map(
         (i) =>
           new Ingrediente(
-            id ? i.id : 0, // Use 0 for new ingredientes when creating
+            id ? i.id : 0,
             i.productoId,
             i.unidadId,
             i.cantidad,
           ),
       ),
       data.observaciones,
+      data.precio,
+      data.precio_unidad
     );
 
     if (id) {
@@ -178,13 +193,13 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
   function ingredienteToRow(ingrediente: Ingrediente): GrillaIngredientesRow {
     const producto = productos.find((row) => row.id === ingrediente.productoId);
     const unidad = unidades.find((row) => row.id === producto?.unidadId);
-    const precio = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
+    const precioIngrediente = ((producto?.precio ?? 0) / (producto?.cantidad ?? 1)) * ingrediente.cantidad;
     return new GrillaIngredientesRow(
       ingrediente.id,
       ingrediente.cantidad.toString() + (unidad ? " " + unidad?.abreviacion : ""),
       ingrediente.productoId,
       ingrediente.unidadId,
-      precio.toLocaleString("es-AR", {
+      precioIngrediente.toLocaleString("es-AR", {
         style: "currency",
         currency: "ARS",
       }),
@@ -200,6 +215,23 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
     }
     return new Ingrediente(row.id, row.productoId, row.unidadId, cantidad);
   }
+
+  function actualizartCostos(ingredientes: GrillaIngredientesRow[]){
+    setCosto(ingredientes.reduce((cst: number, row: GrillaIngredientesRow) => {
+        if (typeof row.precio === "string") {
+          const precioNumerico = parseFloat(row.precio.replace(/[^0-9,-]+/g, "").replace(",", "."));
+          return cst + (isNaN(precioNumerico) ? 0 : precioNumerico);
+        }
+        return cst;
+      }, 0));
+  }
+
+  const totalAsString = (total: number) => {
+    return total.toLocaleString("es-AR", {
+      style: "currency",
+      currency: "ARS",
+    });
+  };
 
   return (
     <div>
@@ -252,6 +284,7 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                   rules={{
                     required: "Ingrese cuantas porciones rinde la receta.",
                     min: { value: 1, message: "Ingrese cuantas porciones rinde la receta." },
+                    max: { value: 99, message: "El valor debe ser menor a 99." },
                   }}
                   render={({ field }) => (
                     <Tooltip title="Cuantas Porciones rinde la receta">
@@ -287,7 +320,8 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                         onChange={(rows) => {
                           const ingredientes = rows.map(rowToIngrediente);
                           field.onChange(ingredientes);
-                          setValue("ingredientes", ingredientes, { shouldValidate: true }); // <-- fuerza la actualización y validación
+                          setValue("ingredientes", ingredientes, { shouldValidate: true });
+                          actualizartCostos(rows);
                         }}
                       />
                     )}
@@ -313,11 +347,91 @@ export default function RecetaFormModal({ openArg, onClose, idToOpen }: UnidadFo
                         fullWidth
                         margin="normal"
                         sx={observacionesTextFieldStyle}
-                        inputProps={{ "data-testid": "observaciones-input" }}
+                        slotProps={{
+                          htmlInput: { "data-testid": "observaciones-input" }
+                        }}
                       />
                     )}
                   />
                 </Box>
+                <Box sx={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "flex-end",}}>
+                 <Controller
+                    name="precio"
+                    control={control}
+                    rules={{
+                      required: 'Ingrese un precio.',
+                      min: { value: 0, message: 'El precio debe ser mayor que 0.' },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Precio"
+                        margin="normal"
+                        error={!!errors.precio}
+                        helperText={errors.precio?.message}
+                        InputProps={{
+                          inputComponent: CurrencyFormatCustom as any, // Use inputComponent
+                        }}
+                        inputProps={{
+                          name: field.name,
+                          onChange: field.onChange,
+                          value: field.value,
+                        }}                        
+                        sx={precioTextFieldStyle}
+                      />
+                    )}
+                  />
+                 <Controller
+                    name="precio_unidad"
+                    control={control}
+                    rules={{
+                      required: 'Ingrese un precio.',
+                      min: { value: 0, message: 'El precio debe ser mayor que 0.' },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Precio x Unidad/Porcion"
+                        margin="normal"
+                        error={!!errors.precio_unidad}
+                        helperText={errors.precio_unidad?.message}
+                        InputProps={{
+                          inputComponent: CurrencyFormatCustom as any, // Use inputComponent
+                        }}
+                        inputProps={{
+                          name: field.name,
+                          onChange: field.onChange,
+                          value: field.value,
+                        }}
+                        sx={precioTextFieldStyle}
+                      />
+                    )}
+                  />
+                </Box>
+                <Box sx={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "flex-end",}}>
+                  <TextField
+                    value={totalAsString(costo)}
+                    label="Costo"
+                    margin="normal"
+                    sx={precioTextFieldStyle}
+                  />
+                  <TextField
+                    value={totalAsString(costo/rindeValue)}
+                    label="Costo x Unidad/Porcion"
+                    margin="normal"
+                    sx={precioTextFieldStyle}
+                  />
+                </Box>
+                <Stack direction="column" alignItems="flex-end" spacing={1} sx={{ width: "100%" }}>
+                  <span>
+                    Ganancia total: { totalAsString(precio - costo) } (
+                    { ((precio - costo) / costo * 100).toFixed(2) }%)
+                  </span>
+                  <span>
+                    Ganancia por porción: { totalAsString(precio_unidad - (costo / rindeValue)) } (
+                    { (((precio_unidad - (costo / rindeValue)) / (costo / rindeValue)) * 100).toFixed(2) }%)
+                  </span>
+                </Stack>
               </Box>
             </Box>
             <Box sx={footerBoxStyle}>

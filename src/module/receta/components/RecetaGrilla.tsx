@@ -14,11 +14,13 @@ import HeaderApp from "../../core/components/HeaderApp";
 import { usePermisos } from "../../contexts/Permisos";
 import { useAuth } from "../../contexts/AuthContext";
 import Actionbuttons from "../../core/components/ActionButtons";
+import VisorReceta from "./VisorReceta";
 
 export default function RecetaGrilla() {
   const [seleccionado, setSeleccionado] = useState(false);
   const [, setSelectionModel] = useState<GridRowSelectionModel>();
   const [openModal, setOpenModal] = useState(false);
+  const [openReceta, setOpenReceta] = useState(false);
   const [openBorrarReceta, setOpenBorrarUnidad] = useState(false);
   const [idToOpen, setIdToOpen] = useState<number>(0);
   const [rows, setRows] = useState<GrillaReceta[]>([]);
@@ -28,7 +30,7 @@ export default function RecetaGrilla() {
     canBeDeleted: false,
     id: false,
   });
-  const { change_receta, add_receta, delete_receta } = usePermisos();
+  const { view_receta, change_receta, add_receta, delete_receta } = usePermisos();
   const { hasPermission } = useAuth();
 
   const handleSeleccion = (rowSelectionModel: GridRowSelectionModel) => {
@@ -42,6 +44,7 @@ export default function RecetaGrilla() {
   const handleCloseModal = () => {
     fetchRows();
     setOpenModal(false);
+    setOpenReceta(false);
   };
 
   const handleCloseDialog = (mensaje: string) => {
@@ -94,6 +97,10 @@ export default function RecetaGrilla() {
     setOpenModal(true);
   }
 
+  function verReceta () {
+    setOpenReceta(true)
+  }
+
   function modificar() {
     setOpenModal(true);
   }
@@ -128,6 +135,7 @@ export default function RecetaGrilla() {
           maxWidth: 800,
         }}>
         <Actionbuttons
+          consultar={{ isDisabled: !hasPermission(view_receta), onClick: verReceta }}
           agregar={{ isDisabled: !hasPermission(add_receta), onClick: agregar }}
           modificar={{
             isDisabled: !hasPermission(change_receta) || !seleccionado,
@@ -168,6 +176,9 @@ export default function RecetaGrilla() {
               onClose={(mensaje: string) => handleCloseDialog(mensaje)}
             />
           )}
+          {openReceta && 
+            <VisorReceta openArg={openReceta} onClose={handleCloseModal} idToOpen={idToOpen} />
+          }
         </div>
       </Box>
     </Box>

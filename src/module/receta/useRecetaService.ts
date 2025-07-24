@@ -95,6 +95,8 @@ export const useRecetaService = () => {
               ),
           ),
           recetaData.observaciones,
+          recetaData.precio,
+          recetaData.precio_unidad,
         );
       } catch (error: unknown) {
         if (error instanceof AxiosError) {

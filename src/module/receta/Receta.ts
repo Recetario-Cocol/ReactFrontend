@@ -6,6 +6,8 @@ export default class Receta {
   private _rinde: number;
   private _ingredientes: Array<Ingrediente>;
   private _observaciones: string;
+  private _precio: number;
+  private _precio_unidad: number;
 
   constructor(
     id: number = 0,
@@ -13,12 +15,16 @@ export default class Receta {
     rinde: number = 0,
     ingredientes: Array<Ingrediente> = [],
     observaciones: string = "",
+    precio: number = 0,
+    precio_unidad: number = 0,
   ) {
     this._id = id;
     this._nombre = nombre;
     this._rinde = rinde;
     this._ingredientes = ingredientes;
     this._observaciones = observaciones;
+    this._precio = precio;
+    this._precio_unidad = precio_unidad;
   }
 
   public get rinde(): number {
@@ -61,6 +67,22 @@ export default class Receta {
     this._observaciones = value;
   }
 
+  public set precio(precio: number) {
+    this._precio = precio;
+  }
+
+  public get precio(): number {
+    return this._precio;
+  }
+
+  public set precio_unidad(precio_unidad: number) {
+    this._precio_unidad = precio_unidad;
+  }
+
+  public get precio_unidad() {
+    return this._precio_unidad;
+  }
+
   public toJSON() {
     return {
       id: this.id,
@@ -68,6 +90,8 @@ export default class Receta {
       rinde: Number(this.rinde),
       ingredientes: this.ingredientes.map((ingrediente) => ingrediente.toJSON()),
       observaciones: this.observaciones,
+      precio: this.precio,
+      precio_unidad: this.precio_unidad,
     };
   }
 }

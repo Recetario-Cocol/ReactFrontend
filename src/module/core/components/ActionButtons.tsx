@@ -2,9 +2,11 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import LockResetIcon from "@mui/icons-material/LockReset";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Box, Button, SxProps, Theme } from "@mui/material";
 
 export interface ActionbuttonsProps {
+  consultar?: ActionbuttonsItemProps;
   agregar: ActionbuttonsItemProps;
   modificar: ActionbuttonsItemProps;
   borrar: ActionbuttonsItemProps;
@@ -19,6 +21,7 @@ interface ActionbuttonsItemProps {
 }
 
 export default function Actionbuttons({
+  consultar,
   agregar,
   modificar,
   borrar,
@@ -27,6 +30,14 @@ export default function Actionbuttons({
 }: ActionbuttonsProps) {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+      {consultar && <Button
+        startIcon={<OpenInNewIcon />}
+        disabled={consultar.isDisabled}
+        onClick={consultar.onClick}
+        sx={consultar.sx}>
+        Consultar
+      </Button>
+      }
       <Button
         startIcon={<AddIcon />}
         disabled={agregar.isDisabled}

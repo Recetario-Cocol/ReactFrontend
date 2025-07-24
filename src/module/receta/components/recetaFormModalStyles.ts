@@ -99,3 +99,11 @@ export const rindeTextFieldStyle = {
     md: "calc(100% - (60% + 32px))",
   },
 };
+
+export const precioTextFieldStyle = {
+  width: {
+    xs: "100%",
+    md: "calc(100% - (60% + 32px))",
+  },
+  ml: { xs: 0, md: 2 },
+};

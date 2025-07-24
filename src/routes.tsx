@@ -9,6 +9,7 @@ import Home from "./module/core/components/Home";
 import UsuariosGrilla from "./module/usuarios/components/UsuariosGrilla";
 import { PermisosProvider } from "./module/contexts/Permisos";
 import UpdatePassword from "./module/usuarios/components/updatePassword";
+import Propaganda from "./module/dashboard/components/Proganda";
 
 interface PrivateRouteProps {
   children: ReactNode;
@@ -39,7 +40,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Propaganda />} />
       <Route path="/login" element={<Login />} />
       <Route path="/updatePassword" element={<UpdatePassword />} />
       <Route
