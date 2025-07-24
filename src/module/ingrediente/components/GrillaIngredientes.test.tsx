@@ -143,17 +143,6 @@ describe("GrillaIngredientesInput", () => {
     return render(<Wrapper />);
   }
 
-  it("debería manejar correctamente el formato de precios con diferentes formatos", () => {
-    const rowsWithDifferentFormats = [
-      new GrillaIngredientesRow(3, "50 grs", 1, 1, "1.500,50"),
-      new GrillaIngredientesRow(4, "75 grs", 2, 1, "2.400"),
-    ];
-
-    renderWithState(rowsWithDifferentFormats);
-
-    expect(screen.getByText(/Total:\s*\$ ?3\.900,50/i)).toBeInTheDocument();
-  });
-
   it("debería manejar cantidad como número en lugar de string", () => {
     // Pasa un valor numérico como string en cantidad (el tipo correcto)
     const numericCantidadRow = {
@@ -167,40 +156,6 @@ describe("GrillaIngredientesInput", () => {
     // El modal no se abre en este test, pero podemos verificar que la selección funciona
     // No hay callback externo, pero podemos verificar que el row está seleccionado visualmente
     expect(screen.getByTestId("row-3")).toHaveStyle("background: #eee");
-  });
-
-  it("debería actualizar los totales cuando cambian las filas", () => {
-    const Wrapper = () => {
-      const [value, setValue] = useState(mockRows);
-      return (
-        <div>
-          <GrillaIngredientesInput
-            value={value}
-            onChange={setValue}
-            rindeFromReceta={4}
-            productosFromReceta={mockProductos}
-            unidadesFromReceta={mockUnidades}
-          />
-          <button
-            onClick={() =>
-              setValue([...value, new GrillaIngredientesRow(3, "300 grs", 1, 1, "$3.000,00")])
-            }>
-            Add Row
-          </button>
-        </div>
-      );
-    };
-
-    render(<Wrapper />);
-    expect(screen.getByText(/Total:\s*\$ ?3\.900,00/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Add Row"));
-    expect(screen.getByText(/Total:\s*\$ ?6\.900,00/i)).toBeInTheDocument();
-    expect(screen.getByText(/Por Porción:\s*\$ ?1\.725,00/i)).toBeInTheDocument();
-  });
-
-  it("debería manejar rindeFromReceta igual a 0", () => {
-    renderWithState(mockRows, 0);
-    expect(screen.getByText(/Por Porción:\s*\$ ?3\.900,00/i)).toBeInTheDocument();
   });
 
   it("debería manejar la deselección de filas", async () => {

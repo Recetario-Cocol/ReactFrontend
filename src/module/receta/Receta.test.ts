@@ -91,7 +91,7 @@ describe("Clase Receta", () => {
         cantidad: 500,
       });
 
-      const receta = new Receta(1, "Lasagna", 6, [ingredienteMock], "Congelar por porciones");
+      const receta = new Receta(1, "Lasagna", 6, [ingredienteMock], "Congelar por porciones", 10, 60);
 
       const expectedJSON = {
         id: 1,
@@ -106,6 +106,8 @@ describe("Clase Receta", () => {
           },
         ],
         observaciones: "Congelar por porciones",
+        precio: 10,
+        precio_unidad: 60,
       };
 
       expect(receta.toJSON()).toEqual(expectedJSON);
@@ -120,6 +122,8 @@ describe("Clase Receta", () => {
         rinde: 0,
         ingredientes: [],
         observaciones: "",
+        precio: 0,
+        precio_unidad: 0,
       };
 
       expect(receta.toJSON()).toEqual(expectedJSON);

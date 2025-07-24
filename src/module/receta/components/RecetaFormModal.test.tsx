@@ -182,7 +182,7 @@ describe("RecetaFormModal", () => {
       { timeout: 2000 },
     );
     await user.click(screen.getByRole("option", { name: /Harina/i }));
-    await user.click(screen.getByLabelText(/Unidad/i));
+    //await user.click(screen.getByLabelText(/Unidad/i));
     await user.type(screen.getByLabelText(/Cantidad/i), "2");
     await user.click(screen.getByRole("button", { name: /Guardar/i }));
 

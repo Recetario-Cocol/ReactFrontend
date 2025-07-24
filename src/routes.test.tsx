@@ -58,7 +58,7 @@ describe("AppRoutes", () => {
         <AppRoutes />
       </MemoryRouter>,
     );
-    expect(screen.getByText("LoginPage")).toBeInTheDocument();
+    expect(screen.getByText("Cocol")).toBeInTheDocument();
   });
 
   it("renders login on /login", () => {

@@ -71,7 +71,7 @@ describe("ProductoFormModal", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Enviar/i }));
     await waitFor(() => {
-      expect(screen.getByText(/Debe ser mayor a 0\./i)).toBeInTheDocument();
+      expect(screen.getByText(/El precio debe ser mayor que 0\./i)).toBeInTheDocument();
     });
   });
 
