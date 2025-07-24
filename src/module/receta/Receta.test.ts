@@ -91,7 +91,15 @@ describe("Clase Receta", () => {
         cantidad: 500,
       });
 
-      const receta = new Receta(1, "Lasagna", 6, [ingredienteMock], "Congelar por porciones", 10, 60);
+      const receta = new Receta(
+        1,
+        "Lasagna",
+        6,
+        [ingredienteMock],
+        "Congelar por porciones",
+        10,
+        60,
+      );
 
       const expectedJSON = {
         id: 1,
