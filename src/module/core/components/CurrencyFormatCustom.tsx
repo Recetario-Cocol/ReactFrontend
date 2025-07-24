@@ -1,11 +1,11 @@
-import React from 'react';
-import { NumericFormat, NumericFormatProps, NumberFormatValues } from 'react-number-format';
-import { TextFieldProps } from '@mui/material/TextField';
+import React from "react";
+import { NumericFormat, NumericFormatProps, NumberFormatValues } from "react-number-format";
+import { TextFieldProps } from "@mui/material/TextField";
 
-interface CurrencyFormatCustomProps extends Omit<NumericFormatProps, 'onChange'> {
+interface CurrencyFormatCustomProps extends Omit<NumericFormatProps, "onChange"> {
   onChange: (event: { target: { name: string; value: number } }) => void;
   name: string;
-  inputProps?: TextFieldProps['inputProps'];
+  inputProps?: TextFieldProps["inputProps"];
   defaultValue?: string | number | null | undefined;
 }
 
@@ -13,9 +13,7 @@ const CurrencyFormatCustom = React.forwardRef<typeof NumericFormat, CurrencyForm
   function CurrencyFormatCustom(props, ref) {
     const { onChange, name, inputProps, defaultValue, ...other } = props;
 
-    const normalizedDefaultValue = Array.isArray(defaultValue)
-      ? defaultValue[0]
-      : defaultValue;
+    const normalizedDefaultValue = Array.isArray(defaultValue) ? defaultValue[0] : defaultValue;
 
     return (
       <NumericFormat
@@ -40,7 +38,7 @@ const CurrencyFormatCustom = React.forwardRef<typeof NumericFormat, CurrencyForm
         {...inputProps}
       />
     );
-  }
+  },
 );
 
 export default CurrencyFormatCustom;

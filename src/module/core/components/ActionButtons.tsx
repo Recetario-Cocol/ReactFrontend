@@ -30,14 +30,15 @@ export default function Actionbuttons({
 }: ActionbuttonsProps) {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-      {consultar && <Button
-        startIcon={<OpenInNewIcon />}
-        disabled={consultar.isDisabled}
-        onClick={consultar.onClick}
-        sx={consultar.sx}>
-        Consultar
-      </Button>
-      }
+      {consultar && (
+        <Button
+          startIcon={<OpenInNewIcon />}
+          disabled={consultar.isDisabled}
+          onClick={consultar.onClick}
+          sx={consultar.sx}>
+          Consultar
+        </Button>
+      )}
       <Button
         startIcon={<AddIcon />}
         disabled={agregar.isDisabled}

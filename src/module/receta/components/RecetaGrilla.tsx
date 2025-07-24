@@ -97,8 +97,8 @@ export default function RecetaGrilla() {
     setOpenModal(true);
   }
 
-  function verReceta () {
-    setOpenReceta(true)
+  function verReceta() {
+    setOpenReceta(true);
   }
 
   function modificar() {
@@ -176,9 +176,9 @@ export default function RecetaGrilla() {
               onClose={(mensaje: string) => handleCloseDialog(mensaje)}
             />
           )}
-          {openReceta && 
+          {openReceta && (
             <VisorReceta openArg={openReceta} onClose={handleCloseModal} idToOpen={idToOpen} />
-          }
+          )}
         </div>
       </Box>
     </Box>

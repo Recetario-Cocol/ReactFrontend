@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Modal,
-  Box,
-  Typography,
-  IconButton,
-  Alert,
-} from "@mui/material";
+import { Modal, Box, Typography, IconButton, Alert } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Receta from "../Receta";
 import { useRecetaService } from "../useRecetaService";
@@ -16,10 +10,7 @@ import { Unidad } from "../../unidad/Unidad";
 import LoadingModel from "../../core/components/LoadingModel";
 import { useForm } from "react-hook-form";
 
-import {
-  modalStyle,
-  headerBoxStyle,
-} from "./recetaFormModalStyles";
+import { modalStyle, headerBoxStyle } from "./recetaFormModalStyles";
 import VisorIngredientesTable from "./VisorIngredientesTable";
 
 interface VisorReceta {
@@ -40,10 +31,7 @@ export default function VisorReceta({ openArg, onClose, idToOpen }: VisorReceta)
   const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
   const [mensajeDeError, setMensajeDeError] = useState<string>("");
 
-  const {
-    reset,
-    watch,
-  } = useForm<Receta>({
+  const { reset, watch } = useForm<Receta>({
     defaultValues: {
       id: 0,
       nombre: "",
@@ -118,15 +106,15 @@ export default function VisorReceta({ openArg, onClose, idToOpen }: VisorReceta)
   }, [idToOpen, productos, unidades]);
 
   const handleCloseClick = (event: React.SyntheticEvent) => {
-      event.preventDefault();
-      handleClose("");
+    event.preventDefault();
+    handleClose("");
   };
 
   const handleClose = (reason?: string) => {
-      if (!reason || reason !== "backdropClick") {
+    if (!reason || reason !== "backdropClick") {
       if (onClose) onClose();
       setOpen(false);
-      }
+    }
   };
 
   return (
@@ -136,41 +124,54 @@ export default function VisorReceta({ openArg, onClose, idToOpen }: VisorReceta)
         onClose={handleCloseClick}
         aria-labelledby="receta-modal-title"
         role="dialog">
-            <Box sx={modalStyle}>
-                <Box sx={headerBoxStyle}>
-                    <Typography id="receta-modal-title" variant="h6" component="h2">
-                        Receta: {nombre || <em>(Sin nombre)</em>}
-                        <IconButton
-                            aria-label="close"
-                            onClick={handleCloseClick}
-                            sx={{ position: "absolute", right: 8, top: 8 }}>
-                            <CloseIcon />
-                        </IconButton>
-                    </Typography>
-                </Box>
-                {mensajeDeError && (
-                    <Alert severity="error" color="error">
-                        {mensajeDeError}
-                    </Alert>
-                )}
+        <Box sx={modalStyle}>
+          <Box sx={headerBoxStyle}>
+            <Typography id="receta-modal-title" variant="h6" component="h2">
+              Receta: {nombre || <em>(Sin nombre)</em>}
+              <IconButton
+                aria-label="close"
+                onClick={handleCloseClick}
+                sx={{ position: "absolute", right: 8, top: 8 }}>
+                <CloseIcon />
+              </IconButton>
+            </Typography>
+          </Box>
+          {mensajeDeError && (
+            <Alert severity="error" color="error">
+              {mensajeDeError}
+            </Alert>
+          )}
 
-                <Box sx={{ width: "100%", ml: 2, mt: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">Rinde:</Typography>
-                    <Box sx={{ width: "100%", pl:  5 }}>{   rinde || 0} Porciones</Box>
-                </Box>
-                <Box sx={{ width: "100%", ml: 2, mt: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">Ingredientes:</Typography>
-                    <VisorIngredientesTable ingredientes={ingredientes} rinde={rinde} precio={precio} precio_unidad={precio_unidad} unidades={unidades} productos={productos}/>
-                </Box>
-                <Box sx={{ width: "100%", ml: 2, mt: 2, mb: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">Observaciones/Pasos:</Typography>
-                    <Box sx={{ whiteSpace: 'pre-wrap', width: "100%", pl: 5 }}>
-                      {observaciones?.trim() ? observaciones : "(Sin observaciones)"}
-                    </Box>
-                </Box>
+          <Box sx={{ width: "100%", ml: 2, mt: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Rinde:
+            </Typography>
+            <Box sx={{ width: "100%", pl: 5 }}>{rinde || 0} Porciones</Box>
+          </Box>
+          <Box sx={{ width: "100%", ml: 2, mt: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Ingredientes:
+            </Typography>
+            <VisorIngredientesTable
+              ingredientes={ingredientes}
+              rinde={rinde}
+              precio={precio}
+              precio_unidad={precio_unidad}
+              unidades={unidades}
+              productos={productos}
+            />
+          </Box>
+          <Box sx={{ width: "100%", ml: 2, mt: 2, mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Observaciones/Pasos:
+            </Typography>
+            <Box sx={{ whiteSpace: "pre-wrap", width: "100%", pl: 5 }}>
+              {observaciones?.trim() ? observaciones : "(Sin observaciones)"}
             </Box>
-        </Modal>
-        {(loading || loadingProducts) && <LoadingModel />}
+          </Box>
+        </Box>
+      </Modal>
+      {(loading || loadingProducts) && <LoadingModel />}
     </div>
   );
 }
